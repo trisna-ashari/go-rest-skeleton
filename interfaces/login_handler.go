@@ -7,11 +7,16 @@ import (
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
+	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/middleware"
 	"golang.org/x/exp/errors"
 	"net/http"
 	"os"
 )
+
+type Language struct {
+	language     string `json:"language" binding:"required"`
+}
 
 type Authenticate struct {
 	us application.UserAppInterface
@@ -31,13 +36,38 @@ func NewAuthenticate(uApp application.UserAppInterface, rd authorization.AuthInt
 func (au *Authenticate) Profile(c *gin.Context) {
 	metadata, err := au.tk.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, errors.New("Unauthorized"))
+		c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
 		return
 	}
 
 	UUID := metadata.UUID
 	userData, _ := au.us.GetUser(UUID)
-	middleware.Formatter(c, userData.DetailUser(), "Successfully get profile")
+	middleware.Formatter(c, userData.DetailUser(), "api.msg.success.successfully_get_profile")
+}
+
+func (au *Authenticate) SwitchLanguage(c *gin.Context) {
+	_, err := au.tk.ExtractTokenMetadata(c.Request)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
+		return
+	}
+	var language map[string]interface{}
+	if err := c.ShouldBindJSON(&language); err != nil {
+		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		return
+	}
+	selectedLanguage := language["language"].(string)
+	if persistence.IsValidAcceptLanguage(selectedLanguage) != true {
+		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		return
+	}
+
+	c.Header("AcceptLanguage", selectedLanguage)
+
+	userData := make(map[string]interface{})
+	userData["language"] = selectedLanguage
+
+	middleware.Formatter(c, userData, "api.msg.success.successfully_switch_language")
 }
 
 func (au *Authenticate) Login(c *gin.Context) {
@@ -45,19 +75,19 @@ func (au *Authenticate) Login(c *gin.Context) {
 	var tokenErr = map[string]string{}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
 		return
 	}
 	validateUser := user.Validate("login")
 	if len(validateUser) > 0 {
 		c.Set("data", validateUser)
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
 		return
 	}
 	u, userErr := au.us.GetUserByEmailAndPassword(user)
 	if userErr != nil {
 		c.Set("data", userErr)
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
 		return
 	}
 	ts, tErr := au.tk.CreateToken(u.UUID)
@@ -79,23 +109,22 @@ func (au *Authenticate) Login(c *gin.Context) {
 	userData["last_name"] = u.LastName
 	userData["language"] = os.Getenv("APP_LANG")
 
-	middleware.Formatter(c, userData, "api_msg_success_successfully_login")
+	middleware.Formatter(c, userData, "api.msg.success.successfully_login")
 }
 
 func (au *Authenticate) Logout(c *gin.Context) {
 	metadata, err := au.tk.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, errors.New("Unauthorized"))
+		c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
 		return
 	}
-	//fmt.Println(metadata)
 	//if the access token exist and it is still valid, then delete both the access token and the refresh token
 	deleteErr := au.rd.DeleteTokens(metadata)
 	if deleteErr != nil {
 		c.JSON(http.StatusUnauthorized, deleteErr.Error())
 		return
 	}
-	middleware.Formatter(c, nil, "Successfully logout")
+	middleware.Formatter(c, nil, "api.msg.success.successfully_logout")
 }
 
 //Refresh is the function that uses the refresh_token to generate new pairs of refresh and access tokens.
@@ -128,16 +157,16 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 	//Since token is valid, get the uuid:
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		refreshUuid, ok := claims["refresh_uuid"].(string) //convert the interface to string
+		refreshUuid, ok := claims["refresh_uuid"].(string)
 		if !ok {
-			c.JSON(http.StatusUnprocessableEntity, "Cannot get uuid")
+			c.JSON(http.StatusUnprocessableEntity, "api.msg.error.unprocessable_entity")
 			return
 		}
 		UUID := fmt.Sprintf("%.f", claims["UUID"])
 		//Delete the previous Refresh Token
 		delErr := au.rd.DeleteRefresh(refreshUuid)
-		if delErr != nil { //if any goes wrong
-			c.JSON(http.StatusUnauthorized, "unauthorized")
+		if delErr != nil {
+			c.JSON(http.StatusUnauthorized, "api.msg.error.unauthorized")
 			return
 		}
 		//Create new pairs of refresh and access tokens
@@ -156,8 +185,8 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 			"access_token":  ts.AccessToken,
 			"refresh_token": ts.RefreshToken,
 		}
-		c.JSON(http.StatusCreated, tokens)
+		middleware.Formatter(c, tokens, "api.msg.success.successfully_refresh_token")
 	} else {
-		c.JSON(http.StatusUnauthorized, "refresh token expired")
+		c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.refresh_token_expired"))
 	}
 }

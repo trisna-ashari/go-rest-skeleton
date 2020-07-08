@@ -43,6 +43,7 @@ func main() {
 	}
 	defer dbServices.Close()
 	dbServices.AutoMigrate()
+	dbServices.Seeds()
 
 	// Connect to redis
 	redisHost := os.Getenv("REDIS_HOST")
@@ -99,6 +100,7 @@ func main() {
 	v1.POST("/login", authenticate.Login)
 	v1.POST("/logout", middleware.AuthMiddleware(), authenticate.Logout)
 	v1.POST("/refresh", authenticate.Refresh)
+	v1.POST("/language", middleware.AuthMiddleware(), authenticate.SwitchLanguage)
 
 	// users
 	v1.GET("/users", middleware.AuthMiddleware(), userV1.GetUsers)
@@ -117,7 +119,7 @@ func main() {
 
 	// no route
 	router.NoRoute(func(c *gin.Context) {
-		c.AbortWithError(http.StatusNotFound, errors.New("Not Found"))
+		c.AbortWithError(http.StatusNotFound, errors.New("api_"))
 	})
 
 	// Run app at defined port
