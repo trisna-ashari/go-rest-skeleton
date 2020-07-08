@@ -1,0 +1,19 @@
+api:
+  msg:
+    error:
+      an_error_occured: "An Error Occurred"
+      internal_server_error: "Internal Server Error"
+      not_found: "Not Found"
+      bad_request: "Bad Request"
+      unauthorized: "Unauthorized"
+      forbidden: "Forbidden"
+      unprocessable_entity: "Unprocessable Entity"
+    success:
+      successfully_login: "Successfully Login"
+      successfully_logout: "Successfully Logout"
+      successfully_switch_language: "Successfully Switch Language"
+      successfully_refresh_token: "Successfully Get New Token"
+      successfully_get_profile: "Successfully Get Profile"
+      successfully_get_user_list: "Successfully Get User List"
+      successfully_get_user_detail: "Successfully Get User Detail"
+      successfully_create_user: "Successfully Create a New User"

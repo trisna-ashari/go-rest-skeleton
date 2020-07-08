@@ -82,7 +82,8 @@ func (m *Middleware) Handler() gin.HandlerFunc {
 		response.Data = errData
 
 		// Set translations
-		translatedMessage := persistence.NewTranslation(c, "error", response.Message)
+		translatedMessage, language := persistence.NewTranslation(c, "error", response.Message)
+		c.Header("Accept-Language", language)
 
 		// If environment is production
 		if env == "production" && errCode == 500 {
@@ -118,9 +119,10 @@ func Formatter(c *gin.Context, data interface{}, message string) {
 	if message != "" {
 		response.Message = message
 	}
-	translatedMessage := persistence.NewTranslation(c, "error", response.Message)
+	translatedMessage, language := persistence.NewTranslation(c, "error", response.Message)
 	response.Message = translatedMessage
 
+	c.Header("Accept-Language", language)
 	c.JSON(c.Writer.Status(), response)
 }
 
@@ -131,8 +133,9 @@ func FormatterWithMeta(c *gin.Context, data interface{}, message string, meta in
 	if message != "" {
 		response.Message = message
 	}
-	translatedMessage := persistence.NewTranslation(c, "error", response.Message)
+	translatedMessage, language := persistence.NewTranslation(c, "error", response.Message)
 	response.Message = translatedMessage
 
+	c.Header("Accept-Language", language)
 	c.JSON(c.Writer.Status(), response)
 }

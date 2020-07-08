@@ -1,4 +1,0 @@
-api_msg_errpr_an_error_occurred = "Terjadi Kesalahan"
-api_msg_error_internal_server_error = "Terjadi Kesalahan Di Server"
-api_msg_error_unauthorized = "Permintaan Tidak Sah"
-api_msg_success_successfully_login = "Berhasil Login"

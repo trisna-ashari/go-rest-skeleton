@@ -1,0 +1,19 @@
+api:
+  msg:
+    error:
+      an_error_occured: "Terjadi Kesalahan"
+      internal_server_error: "Terjadi Kesalahan di Server"
+      not_found: "Tidak Ditemukan"
+      bad_request: "Permintaan Buruk"
+      unauthorized: "Permintaan Tidak Sah"
+      forbidden: "Dilarang"
+      unprocessable_entity: "Permintaan Tidak Dapat Diproses"
+    success:
+      successfully_login: "Berhasil Masuk"
+      successfully_logout: "Berhasil Keluar"
+      successfully_switch_language: "Berhasil Mengganti Bahasa"
+      successfully_refresh_token: "Berhasil Mendapatkan Token Baru"
+      successfully_get_profile: "Berhasil Mendapatkan Profil"
+      successfully_get_user_list: "Berhasil Mendapatkan Daftar User"
+      successfully_get_user_detail: "Berhasil Mendapatkan Rincian User"
+      successfully_create_user: "Berhasil Menambahkan User Baru"
