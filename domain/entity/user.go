@@ -21,6 +21,15 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
+type UserFaker struct {
+	UUID      string `faker:"uuid_hyphenated"`
+	FirstName string `faker:"first_name"`
+	LastName  string `faker:"last_name"`
+	Email     string `faker:"email"`
+	Phone     string `faker:"phone_number"`
+	Password  string `faker:"password"`
+}
+
 type Users []User
 
 type DetailUser struct {

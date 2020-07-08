@@ -6,6 +6,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
+	"go-rest-skeleton/domain/seeds"
+	"log"
 )
 
 type Repositories struct {
@@ -42,4 +44,18 @@ func (s *Repositories) Close() error {
 // migrate all tables
 func (s *Repositories) AutoMigrate() error {
 	return s.db.AutoMigrate(&entity.User{}).Error
+}
+
+// seeds
+func (s *Repositories) Seeds() error {
+	db := s.db
+	var error error
+	for _, seed := range seeds.All() {
+		if err := seed.Run(db); err != nil {
+			log.Fatalf("Running seed '%s', failed with error: %s", seed.Name, err)
+			error = err
+		}
+	}
+
+	return error
 }
