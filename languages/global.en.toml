@@ -1,0 +1,4 @@
+api_msg_errpr_an_error_occurred = "An Error Occured"
+api_msg_error_internal_server_error = "Internal Server Error"
+api_msg_error_unauthorized = "Unauthorized"
+api_msg_success_successfully_login = "Successfuly Login"
