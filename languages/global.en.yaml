@@ -18,3 +18,5 @@ api:
       successfully_get_user_list: "Successfully Get User List"
       successfully_get_user_detail: "Successfully Get User Detail"
       successfully_create_user: "Successfully Create a New User"
+user:
+  not_found: "User Not Found"

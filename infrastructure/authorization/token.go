@@ -1,43 +1,48 @@
 package authorization
 
 import (
-	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/twinj/uuid"
+	"go-rest-skeleton/infrastructure/exception"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/twinj/uuid"
 )
 
+// Token is a struct.
 type Token struct{}
 
+// NewToken is a constructor will initialize token.
 func NewToken() *Token {
 	return &Token{}
 }
 
+// TokenInterface is an interface.
 type TokenInterface interface {
 	CreateToken(UUID string) (*TokenDetails, error)
 	ExtractTokenMetadata(*http.Request) (*AccessDetails, error)
 }
 
-//Token implements the TokenInterface
+// Token implements the TokenInterface.
 var _ TokenInterface = &Token{}
 
+// CreateToken is a function uses to create a new token.
 func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 	td := &TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
-	td.TokenUuid = uuid.NewV4().String()
+	td.TokenUUID = uuid.NewV4().String()
 
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
-	td.RefreshUuid = td.TokenUuid + "++" + UUID
+	td.RefreshUUID = td.TokenUUID + "++" + UUID
 
 	var err error
 
 	// Creating Access Token
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
-	atClaims["access_uuid"] = td.TokenUuid
+	atClaims["access_uuid"] = td.TokenUUID
 	atClaims["uuid"] = UUID
 	atClaims["exp"] = td.AtExpires
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
@@ -48,7 +53,7 @@ func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 
 	// Creating Refresh Token
 	rtClaims := jwt.MapClaims{}
-	rtClaims["refresh_uuid"] = td.RefreshUuid
+	rtClaims["refresh_uuid"] = td.RefreshUUID
 	rtClaims["uuid"] = UUID
 	rtClaims["exp"] = td.RtExpires
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
@@ -59,6 +64,7 @@ func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 	return td, nil
 }
 
+// TokenValid is a function uses to validate token.
 func TokenValid(r *http.Request) error {
 	token, err := VerifyToken(r)
 	if err != nil {
@@ -70,12 +76,14 @@ func TokenValid(r *http.Request) error {
 	return nil
 }
 
+// VerifyToken is a function to verify token.
 func VerifyToken(r *http.Request) (*jwt.Token, error) {
 	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		//Make sure that the token method conform to "SigningMethodHMAC"
+		// Make sure that the token method conform to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			// fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, exception.ErrorTextAnErrorOccurred
 		}
 		return []byte(os.Getenv("APP_PRIVATE_KEY")), nil
 	})
@@ -85,7 +93,7 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 	return token, nil
 }
 
-//get the token from the request body
+// ExtractToken is a function uses to get the token from the request body.
 func ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
@@ -95,6 +103,7 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
+// ExtractTokenMetadata is a function to extract meta data from the token.
 func (t *Token) ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
 	token, err := VerifyToken(r)
 	if err != nil {
@@ -103,15 +112,15 @@ func (t *Token) ExtractTokenMetadata(r *http.Request) (*AccessDetails, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if ok && token.Valid {
-		accessUuid, ok := claims["access_uuid"].(string)
+		accessUUID, ok := claims["access_uuid"].(string)
 		if !ok {
 			return nil, err
 		}
 
-		uuid, ok := claims["uuid"].(string)
+		UUID, _ := claims["uuid"].(string)
 		return &AccessDetails{
-			TokenUuid: accessUuid,
-			UUID:      uuid,
+			TokenUUID: accessUUID,
+			UUID:      UUID,
 		}, nil
 	}
 	return nil, err

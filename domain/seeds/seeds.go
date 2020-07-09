@@ -2,17 +2,20 @@ package seeds
 
 import (
 	"fmt"
-	"github.com/bxcodec/faker"
-	"github.com/jinzhu/gorm"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/seed"
+
+	"github.com/bxcodec/faker"
+	"github.com/jinzhu/gorm"
 )
 
+// All will seeds all defined seeder.
 func All() []seed.Seed {
 	b := Prepare()
 	return b
 }
 
+// Prepare will prepare fake data based on entity's faker struct.
 func Prepare() []seed.Seed {
 	fakerFactories := make([]seed.Seed, 5)
 	for i := 0; i < 5; i++ {
@@ -30,4 +33,4 @@ func Prepare() []seed.Seed {
 		}
 	}
 	return fakerFactories
-} 
+}

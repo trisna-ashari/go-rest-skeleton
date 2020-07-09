@@ -1,10 +1,12 @@
 package repository
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
+// Parameters represent it self.
 type Parameters struct {
 	Offset  int
 	Limit   int
@@ -13,12 +15,14 @@ type Parameters struct {
 	Order   string
 }
 
+// Meta represent it self.
 type Meta struct {
 	PerPage int
-	Page	int
-	Total	interface{}
+	Page    int
+	Total   interface{}
 }
 
+// NewParameters construct Parameters from request.
 func NewParameters(c *gin.Context) *Parameters {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "5"))
@@ -43,10 +47,11 @@ func NewParameters(c *gin.Context) *Parameters {
 	}
 }
 
+// NewMeta construct of metadata for response.
 func NewMeta(p *Parameters, total int) *Meta {
 	return &Meta{
-		Page: p.Page,
+		Page:    p.Page,
 		PerPage: p.PerPage,
-		Total: total,
+		Total:   total,
 	}
 }

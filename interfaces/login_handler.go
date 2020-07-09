@@ -2,25 +2,31 @@ package interfaces
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
+	"go-rest-skeleton/infrastructure/exception"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/middleware"
-	"golang.org/x/exp/errors"
 	"net/http"
 	"os"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
+// Authenticate is a struct to store interfaces.
 type Authenticate struct {
 	us application.UserAppInterface
 	rd authorization.AuthInterface
 	tk authorization.TokenInterface
 }
 
-func NewAuthenticate(uApp application.UserAppInterface, rd authorization.AuthInterface, tk authorization.TokenInterface) *Authenticate {
+// NewAuthenticate will initialize authenticate interface for login handler.
+func NewAuthenticate(
+	uApp application.UserAppInterface,
+	rd authorization.AuthInterface,
+	tk authorization.TokenInterface) *Authenticate {
 	return &Authenticate{
 		us: uApp,
 		rd: rd,
@@ -28,10 +34,11 @@ func NewAuthenticate(uApp application.UserAppInterface, rd authorization.AuthInt
 	}
 }
 
+// Profile will return detail user of current logged in user.
 func (au *Authenticate) Profile(c *gin.Context) {
 	metadata, err := au.tk.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
+		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 		return
 	}
 
@@ -40,20 +47,21 @@ func (au *Authenticate) Profile(c *gin.Context) {
 	middleware.Formatter(c, userData.DetailUser(), "api.msg.success.successfully_get_profile", nil)
 }
 
+// SwitchLanguage will switch active language for current user.
 func (au *Authenticate) SwitchLanguage(c *gin.Context) {
 	_, err := au.tk.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
+		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 		return
 	}
 	var language map[string]interface{}
 	if err := c.ShouldBindJSON(&language); err != nil {
-		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	selectedLanguage := language["language"].(string)
-	if persistence.IsValidAcceptLanguage(selectedLanguage) != true {
-		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+	if !persistence.IsValidAcceptLanguage(selectedLanguage) {
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 
@@ -65,24 +73,25 @@ func (au *Authenticate) SwitchLanguage(c *gin.Context) {
 	middleware.Formatter(c, userData, "api.msg.success.successfully_switch_language", nil)
 }
 
+// Login will handle login request.
 func (au *Authenticate) Login(c *gin.Context) {
 	var user *entity.User
 	var tokenErr = map[string]string{}
 
 	if err := c.ShouldBindJSON(&user); err != nil {
-		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	validateUser := user.Validate("login")
 	if len(validateUser) > 0 {
 		c.Set("data", validateUser)
-		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	u, userErr := au.us.GetUserByEmailAndPassword(user)
 	if userErr != nil {
 		c.Set("data", userErr)
-		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	ts, tErr := au.tk.CreateToken(u.UUID)
@@ -107,27 +116,28 @@ func (au *Authenticate) Login(c *gin.Context) {
 	middleware.Formatter(c, userData, "api.msg.success.successfully_login", nil)
 }
 
+// Logout will handle logout request.
 func (au *Authenticate) Logout(c *gin.Context) {
 	metadata, err := au.tk.ExtractTokenMetadata(c.Request)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.unauthorized"))
+		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 		return
 	}
 
 	// If the access token exist and it is still valid, then delete both the access token and the refresh token
 	deleteErr := au.rd.DeleteTokens(metadata)
 	if deleteErr != nil {
-		c.JSON(http.StatusUnauthorized, deleteErr.Error())
+		_ = c.AbortWithError(http.StatusUnauthorized, deleteErr)
 		return
 	}
 	middleware.Formatter(c, nil, "api.msg.success.successfully_logout", nil)
 }
 
-// Refresh is the function that uses the refresh_token to generate new pairs of refresh and access tokens.
+// Refresh will handle request to generate new pairs of refresh and access tokens.
 func (au *Authenticate) Refresh(c *gin.Context) {
 	mapToken := map[string]string{}
 	if err := c.ShouldBindJSON(&mapToken); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	refreshToken := mapToken["refresh_token"]
@@ -136,59 +146,65 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
 		//Make sure that the token method conform to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			// fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, exception.ErrorTextAnErrorOccurred
 		}
 		return []byte(os.Getenv("REFRESH_SECRET")), nil
 	})
 
 	// Any error may be due to token expiration
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, err.Error())
+		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	// Is token valid?
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		c.JSON(http.StatusUnauthorized, err)
+		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	// Since token is valid, get the uuid:
 	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		refreshUuid, ok := claims["refresh_uuid"].(string)
+	if !ok {
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextAnErrorOccurred)
+	}
+
+	if token.Valid {
+		refreshUUID, ok := claims["refresh_uuid"].(string)
 		if !ok {
-			_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("api.msg.error.unprocessable_entity"))
+			_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 			return
 		}
 		UUID := fmt.Sprintf("%.f", claims["UUID"])
 
 		// Delete the previous Refresh Token
-		delErr := au.rd.DeleteRefresh(refreshUuid)
+		delErr := au.rd.DeleteRefresh(refreshUUID)
 		if delErr != nil {
-			c.JSON(http.StatusUnauthorized, "api.msg.error.unauthorized")
+			_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 			return
 		}
 
 		// Create new pairs of refresh and access tokens
 		ts, createErr := au.tk.CreateToken(UUID)
 		if createErr != nil {
-			c.JSON(http.StatusForbidden, createErr.Error())
+			_ = c.AbortWithError(http.StatusForbidden, createErr)
 			return
 		}
 
 		// Save the tokens metadata to redis
 		saveErr := au.rd.CreateAuth(UUID, ts)
 		if saveErr != nil {
-			c.JSON(http.StatusForbidden, saveErr.Error())
+			_ = c.AbortWithError(http.StatusForbidden, saveErr)
 			return
 		}
+
 		tokens := map[string]string{
 			"access_token":  ts.AccessToken,
 			"refresh_token": ts.RefreshToken,
 		}
 		middleware.Formatter(c, tokens, "api.msg.success.successfully_refresh_token", nil)
 	} else {
-		_ = c.AbortWithError(http.StatusUnauthorized, errors.New("api.msg.error.refresh_token_expired"))
+		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextRefreshTokenIsExpired)
 	}
 }

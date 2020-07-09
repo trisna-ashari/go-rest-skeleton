@@ -2,29 +2,45 @@ package persistence
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/domain/seeds"
 	"log"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"    // for mysql driver (optional)
+	_ "github.com/jinzhu/gorm/dialects/postgres" // for postgres driver (optional)
 )
 
+// Repositories represent it self.
 type Repositories struct {
 	User repository.UserRepository
-	db *gorm.DB
+	db   *gorm.DB
 }
 
+// NewRepositories will initialize db connection and return repositories.
 func NewRepositories(dbDriver, dbUser, dbPassword, dbHost, dbName, dbPort string) (*Repositories, error) {
-	dbUrl := ""
+	dbURL := ""
 	switch dbDriver {
 	case "postgres":
-		dbUrl = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbPort, dbUser, dbName, dbPassword)
+		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
+			dbHost,
+			dbPort,
+			dbUser,
+			dbName,
+			dbPassword,
+		)
 	case "mysql":
-		dbUrl = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbPort, dbName)
+		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+			dbUser,
+			dbPassword,
+			dbHost,
+			dbPort,
+			dbName,
+		)
 	}
 
-	db, err := gorm.Open(dbDriver, dbUrl)
+	db, err := gorm.Open(dbDriver, dbURL)
 	if err != nil {
 		return nil, err
 	}
@@ -32,30 +48,31 @@ func NewRepositories(dbDriver, dbUser, dbPassword, dbHost, dbName, dbPort string
 
 	return &Repositories{
 		User: NewUserRepository(db),
-		db: db,
+		db:   db,
 	}, nil
 }
 
-// closes the  database connection
+// Close will closes the database connection.
 func (s *Repositories) Close() error {
 	return s.db.Close()
 }
 
-// migrate all tables
+// AutoMigrate will migrate all tables.
 func (s *Repositories) AutoMigrate() error {
 	return s.db.AutoMigrate(&entity.User{}).Error
 }
 
-// seeds
+// Seeds all seeders.
 func (s *Repositories) Seeds() error {
 	db := s.db
-	var error error
+	var err error
 	for _, seed := range seeds.All() {
-		if err := seed.Run(db); err != nil {
+		errSeed := seed.Run(db)
+		if errSeed != nil {
+			err = errSeed
 			log.Fatalf("Running seed '%s', failed with error: %s", seed.Name, err)
-			error = err
 		}
 	}
 
-	return error
+	return err
 }

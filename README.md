@@ -40,7 +40,7 @@ go get https://github.com/trisna-ashari/go-rest-skeleton
 ```
 
 Before running API server, you should set configs with yours.
-Create & configure your `.env` based on [.env.example](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/.env.example)
+Create & configure your `.env` based on: [.env.example](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/.env.example)
 
 Fast run with:
 
@@ -240,7 +240,7 @@ Coming Soon
 
 ## Credits
 - [Go](https://github.com/golang/go) - The Go Programming Language
-- [gin](https://github.com/gin-gonic/gin) - Gin is a HTTP web framework written in Go (Golang)
+- [gin](https://github.com/gin-gonic/gin) - Gin is HTTP web framework written in Go (Golang)
 - [gorm](https://github.com/go-gorm/gorm) - The fantastic ORM library for Golang
  
 ## License

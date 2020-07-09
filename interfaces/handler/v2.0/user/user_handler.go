@@ -1,25 +1,29 @@
-package user_v2_0_0
+package userv2point00
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
+	"go-rest-skeleton/infrastructure/exception"
 	"go-rest-skeleton/interfaces/middleware"
-	"golang.org/x/exp/errors"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
-//Users struct defines the dependencies that will be used
+// Users is a struct defines the dependencies that will be used.
 type Users struct {
 	us application.UserAppInterface
 	rd authorization.AuthInterface
 	tk authorization.TokenInterface
 }
 
-//Users constructor
-func NewUsers(us application.UserAppInterface, rd authorization.AuthInterface, tk authorization.TokenInterface) *Users {
+// NewUsers is constructor will initialize user handler.
+func NewUsers(
+	us application.UserAppInterface,
+	rd authorization.AuthInterface,
+	tk authorization.TokenInterface) *Users {
 	return &Users{
 		us: us,
 		rd: rd,
@@ -27,54 +31,57 @@ func NewUsers(us application.UserAppInterface, rd authorization.AuthInterface, t
 	}
 }
 
+// SaveUser is a function uses to handle create a new user.
 func (s *Users) SaveUser(c *gin.Context) {
 	var user entity.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	validateErr := user.Validate("")
 	if len(validateErr) > 0 {
 		c.Set("data", validateErr)
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 	newUser, err := s.us.SaveUser(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New("Unable to create user"))
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
 		return
 	}
 	c.Status(http.StatusCreated)
-	middleware.Formatter(c, newUser.DetailUser(), "Successfully create a new user")
+	middleware.Formatter(c, newUser.DetailUser(), "api.msg.success.successfully_create_a_new_user", nil)
 }
 
+// GetUsers is a function uses to handle get user list.
 func (s *Users) GetUsers(c *gin.Context) {
 	users := entity.Users{}
 	var err error
 	users, meta, err := s.us.GetUsers(c)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.FormatterWithMeta(c, users.DetailUsers(), "Successfully get user list", meta)
+	middleware.Formatter(c, users.DetailUsers(), "api.msg.success.successfully_get_user_list", meta)
 }
 
+// GetUser is a function uses to handle get user detail by UUID.
 func (s *Users) GetUser(c *gin.Context) {
 	var userEntity entity.User
 	if err := c.ShouldBindUri(&userEntity.UUID); err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("Bad Request"))
+		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextBadRequest)
 		return
 	}
+
 	UUID := c.Param("uuid")
 	user, err := s.us.GetUser(UUID)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.AbortWithError(http.StatusNotFound, errors.New("Record not found"))
-			return
-		} else {
-			c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
+			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserNotFound)
 			return
 		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
-	middleware.Formatter(c, user.DetailUser(), "Successfully get user detail")
+	middleware.Formatter(c, user.DetailUser(), "api.msg.success.successfully_get_user_detail", nil)
 }

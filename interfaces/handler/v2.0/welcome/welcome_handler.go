@@ -1,23 +1,21 @@
-package welcome_v2_0_0
+package welcomev2point00
 
 import (
-	"github.com/gin-gonic/gin"
-	"go-rest-skeleton/application"
 	"go-rest-skeleton/interfaces/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
+// WelcomeHandler is a struct.
 type WelcomeHandler struct {
-	wa application.WelcomeAppInterface
 }
 
+// NewWelcomeHandler will initialize welcome handler.
 func NewWelcomeHandler() *WelcomeHandler {
 	return &WelcomeHandler{}
 }
 
+// Index will handle request.
 func (s *WelcomeHandler) Index(c *gin.Context) {
 	middleware.Formatter(c, nil, "PONG v2.0", nil)
-}
-
-func (s *WelcomeHandler) Greeting(c *gin.Context) {
-	middleware.Formatter(c, nil, "GREETING v2.0", nil)
 }

@@ -1,14 +1,16 @@
 package entity
 
 import (
-	"github.com/badoux/checkmail"
-	"github.com/google/uuid"
 	"go-rest-skeleton/infrastructure/security"
 	"html"
 	"strings"
 	"time"
+
+	"github.com/badoux/checkmail"
+	"github.com/google/uuid"
 )
 
+// User represent schema of table user.
 type User struct {
 	UUID      string     `gorm:"size:36;not null;unique_index;" json:"uuid"`
 	FirstName string     `gorm:"size:100;not null;" json:"first_name"`
@@ -21,6 +23,7 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
+// UserFaker represent content when generate fake data of user.
 type UserFaker struct {
 	UUID      string `faker:"uuid_hyphenated"`
 	FirstName string `faker:"first_name"`
@@ -30,8 +33,10 @@ type UserFaker struct {
 	Password  string `faker:"password"`
 }
 
+// Users represent multiple user.
 type Users []User
 
+// DetailUser represent format of detail user.
 type DetailUser struct {
 	UUID      string `gorm:"size:36;not null;unique_index;" json:"uuid"`
 	FirstName string `gorm:"size:100;not null;" json:"first_name"`
@@ -40,6 +45,7 @@ type DetailUser struct {
 	Phone     string `gorm:"size:100;" json:"phone,omitempty"`
 }
 
+// Prepare will prepare submitted data of user.
 func (u *User) Prepare() {
 	u.FirstName = html.EscapeString(strings.TrimSpace(u.FirstName))
 	u.LastName = html.EscapeString(strings.TrimSpace(u.LastName))
@@ -48,6 +54,7 @@ func (u *User) Prepare() {
 	u.UpdatedAt = time.Now()
 }
 
+// BeforeSave handle uuid generation and password hashing.
 func (u *User) BeforeSave() error {
 	generateUUID := uuid.New()
 	hashPassword, err := security.Hash(u.Password)
@@ -60,6 +67,7 @@ func (u *User) BeforeSave() error {
 	return nil
 }
 
+// DetailUsers will return formatted user detail of multiple user.
 func (users Users) DetailUsers() []interface{} {
 	result := make([]interface{}, len(users))
 	for index, user := range users {
@@ -68,6 +76,7 @@ func (users Users) DetailUsers() []interface{} {
 	return result
 }
 
+// DetailUser will return formatted user detail of user.
 func (u *User) DetailUser() interface{} {
 	return &DetailUser{
 		UUID:      u.UUID,
@@ -78,6 +87,7 @@ func (u *User) DetailUser() interface{} {
 	}
 }
 
+// Validate will validate any action related to user.
 func (u *User) Validate(action string) map[string]string {
 	var errorMessages = make(map[string]string)
 	var err error

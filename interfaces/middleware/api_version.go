@@ -1,13 +1,15 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"regexp"
+
+	"github.com/gin-gonic/gin"
 )
 
-func ApiVersion() gin.HandlerFunc {
+// APIVersion is a middleware function uses to inject X-Api-Version to response's header.
+func APIVersion() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		re, _ := regexp.Compile("v\\d*")
+		re, _ := regexp.Compile(`v\d*`)
 		version := re.FindStringSubmatch(c.Request.RequestURI)
 
 		if len(version) > 0 {

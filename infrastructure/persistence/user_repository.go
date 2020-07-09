@@ -2,25 +2,32 @@ package persistence
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
+	"go-rest-skeleton/infrastructure/exception"
 	"go-rest-skeleton/infrastructure/security"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
+// UserRepo is a struct to store db connection.
 type UserRepo struct {
 	db *gorm.DB
 }
 
+// NewUserRepository will initialize user repository.
 func NewUserRepository(db *gorm.DB) *UserRepo {
 	return &UserRepo{db}
 }
-//UserRepo implements the repository.UserRepository interface
+
+// UserRepo implements the repository.UserRepository interface.
 var _ repository.UserRepository = &UserRepo{}
 
+// SaveUser will create a new user.
 func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string) {
 	dbErr := map[string]string{}
 	err := r.db.Debug().Create(&user).Error
@@ -37,6 +44,7 @@ func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string)
 	return user, nil
 }
 
+// GetUser will return user detail.
 func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 	var user entity.User
 	err := r.db.Debug().Where("uuid = ?", uuid).Take(&user).Error
@@ -44,11 +52,12 @@ func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 		return nil, err
 	}
 	if gorm.IsRecordNotFoundError(err) {
-		return nil, errors.New("user not found")
+		return nil, exception.ErrorTextUserNotFound
 	}
 	return &user, nil
 }
 
+// GetUsers will return user list.
 func (r *UserRepo) GetUsers(c *gin.Context) ([]entity.User, interface{}, error) {
 	var total int
 	var users []entity.User
@@ -68,6 +77,7 @@ func (r *UserRepo) GetUsers(c *gin.Context) ([]entity.User, interface{}, error) 
 	return users, meta, nil
 }
 
+// GetUserByEmailAndPassword will find user by email and password.
 func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[string]string) {
 	var user entity.User
 	dbErr := map[string]string{}
@@ -82,13 +92,11 @@ func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[
 	}
 
 	err = security.VerifyPassword(user.Password, u.Password)
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		dbErr["password"] = "incorrect password"
-		return nil, dbErr
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			dbErr["password"] = "incorrect password"
+			return nil, dbErr
+		}
 	}
 	return &user, nil
-}
-
-func (r *UserRepo) Greeting(c *gin.Context) (string, error) {
-	return "", nil
 }

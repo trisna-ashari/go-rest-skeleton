@@ -3,26 +3,30 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
+// LoggerOptions is a struct to store options for SetLogger.
 type LoggerOptions struct {
 	AllowSetting bool
 }
 
+// Config is a struct to store config for SetLogger.
 type Config struct {
-	Logger *zerolog.Logger
+	Logger         *zerolog.Logger
 	UTC            bool
 	SkipPath       []string
 	SkipPathRegexp *regexp.Regexp
 }
 
+// SetLogger is a middleware function uses to log all incoming request and print it to console.
 func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 	var newConfig Config
 	if len(config) > 0 {
@@ -112,6 +116,5 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 					Msg(msg)
 			}
 		}
-
 	}
 }

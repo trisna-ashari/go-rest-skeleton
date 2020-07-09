@@ -1,10 +1,12 @@
 package repository
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-rest-skeleton/domain/entity"
+
+	"github.com/gin-gonic/gin"
 )
 
+// UserRepository is an interface.
 type UserRepository interface {
 	SaveUser(*entity.User) (*entity.User, map[string]string)
 	GetUser(string) (*entity.User, error)

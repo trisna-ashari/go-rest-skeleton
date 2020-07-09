@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
@@ -13,12 +14,13 @@ type translationLanguage struct {
 }
 
 type translationMessage struct {
-	Default string
-	Message string
-	Language string
-	Type string
+	DefaultMessage string
+	Message        string
+	Language       string
+	Type           string
 }
 
+// NewTranslation will translate message.
 func NewTranslation(c *gin.Context, messageType string, messageString string) (string, string) {
 	bundle := i18n.NewBundle(language.Indonesian)
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
@@ -26,15 +28,15 @@ func NewTranslation(c *gin.Context, messageType string, messageString string) (s
 	translation := translationMessage{Message: messageString, Language: "en", Type: messageType}
 
 	if accept != "" {
-		if IsValidAcceptLanguage(accept) == true {
+		if IsValidAcceptLanguage(accept) {
 			translation.Language = accept
 		}
 	}
 	if messageType == "success" {
-		translation.Default = "OK"
+		translation.DefaultMessage = "OK"
 	}
 	if messageType == "error" {
-		translation.Default = messageString
+		translation.DefaultMessage = messageString
 	}
 
 	languageFile := fmt.Sprintf("languages/global.%s.yaml", translation.Language)
@@ -46,13 +48,14 @@ func NewTranslation(c *gin.Context, messageType string, messageString string) (s
 	translatedMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    translation.Message,
-			Other: translation.Default,
+			Other: translation.DefaultMessage,
 		},
 	})
 
 	return translatedMessage, translation.Language
 }
 
+// IsValidAcceptLanguage will validate given string is valid Accept-Language or not.
 func IsValidAcceptLanguage(x string) bool {
 	a := translationLanguage{
 		Available: []string{"en", "id"},

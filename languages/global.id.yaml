@@ -18,3 +18,5 @@ api:
       successfully_get_user_list: "Berhasil Mendapatkan Daftar User"
       successfully_get_user_detail: "Berhasil Mendapatkan Rincian User"
       successfully_create_user: "Berhasil Menambahkan User Baru"
+user:
+  not_found: "User Tidak Ditemukan"

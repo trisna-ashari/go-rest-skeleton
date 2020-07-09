@@ -1,13 +1,16 @@
 package middleware
 
 import (
+	"go-rest-skeleton/infrastructure/persistence"
+
 	"github.com/ansel1/merry"
 	"github.com/gin-gonic/gin"
-	"go-rest-skeleton/infrastructure/persistence"
 )
 
+// DefaultGenericError is to define default generic error for production environment.
 const DefaultGenericError = `an_error_occurred`
 
+// ResponseOptions is a struct to store options for error response.
 type ResponseOptions struct {
 	Environment     string
 	DebugMode       bool
@@ -31,6 +34,7 @@ type successOutput struct {
 	Meta    interface{} `json:"meta,omitempty"`
 }
 
+// New will initialize response middleware.
 func New(o ResponseOptions) *ResponseOptions {
 	return &ResponseOptions{
 		DebugMode:       o.DebugMode,
@@ -39,6 +43,7 @@ func New(o ResponseOptions) *ResponseOptions {
 	}
 }
 
+// Handler will handle any error response.
 func (r *ResponseOptions) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Before request
@@ -90,7 +95,7 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 		response.Message = translatedMessage
 
 		// Add the error's stack if Debug is enabled
-		if r.DebugMode == true {
+		if r.DebugMode {
 			response.Args[`stack`] = merry.Stacktrace(err)
 		}
 
@@ -101,6 +106,5 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 
 		// Return error response
 		c.JSON(errCode, response)
-		return
 	}
 }
