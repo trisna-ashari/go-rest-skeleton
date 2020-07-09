@@ -3,6 +3,7 @@ Golang RESTful API boilerplate with modern architectures.
 
 ## [Go-Rest-Skeleton](https://github.com/trisna-ashari/go-rest-skeleton)
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/bxcodec/faker/blob/master/LICENSE)
+[![Go Report](https://goreportcard.com/badge/github.com/trisna-ashari/go-rest-skeleton)](https://goreportcard.com/report/github.com/trisna-ashari/go-rest-skeleton)
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -18,6 +19,7 @@ Golang RESTful API boilerplate with modern architectures.
         - [Builtin Seeders](#builtin-seeder)
     - [Internationalization](#internationalization)
     - [Logger](#logger)
+    - [Test](#test)
 - [Documentation](#documentation)
 - [Credits](#credits)
 - [License](#license)
@@ -92,7 +94,7 @@ air
 
 ## Features
 ### Better API Response
-All endpoints were designed with `prefix` and `versioning` support. For example: /`api`/`v1`/`external`/routes.
+All RESTful endpoints were designed with `prefix` and `versioning` support. Prefix format is: /`api`/`v1`/`external`/routes.
 
 Supported HTTP Method: `POST`, `OPTIONS`, `GET`, `PUT`, `PATCH`, `DELETE`.
 
@@ -178,15 +180,17 @@ will return:
 
 #### Basic Auth
 Coming Soon
+
 #### LDAP
 Coming Soon
+
 
 ### DB Migration and Seeder
 Yes, this skeleton has builtin db migration and seeders.
 #### Auto Migrate
 Why auto migrate? This feature is very helpful to keep your `table(s) schema` always update depends on changes in each `entities`. 
 
-AutoMigrate automatically run when you start the application `manually` or with `hot reload`.
+`AutoMigrate` automatically run when you `manually` start the application or with triggered by `hot reload`.
 
 #### Builtin Seeder
 This builtin seeder can help you to fill your schema with dummy data, so you don't need wast your time to type `an lorem ipsum`.
@@ -234,6 +238,9 @@ This is examples of what logger prints:
 8:05PM INF Request ip=127.0.0.1 latency=87.734547 method=POST path=/api/v1/external/login payloads={"email":"me@example.com","password":"123456"} status=200 user-agent=curl/7.68.0
 8:06AM INF Request ip=127.0.0.1 latency=2.405021 method=GET path=/api/v1/external/profile payloads={} status=200 user-agent=PostmanRuntime/7.26.1
 ```
+
+### Test
+Coming Soon
 
 ## Documentation
 Coming Soon
