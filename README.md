@@ -1,13 +1,12 @@
 # Docs
-Golang REST API boilerplate with modern architectures.
- 
-Only one purpose: to help you boost development process.
+Golang RESTful API boilerplate with modern architectures.
 
 ## [Go-Rest-Skeleton](https://github.com/trisna-ashari/go-rest-skeleton)
 [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/bxcodec/faker/blob/master/LICENSE)
 
 ## Table of Contents
 - [Getting Started](#getting-started)
+- [Structures](#structures)
 - [Features](#features)
     - [Better API Response](#better-api-response)
     - [Authentication](#authentication)
@@ -32,12 +31,23 @@ Only one purpose: to help you boost development process.
 - Redis
 - Go v1.14.x
 
+#### Install & Run
+
+```shell script
+# Download this project
+
+go get https://github.com/trisna-ashari/go-rest-skeleton
+```
+
+Before running API server, you should set configs with yours.
 Create & configure your `.env` based on [.env.example](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/.env.example)
 
 Fast run with:
 
 ```shell script
 go run main.go
+
+# API Endpoint : http://127.0.0.1:8888
 ```
 
 or Enable hot reload with [Air](https://github.com/cosmtrek/air):
@@ -53,6 +63,32 @@ air
 ```
 
 **NOTE**: hot reload very useful on development processes
+
+## Structures
+
+```shell script
+├── application
+├── domain
+│   ├── entity
+│   ├── repository
+│   ├── seeds
+├── infrastructure
+│   ├── authorization
+│   ├── persistence
+│   ├── security
+│   └── seed
+├── interfaces
+│   ├── handler
+│   │   ├── v1.0
+│   │   │   ├── ...
+│   │   │   ├── role
+│   │   │   └── user
+│   │   └── v2.0
+│   │   │   └── ...
+│   └── middleware
+├── languages
+└── main.go
+```
 
 ## Features
 ### Better API Response
@@ -117,7 +153,7 @@ This is an example of response with meta pagination including `page`, `per_page`
 
 ### Authentication
 #### JWT
-This skeleton has builtin JWT authentication. For an example:
+This skeleton has builtin `JWT` based authentication. For an example:
 ```shell script
 curl --location --request POST 'http://localhost:8888/api/v1/external/login' --header 'Accept-Language: ' --header 'Content-Type: application/json' --data-raw '{
     "email": "me@example.com",
@@ -157,14 +193,12 @@ This builtin seeder can help you to fill your schema with dummy data, so you don
 
 
 ### Internationalization
-Internationalization made easy with this skeleton. [go-i18n](https://github.com/nicksnyder/go-i18n) was used to handle multilingual support. All translations text stored in *.`yaml` file.
+Internationalization made easy with this skeleton. [go-i18n](https://github.com/nicksnyder/go-i18n) was used to handle multilingual support. All translations text stored in *.`yaml` file on `languages` directory.
 ```shell script
 . . .
-languages
-|   global.en.yaml
-|   global.id.yaml
-|   global.es.yaml
-|   ....
+├── languages
+│   ├── global.en.yaml
+│   └── global.id.yaml
 . . .
 ```
 For example of *.`yaml` file:
@@ -194,8 +228,11 @@ api:
 ### Logger
 Yes, `logger` is very useful in development process. This skeleton has built in logger to watch any request are coming to your rest API. It was configurable :).
 
+This is examples of what logger prints:
 ```shell script
-11:25PM INF Request ip=127.0.0.1 latency=87.734547 method=POST path=/api/v1/external/login payloads={"email":"me@example.com","password":"123456"} status=200 user-agent=curl/7.68.0
+8:05AM INF Request ip=127.0.0.1 latency=1.110047 method=GET path=/api/v1/external/welcome payloads={} status=200 user-agent=PostmanRuntime/7.26.1
+8:05PM INF Request ip=127.0.0.1 latency=87.734547 method=POST path=/api/v1/external/login payloads={"email":"me@example.com","password":"123456"} status=200 user-agent=curl/7.68.0
+8:06AM INF Request ip=127.0.0.1 latency=2.405021 method=GET path=/api/v1/external/profile payloads={} status=200 user-agent=PostmanRuntime/7.26.1
 ```
 
 ## Documentation
