@@ -1,12 +1,12 @@
 package user_v2_0_0
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/interfaces/middleware"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/exp/errors"
 	"net/http"
 )

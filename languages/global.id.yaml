@@ -8,6 +8,7 @@ api:
       unauthorized: "Permintaan Tidak Sah"
       forbidden: "Dilarang"
       unprocessable_entity: "Permintaan Tidak Dapat Diproses"
+      file_too_large: "Ukuran File Terlalu Besar"
     success:
       successfully_login: "Berhasil Masuk"
       successfully_logout: "Berhasil Keluar"

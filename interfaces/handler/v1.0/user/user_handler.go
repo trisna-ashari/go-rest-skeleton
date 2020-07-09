@@ -30,22 +30,22 @@ func NewUsers(us application.UserAppInterface, rd authorization.AuthInterface, t
 func (s *Users) SaveUser(c *gin.Context) {
 	var user entity.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
 		return
 	}
 	validateErr := user.Validate("")
 	if len(validateErr) > 0 {
 		c.Set("data", validateErr)
-		c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, errors.New("Unprocessable Entity"))
 		return
 	}
 	newUser, err := s.us.SaveUser(&user)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New("Unable to create user"))
+		_ = c.AbortWithError(http.StatusInternalServerError, errors.New("Unable to create user"))
 		return
 	}
 	c.Status(http.StatusCreated)
-	middleware.Formatter(c, newUser.DetailUser(), "Successfully create a new user")
+	middleware.Formatter(c, newUser.DetailUser(), "Successfully create a new user", nil)
 }
 
 func (s *Users) GetUsers(c *gin.Context) {
@@ -53,28 +53,28 @@ func (s *Users) GetUsers(c *gin.Context) {
 	var err error
 	users, meta, err := s.us.GetUsers(c)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
+		_ = c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
 		return
 	}
-	middleware.FormatterWithMeta(c, users.DetailUsers(), "Successfully get user list", meta)
+	middleware.Formatter(c, users.DetailUsers(), "Successfully get user list", meta)
 }
 
 func (s *Users) GetUser(c *gin.Context) {
 	var userEntity entity.User
 	if err := c.ShouldBindUri(&userEntity.UUID); err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("Bad Request"))
+		_ = c.AbortWithError(http.StatusBadRequest, errors.New("Bad Request"))
 		return
 	}
 	UUID := c.Param("uuid")
 	user, err := s.us.GetUser(UUID)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			c.AbortWithError(http.StatusNotFound, errors.New("Record not found"))
+			_ = c.AbortWithError(http.StatusNotFound, errors.New("Record not found"))
 			return
 		} else {
-			c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
+			_ = c.AbortWithError(http.StatusInternalServerError, errors.New(err.Error()))
 			return
 		}
 	}
-	middleware.Formatter(c, user.DetailUser(), "Successfully get user detail")
+	middleware.Formatter(c, user.DetailUser(), "Successfully get user detail", nil)
 }

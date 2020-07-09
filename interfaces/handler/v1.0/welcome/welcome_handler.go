@@ -15,9 +15,9 @@ func NewWelcomeHandler() *WelcomeHandler {
 }
 
 func (s *WelcomeHandler) Index(c *gin.Context) {
-	middleware.Formatter(c, nil, "PONG v1.0")
+	middleware.Formatter(c, nil, "PONG v1.0", nil)
 }
 
 func (s *WelcomeHandler) Greeting(c *gin.Context) {
-	middleware.Formatter(c, nil, "GREETING v1.0")
+	middleware.Formatter(c, nil, "GREETING v1.0", nil)
 }

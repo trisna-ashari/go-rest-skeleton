@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
-	"strconv"
 	"time"
 )
 
 type AuthInterface interface {
 	CreateAuth(string, *TokenDetails) error
-	FetchAuth(string) (uint64, error)
+	FetchAuth(string) (string, error)
 	DeleteRefresh(string) error
 	DeleteTokens(*AccessDetails) error
 }
@@ -39,7 +38,7 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-//Save token metadata to Redis
+// Save token metadata to Redis
 func (tk *ClientData) CreateAuth(UUID string, td *TokenDetails) error {
 	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
 	rt := time.Unix(td.RtExpires, 0)
@@ -59,41 +58,38 @@ func (tk *ClientData) CreateAuth(UUID string, td *TokenDetails) error {
 	return nil
 }
 
-//Check the metadata saved
-func (tk *ClientData) FetchAuth(tokenUuid string) (uint64, error) {
-	userid, err := tk.client.Get(tk.client.Context(), tokenUuid).Result()
+// Check the metadata saved
+func (tk *ClientData) FetchAuth(tokenUuid string) (string, error) {
+	UUID, err := tk.client.Get(tk.client.Context(), tokenUuid).Result()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	userID, _ := strconv.ParseUint(userid, 10, 64)
-	return userID, nil
+	return UUID, nil
 }
 
-//Once a user row in the token table
+// Once a user row in the token table
 func (tk *ClientData) DeleteTokens(authD *AccessDetails) error {
-	//get the refresh uuid
+	// Get the refresh uuid
 	refreshUuid := fmt.Sprintf("%s++%s", authD.TokenUuid, authD.UUID)
-	//delete access token
+	// Delete access token
 	deletedAt, err := tk.client.Del(tk.client.Context(), authD.TokenUuid).Result()
-	//fmt.Println(err)
 	if err != nil {
 		return err
 	}
-	//delete refresh token
-	fmt.Println(refreshUuid)
+	// Delete refresh token
 	deletedRt, err := tk.client.Del(tk.client.Context(), refreshUuid).Result()
 	if err != nil {
 		return err
 	}
-	//When the record is deleted, the return value is 1
+	// When the record is deleted, the return value is 1
 	if deletedAt != 1 || deletedRt != 1 {
-		return errors.New("something went wrong")
+		return errors.New("api.msg.error.an_error_occurred")
 	}
 	return nil
 }
 
 func (tk *ClientData) DeleteRefresh(refreshUuid string) error {
-	//delete refresh token
+	// Delete refresh token
 	deleted, err := tk.client.Del(tk.client.Context(), refreshUuid).Result()
 	if err != nil || deleted == 0 {
 		return err

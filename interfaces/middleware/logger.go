@@ -12,21 +12,17 @@ import (
 	"time"
 )
 
-// Config to enable logger
 type LoggerOptions struct {
 	AllowSetting bool
 }
 
-// Config defines the config for logger middleware
 type Config struct {
 	Logger *zerolog.Logger
-	// UTC a boolean stating whether to use UTC time zone or local.
 	UTC            bool
 	SkipPath       []string
 	SkipPathRegexp *regexp.Regexp
 }
 
-// SetLogger initializes the logging middleware.
 func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 	var newConfig Config
 	if len(config) > 0 {

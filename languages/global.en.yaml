@@ -8,6 +8,7 @@ api:
       unauthorized: "Unauthorized"
       forbidden: "Forbidden"
       unprocessable_entity: "Unprocessable Entity"
+      file_too_large: "File Too Large"
     success:
       successfully_login: "Successfully Login"
       successfully_logout: "Successfully Logout"

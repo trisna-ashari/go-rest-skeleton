@@ -15,12 +15,7 @@ import (
 	"golang.org/x/exp/errors"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
-)
-
-var (
-	rxURL = regexp.MustCompile(`^/regexp\d*`)
 )
 
 func init() {
@@ -42,8 +37,18 @@ func main() {
 		panic(errDb)
 	}
 	defer dbServices.Close()
-	dbServices.AutoMigrate()
-	dbServices.Seeds()
+
+	// Init DB Migrate
+	errAM := dbServices.AutoMigrate()
+	if errAM != nil {
+		panic(errAM)
+	}
+
+	// Init DB Seeds
+	errDS :=dbServices.Seeds()
+	if errDS != nil {
+		panic(errDS)
+	}
 
 	// Connect to redis
 	redisHost := os.Getenv("REDIS_HOST")
@@ -61,11 +66,19 @@ func main() {
 	optSetLogger, _ := strconv.ParseBool(os.Getenv("ENABLE_LOGGER"))
 	optSetCors, _ := strconv.ParseBool(os.Getenv("ENABLE_CORS"))
 
+	// Init response options
+	optResponse := middleware.ResponseOptions{
+		Environment: os.Getenv("APP_ENV"),
+		DebugMode: optSetDebug,
+		DefaultLanguage: optSetLanguage,
+	}
+
 	// Init authorization
 	authToken := authorization.NewToken()
 	authenticate := interfaces.NewAuthenticate(dbServices.User, redisServices.Auth, authToken)
 
 	// Init interfaces
+	secret := interfaces.NewSecretHandler()
 	welcomeApp := interfaces.NewWelcomeHandler(dbServices.User, authToken)
 	welcomeV1 := welcome_v1_0_0.NewWelcomeHandler()
 	welcomeV2 := welcome_v2_0_0.NewWelcomeHandler()
@@ -86,40 +99,49 @@ func main() {
 	// Init gin with middleware
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.Use(middleware.New(middleware.ResponseOptions{DebugMode: optSetDebug, DefaultLanguage: optSetLanguage}).Handler())
+	router.Use(middleware.New(optResponse).Handler())
 	router.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: optSetRequestID}))
 	router.Use(middleware.CORSMiddleware(middleware.CORSOptions{AllowSetting: optSetCors}))
 	router.Use(middleware.SetLogger(middleware.LoggerOptions{AllowSetting: optSetLogger}))
 	router.Use(middleware.ApiVersion())
+
+	// Prepare group routing
 	v1 := router.Group("/api/v1/external")
 	v2 := router.Group("/api/v2/external")
 
 	// Routes
-	// authorization
+	// Authorization
 	v1.GET("/profile", middleware.AuthMiddleware(), authenticate.Profile)
 	v1.POST("/login", authenticate.Login)
 	v1.POST("/logout", middleware.AuthMiddleware(), authenticate.Logout)
 	v1.POST("/refresh", authenticate.Refresh)
 	v1.POST("/language", middleware.AuthMiddleware(), authenticate.SwitchLanguage)
 
-	// users
+	// Users
 	v1.GET("/users", middleware.AuthMiddleware(), userV1.GetUsers)
 	v1.POST("/users", middleware.AuthMiddleware(), userV1.SaveUser)
 	v1.GET("/users/:uuid", middleware.AuthMiddleware(), userV1.GetUser)
 
-	// welcome
+	// Welcome
 	v1.GET("/welcome_app", welcomeApp.Index)
 	v1.GET("/welcome", welcomeV1.Index)
 	v2.GET("/welcome", welcomeV2.Index)
 
-	// ping
+	// Ping
 	v1.GET("/ping", func(c *gin.Context) {
-		middleware.Formatter(c, nil, "pong")
+		middleware.Formatter(c, nil, "pong", nil)
 	})
 
-	// no route
+	// Generate secret & refresh key
+	router.GET("/secret", func(c *gin.Context) {
+		if os.Getenv("APP_ENV") == "production" {
+			_ = c.AbortWithError(http.StatusNotFound, errors.New("api.msg.error.not_found"))
+		}
+	}, secret.GenerateSecret)
+
+	// No route
 	router.NoRoute(func(c *gin.Context) {
-		c.AbortWithError(http.StatusNotFound, errors.New("api_"))
+		_ = c.AbortWithError(http.StatusNotFound, errors.New("api.msg.error.not_found"))
 	})
 
 	// Run app at defined port

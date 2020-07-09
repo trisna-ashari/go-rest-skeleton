@@ -26,14 +26,14 @@ func (s *Welcome) Index(c *gin.Context) {
 		UUID := metadata.UUID
 		userData, err := s.ur.GetUser(UUID)
 		if err == nil {
-			middleware.Formatter(c, nil, fmt.Sprintf("Pak Pong yuk %s :)", userData.FirstName))
+			middleware.Formatter(c, nil, fmt.Sprintf("Pak Pong yuk %s :)", userData.FirstName),nil)
 			return
 		}
 	}
-	middleware.Formatter(c, nil, "APP v1.0")
+	middleware.Formatter(c, nil, "APP v1.0", nil)
 }
 
 func (s *Welcome) Greeting(c *gin.Context) {
-	middleware.Formatter(c, nil, "GREETING v1.0")
+	middleware.Formatter(c, nil, "GREETING v1.0", nil)
 }
 
