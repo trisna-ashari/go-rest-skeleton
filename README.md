@@ -38,7 +38,7 @@ Golang RESTful API boilerplate with modern architectures.
 ```shell script
 # Download this project
 
-go get https://github.com/trisna-ashari/go-rest-skeleton
+git clone https://github.com/trisna-ashari/go-rest-skeleton
 ```
 
 Before running API server, you should set configs with yours.
