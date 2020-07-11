@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-rest-skeleton/infrastructure/persistence"
+	"go-rest-skeleton/infrastructure/util"
 
 	"github.com/ansel1/merry"
 	"github.com/gin-gonic/gin"
@@ -79,7 +79,7 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 		response.Data = errData
 
 		// Set translations
-		translatedMessage, language := persistence.NewTranslation(c, "error", response.Message)
+		translatedMessage, language := util.NewTranslation(c, "error", response.Message, map[string]interface{}{})
 		c.Header("Accept-Language", language)
 
 		// If environment is production
