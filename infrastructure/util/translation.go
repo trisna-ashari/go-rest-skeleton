@@ -1,4 +1,4 @@
-package persistence
+package util
 
 import (
 	"fmt"
@@ -21,7 +21,11 @@ type translationMessage struct {
 }
 
 // NewTranslation will translate message.
-func NewTranslation(c *gin.Context, messageType string, messageString string) (string, string) {
+func NewTranslation(
+	c *gin.Context,
+	messageType string,
+	messageString string,
+	messageData map[string]interface{}) (string, string) {
 	bundle := i18n.NewBundle(language.Indonesian)
 	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 	accept := c.GetHeader("Accept-Language")
@@ -50,6 +54,7 @@ func NewTranslation(c *gin.Context, messageType string, messageString string) (s
 			ID:    translation.Message,
 			Other: translation.DefaultMessage,
 		},
+		TemplateData: messageData,
 	})
 
 	return translatedMessage, translation.Language
