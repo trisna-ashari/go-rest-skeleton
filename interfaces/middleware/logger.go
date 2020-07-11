@@ -8,9 +8,10 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 // LoggerOptions is a struct to store options for SetLogger.
@@ -26,12 +27,7 @@ type Config struct {
 	SkipPathRegexp *regexp.Regexp
 }
 
-// SetLogger is a middleware function uses to log all incoming request and print it to console.
-func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
-	var newConfig Config
-	if len(config) > 0 {
-		newConfig = config[0]
-	}
+func makeSkip(newConfig Config) map[string]struct{} {
 	var skip map[string]struct{}
 	if length := len(newConfig.SkipPath); length > 0 {
 		skip = make(map[string]struct{}, length)
@@ -39,13 +35,29 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 			skip[path] = struct{}{}
 		}
 	}
+	return skip
+}
 
+func makeSubLogger(newConfig Config) zerolog.Logger {
 	var subLog zerolog.Logger
 	if newConfig.Logger == nil {
 		subLog = log.Logger
 	} else {
 		subLog = *newConfig.Logger
 	}
+
+	return subLog
+}
+
+// SetLogger is a middleware function uses to log all incoming request and print it to console.
+func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
+	var newConfig Config
+	if len(config) > 0 {
+		newConfig = config[0]
+	}
+
+	skip := makeSkip(newConfig)
+	subLog := makeSubLogger(newConfig)
 
 	return func(c *gin.Context) {
 		var bodyBytes []byte
