@@ -6,7 +6,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/exception"
-	"go-rest-skeleton/infrastructure/persistence"
+	"go-rest-skeleton/infrastructure/util"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"os"
@@ -43,7 +43,7 @@ func (au *Authenticate) Profile(c *gin.Context) {
 	}
 
 	UUID := metadata.UUID
-	userData, _ := au.us.GetUser(UUID)
+	userData, _ := au.us.GetUserWithRoles(UUID)
 	middleware.Formatter(c, userData.DetailUser(), "api.msg.success.successfully_get_profile", nil)
 }
 
@@ -60,7 +60,7 @@ func (au *Authenticate) SwitchLanguage(c *gin.Context) {
 		return
 	}
 	selectedLanguage := language["language"].(string)
-	if !persistence.IsValidAcceptLanguage(selectedLanguage) {
+	if !util.IsValidAcceptLanguage(selectedLanguage) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -82,7 +82,7 @@ func (au *Authenticate) Login(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	validateUser := user.Validate("login")
+	validateUser := user.ValidateLogin(c)
 	if len(validateUser) > 0 {
 		c.Set("data", validateUser)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
@@ -141,6 +141,7 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 		return
 	}
 	refreshToken := mapToken["refresh_token"]
+	fmt.Println(refreshToken)
 
 	// Verify the token
 	token, err := jwt.Parse(refreshToken, func(token *jwt.Token) (interface{}, error) {
@@ -149,11 +150,12 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 			// fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			return nil, exception.ErrorTextAnErrorOccurred
 		}
-		return []byte(os.Getenv("REFRESH_SECRET")), nil
+		return []byte(os.Getenv("APP_PRIVATE_KEY")), nil
 	})
 
 	// Any error may be due to token expiration
 	if err != nil {
+		fmt.Println("test")
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
