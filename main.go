@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	roleV1Point00 "go-rest-skeleton/interfaces/handler/v1.0/role"
 	userV1Point00 "go-rest-skeleton/interfaces/handler/v1.0/user"
 	welcomeV1Point00 "go-rest-skeleton/interfaces/handler/v1.0/welcome"
 	userV2Point00 "go-rest-skeleton/interfaces/handler/v2.0/user"
@@ -83,7 +84,8 @@ func main() {
 	welcomeApp := interfaces.NewWelcomeHandler(dbServices.User, authToken)
 	welcomeV1 := welcomeV1Point00.NewWelcomeHandler()
 	welcomeV2 := welcomeV2Point00.NewWelcomeHandler()
-	userV1 := userV1Point00.NewUsers(dbServices.User, redisServices.Auth, authToken)
+	roleV1 := roleV1Point00.NewRoles(dbServices.Role, redisServices.Auth, authToken)
+	userV1 := userV1Point00.NewUsers(dbServices, redisServices.Auth, authToken)
 	userV2 := userV2Point00.NewUsers(dbServices.User, redisServices.Auth, authToken)
 
 	// Logging
@@ -118,6 +120,10 @@ func main() {
 	v1.POST("/logout", middleware.AuthMiddleware(), authenticate.Logout)
 	v1.POST("/refresh", authenticate.Refresh)
 	v1.POST("/language", middleware.AuthMiddleware(), authenticate.SwitchLanguage)
+
+	// Roles
+	v1.GET("/roles", middleware.AuthMiddleware(), roleV1.GetRoles)
+	v1.GET("/roles/:uuid", middleware.AuthMiddleware(), roleV1.GetRole)
 
 	// Users
 	v1.GET("/users", middleware.AuthMiddleware(), userV1.GetUsers)

@@ -83,7 +83,7 @@ air
 │   ├── handler
 │   │   ├── v1.0
 │   │   │   ├── ...
-│   │   │   ├── role
+│   │   │   ├── r
 │   │   │   └── user
 │   │   └── v2.0
 │   │   │   └── ...
@@ -243,7 +243,41 @@ This is examples of what logger prints:
 Coming Soon
 
 ## Documentation
-Coming Soon
+### Endpoints
+##### Preparation API
+
+| Method | URI Path                      | Description                                               |
+|:------:|-------------------------------|-----------------------------------------------------------|
+|  `GET` | /secret                       | Generate strong `APP_PRIVATE_KEY` and `APP_PUBLIC_KEY` that can be used on `.env` |
+
+##### Authentication API
+
+| Method | URI Path                      | Description                                               |
+|:------:|-------------------------------|-----------------------------------------------------------|
+| `POST` | /api/v1/external/auth/login   | Perform login with `email` and `password`                 |
+| `POST` | /api/v1/external/auth/logout  | Perform logout for authenticated user with `access_token` |
+| `POST` | /api/v1/external/auth/refresh | Retrieve new `access_token` with `refresh_token`          |
+| `GET`  | /api/v1/external/auth/profile | Retrieve `current authenticated user` profile             |
+| `PUT`  | /api/v1/external/auth/profile | Update `current authenticated user` profile               |
+| `GET`  | /api/v1/external/auth/switch-language | Change `language` preference by `language code`   |
+
+##### User API
+| Method | URI Path                      | Description                                               |
+|:------:|-------------------------------|-----------------------------------------------------------|
+| `POST` | /api/v1/external/users        | Retrieve user list                                        |
+| `GET`  | /api/v1/external/users        | Retrieve user detail                                      |
+| `POST` | /api/v1/external/users/:uuid  | Create a new user                                         |
+| `PUT`  | /api/v1/external/users/:uuid  | Update specified user with `uuid`                         |
+|`DELETE`| /api/v1/external/users/:uuid  | Delete specified user with `uuid`                         |
+
+##### Role API
+| Method | URI Path                      | Description                                               |
+|:------:|-------------------------------|-----------------------------------------------------------|
+| `POST` | /api/v1/external/roles        | Retrieve role list                                        |
+| `GET`  | /api/v1/external/roles        | Retrieve role detail                                      |
+| `POST` | /api/v1/external/roles/:uuid  | Create a new role                                         |
+| `PUT`  | /api/v1/external/roles/:uuid  | Update specified role with `uuid`                         |
+|`DELETE`| /api/v1/external/roles/:uuid  | Delete specified role with `uuid`                         |
 
 ## Credits
 - [Go](https://github.com/golang/go) - The Go Programming Language

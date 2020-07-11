@@ -38,7 +38,7 @@ func (s *Users) SaveUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	validateErr := user.Validate("")
+	validateErr := user.ValidateSaveUser(c)
 	if len(validateErr) > 0 {
 		c.Set("data", validateErr)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
@@ -55,7 +55,7 @@ func (s *Users) SaveUser(c *gin.Context) {
 
 // GetUsers is a function uses to handle get user list.
 func (s *Users) GetUsers(c *gin.Context) {
-	users := entity.Users{}
+	var users entity.Users
 	var err error
 	users, meta, err := s.us.GetUsers(c)
 	if err != nil {

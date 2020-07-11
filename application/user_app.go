@@ -18,6 +18,8 @@ type UserAppInterface interface {
 	SaveUser(*entity.User) (*entity.User, map[string]string)
 	GetUsers(c *gin.Context) ([]entity.User, interface{}, error)
 	GetUser(UUID string) (*entity.User, error)
+	GetUserRoles(UUID string) ([]entity.UserRole, error)
+	GetUserWithRoles(UUID string) (*entity.User, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string)
 }
 
@@ -28,6 +30,16 @@ func (u *userApp) SaveUser(user *entity.User) (*entity.User, map[string]string) 
 
 // GetUser is implementation of method GetUser.
 func (u *userApp) GetUser(UUID string) (*entity.User, error) {
+	return u.us.GetUser(UUID)
+}
+
+// GetUserRoles is implementation of method GetUserWithRoles.
+func (u *userApp) GetUserRoles(UUID string) ([]entity.UserRole, error) {
+	return u.us.GetUserRoles(UUID)
+}
+
+// GetUserWithRoles is implementation of method GetUserWithRoles.
+func (u *userApp) GetUserWithRoles(UUID string) (*entity.User, error) {
 	return u.us.GetUser(UUID)
 }
 

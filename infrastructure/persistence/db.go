@@ -14,8 +14,10 @@ import (
 
 // Repositories represent it self.
 type Repositories struct {
-	User repository.UserRepository
-	db   *gorm.DB
+	Permission repository.PermissionRepository
+	Role       repository.RoleRepository
+	User       repository.UserRepository
+	db         *gorm.DB
 }
 
 // NewRepositories will initialize db connection and return repositories.
@@ -47,8 +49,10 @@ func NewRepositories(dbDriver, dbUser, dbPassword, dbHost, dbName, dbPort string
 	db.LogMode(true)
 
 	return &Repositories{
-		User: NewUserRepository(db),
-		db:   db,
+		Permission: NewPermissionRepository(db),
+		Role:       NewRoleRepository(db),
+		User:       NewUserRepository(db),
+		db:         db,
 	}, nil
 }
 
@@ -59,7 +63,13 @@ func (s *Repositories) Close() error {
 
 // AutoMigrate will migrate all tables.
 func (s *Repositories) AutoMigrate() error {
-	return s.db.AutoMigrate(&entity.User{}).Error
+	return s.db.AutoMigrate(
+		&entity.Permission{},
+		&entity.Role{},
+		&entity.RolePermission{},
+		&entity.User{},
+		&entity.UserRole{},
+	).Error
 }
 
 // Seeds all seeders.

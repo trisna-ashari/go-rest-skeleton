@@ -57,6 +57,32 @@ func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 	return &user, nil
 }
 
+// GetUserRoles will return user roles.
+func (r *UserRepo) GetUserRoles(uuid string) ([]entity.UserRole, error) {
+	var roles []entity.UserRole
+	err := r.db.Debug().Preload("Role").Where("user_uuid = ?", uuid).Find(&roles).Error
+	if err != nil {
+		return nil, err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		return nil, exception.ErrorTextUserNotFound
+	}
+	return roles, nil
+}
+
+// GetUserWithRoles will return user detail with roles.
+func (r *UserRepo) GetUserWithRoles(uuid string) (*entity.User, error) {
+	var user entity.User
+	err := r.db.Debug().Preload("UserRoles.Role").Where("uuid = ?", uuid).Take(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	if gorm.IsRecordNotFoundError(err) {
+		return nil, exception.ErrorTextUserNotFound
+	}
+	return &user, nil
+}
+
 // GetUsers will return user list.
 func (r *UserRepo) GetUsers(c *gin.Context) ([]entity.User, interface{}, error) {
 	var total int

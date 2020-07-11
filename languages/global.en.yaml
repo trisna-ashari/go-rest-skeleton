@@ -9,6 +9,9 @@ api:
       forbidden: "Forbidden"
       unprocessable_entity: "Unprocessable Entity"
       file_too_large: "File Too Large"
+      field_is_required: "Field {{.Field}} is required"
+      invalid_email: "Please provide valid email"
+      invalid_password_length: "Password should be at least 6 characters"
     success:
       successfully_login: "Successfully Login"
       successfully_logout: "Successfully Logout"
@@ -18,5 +21,7 @@ api:
       successfully_get_user_list: "Successfully Get User List"
       successfully_get_user_detail: "Successfully Get User Detail"
       successfully_create_user: "Successfully Create a New User"
+role:
+  not_found: "Role not found"
 user:
   not_found: "User Not Found"

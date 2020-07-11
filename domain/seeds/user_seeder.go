@@ -16,7 +16,6 @@ func CreateUser(
 	email string,
 	phone string,
 	password string) error {
-	// Hash password
 	hashedPassword, _ := security.Hash(password)
 
 	return db.Create(&entity.User{

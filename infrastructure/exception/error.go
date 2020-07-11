@@ -38,5 +38,8 @@ var ErrorTextInvalidPublicKey = errors.New("api.msg.error.invalid_public_key")
 // ErrorTextRefreshTokenIsExpired is an error representing refresh token is expired.
 var ErrorTextRefreshTokenIsExpired = errors.New("api.msg.error.refresh_token_expired")
 
+// ErrorTextRoleNotFound is an error representing role not found in database.
+var ErrorTextRoleNotFound = errors.New("role.not_found")
+
 // ErrorTextUserNotFound is an error representing user not found in database.
 var ErrorTextUserNotFound = errors.New("user.not_found")
