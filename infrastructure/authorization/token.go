@@ -11,6 +11,11 @@ import (
 	"github.com/twinj/uuid"
 )
 
+const expiredTime = 60
+const totalHoursInADay = 24
+const totalDaysInAWeek = 7
+const authorizationLen = 2
+
 // Token is a struct.
 type Token struct{}
 
@@ -31,10 +36,10 @@ var _ TokenInterface = &Token{}
 // CreateToken is a function uses to create a new token.
 func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 	td := &TokenDetails{}
-	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
+	td.AtExpires = time.Now().Add(time.Minute * expiredTime).Unix()
 	td.TokenUUID = uuid.NewV4().String()
 
-	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
+	td.RtExpires = time.Now().Add(time.Hour * totalHoursInADay * totalDaysInAWeek).Unix()
 	td.RefreshUUID = td.TokenUUID + "++" + UUID
 
 	var err error
@@ -97,7 +102,7 @@ func VerifyToken(r *http.Request) (*jwt.Token, error) {
 func ExtractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
-	if len(strArr) == 2 {
+	if len(strArr) == authorizationLen {
 		return strArr[1]
 	}
 	return ""
