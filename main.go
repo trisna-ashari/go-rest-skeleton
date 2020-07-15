@@ -80,7 +80,7 @@ func main() {
 	welcomeV2 := welcomeV2Point00.NewWelcomeHandler()
 	roleV1 := roleV1Point00.NewRoles(dbServices.Role, redisServices.Auth, authToken)
 	userV1 := userV1Point00.NewUsers(dbServices, redisServices.Auth, authToken)
-	userV2 := userV2Point00.NewUsers(dbServices.User, redisServices.Auth, authToken)
+	userV2 := userV2Point00.NewUsers(dbServices, redisServices.Auth, authToken)
 
 	// Logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
