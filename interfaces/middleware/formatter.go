@@ -8,7 +8,7 @@ import (
 
 // Formatter is a middleware function uses to generalize response format of RESTful api.
 func Formatter(c *gin.Context, data interface{}, message string, meta interface{}) {
-	response := successOutput{Code: c.Writer.Status(), Message: "OK"}
+	response := successOutput{SuccessHTTPCode: c.Writer.Status(), Message: "OK"}
 	response.Data = data
 	response.Meta = meta
 

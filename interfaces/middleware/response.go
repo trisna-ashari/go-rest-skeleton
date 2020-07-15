@@ -15,23 +15,24 @@ type ResponseOptions struct {
 	Environment     string
 	DebugMode       bool
 	DefaultLanguage string
+	DefaultTimezone string
 	GenericError    string
 	LogFunc         func(err string, code int, messages map[string]interface{})
 }
 
 type errOutput struct {
-	Code      int                    `json:"code"`
-	Data      interface{}            `json:"data"`
-	Args      map[string]interface{} `json:"details,omitempty"`
-	Message   string                 `json:"message"`
-	ErrorCode string                 `json:"error_code,omitempty"`
+	ErrorHTTPCode    int                    `json:"code"`
+	Data             interface{}            `json:"data"`
+	Args             map[string]interface{} `json:"details,omitempty"`
+	Message          string                 `json:"message"`
+	ErrorTracingCode string                 `json:"error_code,omitempty"`
 }
 
 type successOutput struct {
-	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
-	Message string      `json:"message"`
-	Meta    interface{} `json:"meta,omitempty"`
+	SuccessHTTPCode int         `json:"code"`
+	Data            interface{} `json:"data"`
+	Message         string      `json:"message"`
+	Meta            interface{} `json:"meta,omitempty"`
 }
 
 // New will initialize response middleware.
@@ -39,6 +40,7 @@ func New(o ResponseOptions) *ResponseOptions {
 	return &ResponseOptions{
 		DebugMode:       o.DebugMode,
 		DefaultLanguage: o.DefaultLanguage,
+		DefaultTimezone: o.DefaultTimezone,
 		GenericError:    DefaultGenericError,
 	}
 }
@@ -46,7 +48,6 @@ func New(o ResponseOptions) *ResponseOptions {
 // Handler will handle any error response.
 func (r *ResponseOptions) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Before request
 		c.Header("Content-Type", "application/json; charset: utf-8")
 		c.Next()
 
@@ -65,29 +66,29 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 			if key == "message" || key == "http status code" {
 				continue
 			}
-			if key, ok := key.(string); ok {
-				response.Args[key] = val
+			if argKey, ok := key.(string); ok {
+				response.Args[argKey] = val
 			}
 		}
 
-		// Set error code
-		errCode := c.Writer.Status()
-		response.Code = errCode
-
-		// Set error data
+		// Set error code, data, error tracing code
+		errHTTPCode := c.Writer.Status()
 		errData, _ := c.Get("data")
+		errTracingCode, _ := c.Get("errorTracingCode")
+		response.ErrorHTTPCode = errHTTPCode
 		response.Data = errData
+		response.ErrorTracingCode = errTracingCode.(string)
 
 		// Set translations
 		translatedMessage, language := util.NewTranslation(c, "error", response.Message, map[string]interface{}{})
 		c.Header("Accept-Language", language)
 
 		// If environment is production
-		if r.Environment == "production" && errCode == 500 {
-			errCode := c.Writer.Status()
+		if r.Environment == "production" && errHTTPCode == 500 {
+			httpCode := c.Writer.Status()
 			response.Message = r.GenericError
 			response.Args = nil
-			c.JSON(errCode, response)
+			c.JSON(httpCode, response)
 			return
 		}
 
@@ -101,10 +102,10 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 
 		// Log the error
 		if r.LogFunc != nil {
-			r.LogFunc(err.Error(), errCode, response.Args)
+			r.LogFunc(err.Error(), errHTTPCode, response.Args)
 		}
 
 		// Return error response
-		c.JSON(errCode, response)
+		c.JSON(errHTTPCode, response)
 	}
 }
