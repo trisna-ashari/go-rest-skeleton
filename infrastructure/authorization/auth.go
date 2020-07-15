@@ -89,7 +89,7 @@ func (tk *ClientData) DeleteTokens(authD *AccessDetails) error {
 	}
 	// When the record is deleted, the return value is 1
 	if deletedAt != 1 || deletedRt != 1 {
-		return exception.ErrorTextAnErrorOccurred
+		return exception.ErrorTextUnauthorized
 	}
 	return nil
 }
