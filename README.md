@@ -14,6 +14,7 @@ Golang RESTful API boilerplate with modern architectures.
         - [JWT](#jwt)
         - [Basic Auth](#basic-auth)
         - [LDAP](#ldap)
+    - [Role Based Access Permission](#cr-based-access-permission)
     - [DB Migration & Seeder](#db-migration-and-seeder)
         - [Auto Migrate](#auto-migrate)
         - [Builtin Seeders](#builtin-seeder)
@@ -78,14 +79,15 @@ air
 │   ├── authorization
 │   ├── persistence
 │   ├── security
+│   ├── util
 │   └── seed
 ├── interfaces
 │   ├── handler
-│   │   ├── v1.0
+│   │   ├── v1.0       // handler version 1.0
 │   │   │   ├── ...
-│   │   │   ├── r
+│   │   │   ├── cr
 │   │   │   └── user
-│   │   └── v2.0
+│   │   └── v2.0       // hanlder version 2.0
 │   │   │   └── ...
 │   └── middleware
 ├── languages
@@ -96,18 +98,24 @@ air
 ### Better API Response
 All RESTful endpoints were designed with `prefix` and `versioning` support. Prefix format is: /`api`/`v1`/`external`/routes.
 
-Supported HTTP Method: `POST`, `OPTIONS`, `GET`, `PUT`, `PATCH`, `DELETE`.
+Supported HTTP Method: 
+- `POST`
+- `GET` 
+- `PUT`
+- `PATCH`
+- `DELETE`
+- `OPTIONS`
 
-Api response generally includes three `keys`:
+Api response generally consists by three `keys` (max four):
 1) `code` as `HTTP Code`
 2) `data` as `actual response (various type of data)`
 3) `message` as `context message (success or error)`
 4) `meta` as `additional response`. Check [example](#response-with-meta-pagination)
 
 On api response's `headers`, its also included additional headers:
+- `Accept-Language`
 - `X-API-Version`
 - `X-Request-Id`
-- `Accept-Language`
 
 #### Basic response
 ```shell script
@@ -184,6 +192,14 @@ Coming Soon
 #### LDAP
 Coming Soon
 
+### Role Based Access Permission
+There is builtin middleware called `policy`. It a middleware uses to handle access permission for each URI based on (method on the handler). This `policy` works by defined `cr` and `permission`.
+
+- Each `user` can have more than one cr.
+- Each `cr` can have multiple permissions.
+- Based on database to achieve dynamic and custom roles.
+
+See this [example](#policy-middleware) how easy to implement.
 
 ### DB Migration and Seeder
 Yes, this skeleton has builtin db migration and seeders.
@@ -243,6 +259,193 @@ This is examples of what logger prints:
 Coming Soon
 
 ## Documentation
+### Entities
+Entities represent each table schema on this skeleton. All entities stored in [domain/entity](domain/entity). Entities can contains definition of schema or structure, method, and validations. 
+
+
+Here is current available entities:
+
+- Module `modules`
+- Permission `permissions`
+- Role `roles`
+- RolePermission `role_permissions`
+- User `users`
+- UserRole `user_roles`
+
+
+### Middleware
+##### API Version Middleware
+File:
+[interfaces/middleware/api_version.go](interfaces/middleware/api_version.go)
+
+Description:
+It's responsible to inject header `X-Api-Version` on response header.
+Header `X-Api-Version` value based on api prefix: `api/v1`, `api/v2`, `api/v...`.
+
+If an api route doesn't have prefix `v(1...n)`, this middleware wouldn't inject `X-Api-Version` on response header.
+
+Example an api call with `v1` prefix:
+
+```shell script
+curl http://localhost:8888/api/v1/external/ping -i
+```
+
+will return:
+
+```shell script
+HTTP/1.1 200 OK
+Accept-Language: en
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With
+Access-Control-Allow-Methods: POST, OPTIONS, GET, PUT, PATCH, DELETE
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset: utf-8
+X-Api-Version: v1
+X-Request-Id: cff21ac8-770f-41e6-b575-7b631ffcef33
+Date: Sat, 11 Jul 2020 23:01:41 GMT
+Content-Length: 41
+
+{"code":200,"data":null,"message":"pong"}
+```
+
+```shell script
+curl http://localhost:8888/api/v2/external/ping -i
+```
+
+Example an api call with `v2` prefix:
+
+will return:
+
+```shell script
+HTTP/1.1 200 OK
+Accept-Language: en
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With
+Access-Control-Allow-Methods: POST, OPTIONS, GET, PUT, PATCH, DELETE
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset: utf-8
+X-Api-Version: v2
+X-Request-Id: c7b66211-391e-4a2b-a9f6-626bdbbf5aac
+Date: Sat, 11 Jul 2020 23:01:41 GMT
+Content-Length: 41
+
+{"code":200,"data":null,"message":"pong"}
+```
+
+
+##### Formatter Middleware
+File:
+[interfaces/middleware/formatter.go](interfaces/middleware/formatter.go)
+
+Description:
+Formatter middleware responsible to formulate all `success` response. Generally, there are three response keys (max four):
+- `status` type: `integer`, represent `http code`
+- `data` type: `interface{}` represent `response data`
+- `message` type `string` represent `response message`
+- `meta` type `interface` represent `response meta` such as `page`, `per_page`, `total` which only returned on get list of data.
+
+Each `success` response through function named `Formatter`.
+
+```go
+Formatter(c *gin.Context, data interface{}, message string, meta interface{})
+```
+
+Here is an example usage:
+
+```go
+middleware.Formatter(c, nil, "PONG v1.0", nil)
+```
+will return: 
+```json
+{
+    "code": 200,
+    "data": null,
+    "message": "PONG V1.0"
+}
+```
+
+Parameter `message` type `string` will be translated if match with key in [translation](languages) files. If not match with any `key` in translation files, it will directly returned.
+
+Current `active language` based: `Accept-Language` on request headers (if present).
+If it not exists, will be applied default language that configured on `environment variale` named `APP_LANG`.
+
+All translation process handled by [infrastructure/util/translation.go](infrastructure/util/translation.go). Check [this section](#translation) for more detail.
+
+##### Logger Middleware
+##### Policy Middleware
+##### Request-Id Middleware
+File: [interfaces/middleware/request_id.go](interfaces/middleware/request_id.go)
+
+Description: 
+It's responsible to `set` `Set-Request-Id` on request header. It uses for tracking the request that can be useful for debugging and logging. If the request send `Set-Request-Id` on request header, the value of `Set-Request-Id` will be forwarded to response header. If `Set-Request-Id` not exists on the request header, this middleware will inject `X-Request-Id` on response header automatically.
+
+Example request with `Set-Request-Id` header:
+
+
+##### Response Middleware
+
+### Util
+##### Translation
+Go-rest-skeleton provide `translation util` to make `internalization` more easy. Translation file contain predefined key stored in`YAML` file.
+
+Here is an example how to define key and use it in response:
+- Define key in `YAML` file:
+```yaml
+api:
+  msg:
+    error:
+      email_is_required: "Email is required"
+      field_is_required: "Filed {{.Field}} is required"
+    success:
+      welcome_back: "Welcome back {{.Name}}, You have {{.TotalNotification}} notification"
+```
+
+- Call translation util function named `NewTranslation`:
+  - Without passing data:
+    ```go
+    util.NewTranslation(c, "error", "api.msg.error.email_is_required", map[string]interface{}{})
+    ```
+    
+    will return: 
+
+    ```json
+    {
+        "code": 422,
+        "data": null,
+        "message": "Field email is required"
+    }
+    ```
+
+   - With passing single data
+    ```go
+    errMsgData := make(map[string]interface{})
+    errMsgData['Field'] = "email"
+    util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+    ```
+    will return: 
+    ```json
+    {
+        "code": 422,
+        "data": null,
+        "message": "Field email is required"
+    }
+    ```
+   - With passing multiple data
+    ```go
+    errMsgData := make(map[string]interface{})
+    errMsgData['Name'] = "John"
+    errMsgData['TotalNotification'] = 7
+    util.NewTranslation(c, "error", "api.msg.success.welcome_back", errMsgData)
+    ```
+    will return:
+    ```json
+    {
+        "code": 200,
+        "data": null,
+        "message": "Welcome back John, you have 7 notification"
+    }
+    ```
+
 ### Endpoints
 ##### Preparation API
 
@@ -273,11 +476,11 @@ Coming Soon
 ##### Role API
 | Method | URI Path                      | Description                                               |
 |:------:|-------------------------------|-----------------------------------------------------------|
-| `POST` | /api/v1/external/roles        | Retrieve role list                                        |
-| `GET`  | /api/v1/external/roles        | Retrieve role detail                                      |
-| `POST` | /api/v1/external/roles/:uuid  | Create a new role                                         |
-| `PUT`  | /api/v1/external/roles/:uuid  | Update specified role with `uuid`                         |
-|`DELETE`| /api/v1/external/roles/:uuid  | Delete specified role with `uuid`                         |
+| `POST` | /api/v1/external/roles        | Retrieve cr list                                        |
+| `GET`  | /api/v1/external/roles        | Retrieve cr detail                                      |
+| `POST` | /api/v1/external/roles/:uuid  | Create a new cr                                         |
+| `PUT`  | /api/v1/external/roles/:uuid  | Update specified cr with `uuid`                         |
+|`DELETE`| /api/v1/external/roles/:uuid  | Delete specified cr with `uuid`                         |
 
 ## Credits
 - [Go](https://github.com/golang/go) - The Go Programming Language
