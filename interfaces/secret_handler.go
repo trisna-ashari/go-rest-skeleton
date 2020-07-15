@@ -29,10 +29,10 @@ func (s *SecretHandler) GenerateSecret(c *gin.Context) {
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	secretKey := secretKey{
+	secretPriPubKey := secretKey{
 		PrivateKey: base64.StdEncoding.EncodeToString([]byte(privateKey)),
 		PublicKey:  base64.StdEncoding.EncodeToString([]byte(publicKey)),
 	}
 
-	middleware.Formatter(c, secretKey, "api.msg.success.successfully_generate_rsa_key", nil)
+	middleware.Formatter(c, secretPriPubKey, "api.msg.success.successfully_generate_rsa_key", nil)
 }
