@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
@@ -39,14 +38,14 @@ func NewPolicy(
 
 // Can is a function uses to verify access.
 func (p *Policy) Can(module string, action string, c *gin.Context) bool {
-	metadata, err := p.tk.ExtractTokenMetadata(c.Request)
-	if err != nil {
+	UUID, exists := c.Get("UUID")
+	if !exists {
+		c.Set("ErrorTracingCode", exception.ErrorCodeITMIPO001)
 		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 		return false
 	}
 
-	UUID := metadata.UUID
-	userRoles, _ := p.au.GetUserRoles(UUID)
+	userRoles, _ := p.au.GetUserRoles(UUID.(string))
 	var hasPermission bool
 	var role entity.Role
 	hasPermission = false
@@ -58,10 +57,12 @@ func (p *Policy) Can(module string, action string, c *gin.Context) bool {
 			permission = rolePermission.Permission
 			if permission.ModuleKey == module && permission.PermissionKey == action {
 				hasPermission = true
-				fmt.Println(hasPermission)
 				return hasPermission
 			}
 		}
+	}
+	if !hasPermission {
+		c.Set("errorTracingCode", exception.ErrorCodeITMIPO002)
 	}
 	return hasPermission
 }

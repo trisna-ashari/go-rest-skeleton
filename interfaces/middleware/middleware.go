@@ -16,9 +16,9 @@ type CORSOptions struct {
 }
 
 // AuthMiddleware is a middleware function uses to handle request only from authorized user.
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(g *authorization.Gateway) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := authorization.TokenValid(c.Request)
+		_, err := authorization.AuthGateway(g, c)
 		if err != nil {
 			_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 			return

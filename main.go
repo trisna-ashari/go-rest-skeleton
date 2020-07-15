@@ -2,13 +2,14 @@ package main
 
 import (
 	"go-rest-skeleton/infrastructure/authorization"
+	"go-rest-skeleton/infrastructure/config"
 	"go-rest-skeleton/infrastructure/exception"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"os"
-	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -27,14 +28,13 @@ func main() {
 		panic("no .env file provided")
 	}
 
-	// Connect to DB: postgres | mysql
-	dbDriver := os.Getenv("DB_DRIVER")
-	dbHost := os.Getenv("DB_HOST")
-	dbPassword := os.Getenv("DB_PASSWORD")
-	dbUser := os.Getenv("DB_USER")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
-	dbServices, errDBServices := persistence.NewRepositories(dbDriver, dbUser, dbPassword, dbHost, dbName, dbPort)
+	// Init Config
+	conf := config.New()
+	timeLoc, _ := time.LoadLocation(conf.AppTimezone)
+	time.Local = timeLoc
+
+	// Connect to DB
+	dbServices, errDBServices := persistence.NewRepositories(conf.DBConfig)
 	if errDBServices != nil {
 		panic(errDBServices)
 	}
@@ -53,30 +53,24 @@ func main() {
 	}
 
 	// Connect to redis
-	redisHost := os.Getenv("REDIS_HOST")
-	redisPort := os.Getenv("REDIS_PORT")
-	redisPassword := os.Getenv("REDIS_PASSWORD")
-	redisServices, errRedis := authorization.NewRedisDB(redisHost, redisPort, redisPassword)
+	redisServices, errRedis := persistence.NewRedisDB(conf.RedisConfig)
 	if errRedis != nil {
 		panic(errRedis)
 	}
 
-	// Get options
-	optSetLanguage := os.Getenv("APP_LANG")
-	optSetDebug := os.Getenv("APP_ENV") != "production"
-	optSetRequestID, _ := strconv.ParseBool(os.Getenv("ENABLE_REQUEST_ID"))
-	optSetLogger, _ := strconv.ParseBool(os.Getenv("ENABLE_LOGGER"))
-	optSetCors, _ := strconv.ParseBool(os.Getenv("ENABLE_CORS"))
-
 	// Init response options
 	optResponse := middleware.ResponseOptions{
-		Environment:     os.Getenv("APP_ENV"),
-		DebugMode:       optSetDebug,
-		DefaultLanguage: optSetLanguage,
+		Environment:     conf.AppEnvironment,
+		DebugMode:       conf.DebugMode,
+		DefaultLanguage: conf.AppLanguage,
+		DefaultTimezone: conf.AppTimezone,
 	}
 
 	// Init authorization
-	authToken := authorization.NewToken()
+	authBasic := authorization.NewBasicAuth(dbServices.User)
+	authJWT := authorization.NewJWTAuth(conf.KeyConfig, redisServices.Client)
+	authToken := authorization.NewToken(conf.KeyConfig, redisServices.Client)
+	authGateway := authorization.NewAuthGateway(authBasic, authJWT)
 	authenticate := interfaces.NewAuthenticate(dbServices.User, redisServices.Auth, authToken)
 
 	// Init interfaces
@@ -101,12 +95,14 @@ func main() {
 	)
 
 	// Init gin with middleware
-	gin.SetMode(gin.ReleaseMode)
+	if !conf.DebugMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	router.Use(middleware.New(optResponse).Handler())
-	router.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: optSetRequestID}))
-	router.Use(middleware.CORSMiddleware(middleware.CORSOptions{AllowSetting: optSetCors}))
-	router.Use(middleware.SetLogger(middleware.LoggerOptions{AllowSetting: optSetLogger}))
+	router.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: conf.EnableRequestID}))
+	router.Use(middleware.CORSMiddleware(middleware.CORSOptions{AllowSetting: conf.EnableCors}))
+	router.Use(middleware.SetLogger(middleware.LoggerOptions{AllowSetting: conf.EnableLogger}))
 	router.Use(middleware.APIVersion())
 
 	// Prepare group routing
@@ -115,40 +111,38 @@ func main() {
 
 	// Routes V1
 	// Authorization
-	v1.GET("/profile", middleware.AuthMiddleware(), authenticate.Profile)
+	v1.GET("/profile", middleware.AuthMiddleware(authGateway), authenticate.Profile)
 	v1.POST("/login", authenticate.Login)
-	v1.POST("/logout", middleware.AuthMiddleware(), authenticate.Logout)
+	v1.POST("/logout", middleware.AuthMiddleware(authGateway), authenticate.Logout)
 	v1.POST("/refresh", authenticate.Refresh)
-	v1.POST("/language", middleware.AuthMiddleware(), authenticate.SwitchLanguage)
+	v1.POST("/language", middleware.AuthMiddleware(authGateway), authenticate.SwitchLanguage)
 
 	// Roles
-	v1.GET("/roles", middleware.AuthMiddleware(), roleV1.GetRoles)
-	v1.GET("/roles/:uuid", middleware.AuthMiddleware(), roleV1.GetRole)
+	v1.GET("/roles", middleware.AuthMiddleware(authGateway), roleV1.GetRoles)
+	v1.GET("/roles/:uuid", middleware.AuthMiddleware(authGateway), roleV1.GetRole)
 
 	// Users
-	v1.GET("/users", middleware.AuthMiddleware(), userV1.GetUsers)
-	v1.POST("/users", middleware.AuthMiddleware(), userV1.SaveUser)
-	v1.GET("/users/:uuid", middleware.AuthMiddleware(), userV1.GetUser)
+	v1.GET("/users", middleware.AuthMiddleware(authGateway), userV1.GetUsers)
+	v1.POST("/users", middleware.AuthMiddleware(authGateway), userV1.SaveUser)
+	v1.GET("/users/:uuid", middleware.AuthMiddleware(authGateway), userV1.GetUser)
 
 	// Welcome
 	v1.GET("/welcome_app", welcomeApp.Index)
 	v1.GET("/welcome", welcomeV1.Index)
 
-	// Ping
-	v1.GET("/ping", func(c *gin.Context) {
-		middleware.Formatter(c, nil, "pong", nil)
-	})
-
 	// Routes V2
 	// Users
-	v2.GET("/users", middleware.AuthMiddleware(), userV2.GetUsers)
-	v2.POST("/users", middleware.AuthMiddleware(), userV2.SaveUser)
-	v2.GET("/users/:uuid", middleware.AuthMiddleware(), userV2.GetUser)
+	v2.GET("/users", middleware.AuthMiddleware(authGateway), userV2.GetUsers)
+	v2.POST("/users", middleware.AuthMiddleware(authGateway), userV2.SaveUser)
+	v2.GET("/users/:uuid", middleware.AuthMiddleware(authGateway), userV2.GetUser)
 
 	// Welcome
 	v2.GET("/welcome", welcomeV2.Index)
 
 	// Generate secret & refresh key
+	router.GET("/ping", func(c *gin.Context) {
+		middleware.Formatter(c, nil, "pong", nil)
+	})
 	router.GET("/secret", func(c *gin.Context) {
 		if os.Getenv("APP_ENV") == "production" {
 			err := exception.ErrorTextNotFound

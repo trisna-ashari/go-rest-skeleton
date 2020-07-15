@@ -5,6 +5,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/domain/seeds"
+	"go-rest-skeleton/infrastructure/config"
 	"log"
 
 	"github.com/jinzhu/gorm"
@@ -21,28 +22,28 @@ type Repositories struct {
 }
 
 // NewRepositories will initialize db connection and return repositories.
-func NewRepositories(dbDriver, dbUser, dbPassword, dbHost, dbName, dbPort string) (*Repositories, error) {
+func NewRepositories(config config.DBConfig) (*Repositories, error) {
 	dbURL := ""
-	switch dbDriver {
+	switch config.DBDriver {
 	case "postgres":
 		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
-			dbHost,
-			dbPort,
-			dbUser,
-			dbName,
-			dbPassword,
+			config.DBHost,
+			config.DBPort,
+			config.DBUser,
+			config.DBName,
+			config.DBPassword,
 		)
 	case "mysql":
 		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			dbUser,
-			dbPassword,
-			dbHost,
-			dbPort,
-			dbName,
+			config.DBUser,
+			config.DBPassword,
+			config.DBHost,
+			config.DBPort,
+			config.DBName,
 		)
 	}
 
-	db, err := gorm.Open(dbDriver, dbURL)
+	db, err := gorm.Open(config.DBDriver, dbURL)
 	if err != nil {
 		return nil, err
 	}
