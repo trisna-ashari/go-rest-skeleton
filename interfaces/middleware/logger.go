@@ -49,6 +49,57 @@ func makeSubLogger(newConfig Config) zerolog.Logger {
 	return subLog
 }
 
+func getRequestHeader(c *gin.Context) []byte {
+	var headerBytes []byte
+	var rawHeader = make(map[string]interface{})
+	for headerKey, headerValue := range c.Request.Header {
+		if len(headerValue) == 1 {
+			rawHeader[headerKey] = headerValue[0]
+		} else {
+			rawHeader[headerKey] = headerValue
+		}
+	}
+
+	headerBytes, err := json.Marshal(rawHeader)
+	if err != nil {
+		return headerBytes
+	}
+
+	return headerBytes
+}
+
+func getRequestBody(c *gin.Context) []byte {
+	var bodyBytes []byte
+	if c.Request.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(c.Request.Body)
+	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	var rawBody map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &rawBody); err != nil {
+		bodyBytes = []byte("{}")
+	}
+
+	return bodyBytes
+}
+
+func printLogger(c *gin.Context, l zerolog.Logger, m string) {
+	switch {
+	case c.Writer.Status() >= http.StatusBadRequest && c.Writer.Status() < http.StatusInternalServerError:
+		{
+			l.Warn().
+				Msg(m)
+		}
+	case c.Writer.Status() >= http.StatusInternalServerError:
+		{
+			l.Error().
+				Msg(m)
+		}
+	default:
+		l.Info().
+			Msg(m)
+	}
+}
+
 // SetLogger is a middleware function uses to log all incoming request and print it to console.
 func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 	var newConfig Config
@@ -60,7 +111,6 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 	subLog := makeSubLogger(newConfig)
 
 	return func(c *gin.Context) {
-		var bodyBytes []byte
 		start := time.Now()
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
@@ -68,14 +118,8 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 			path = path + "?" + raw
 		}
 
-		if c.Request.Body != nil {
-			bodyBytes, _ = ioutil.ReadAll(c.Request.Body)
-		}
-		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-		var rawBody map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &rawBody); err != nil {
-			bodyBytes = []byte("{}")
-		}
+		requestHeader := getRequestHeader(c)
+		requestBody := getRequestBody(c)
 
 		c.Next()
 		track := options.AllowSetting
@@ -109,24 +153,11 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 				Str("ip", c.ClientIP()).
 				Dur("latency", latency).
 				Str("user-agent", c.Request.UserAgent()).
-				RawJSON("payloads", bodyBytes).
+				RawJSON("headers", requestHeader).
+				RawJSON("payloads", requestBody).
 				Logger()
 
-			switch {
-			case c.Writer.Status() >= http.StatusBadRequest && c.Writer.Status() < http.StatusInternalServerError:
-				{
-					dumpLogger.Warn().
-						Msg(msg)
-				}
-			case c.Writer.Status() >= http.StatusInternalServerError:
-				{
-					dumpLogger.Error().
-						Msg(msg)
-				}
-			default:
-				dumpLogger.Info().
-					Msg(msg)
-			}
+			printLogger(c, dumpLogger, msg)
 		}
 	}
 }
