@@ -40,6 +40,10 @@ func NewUsers(
 
 // SaveUser is a function uses to handle create a new user.
 func (s *Users) SaveUser(c *gin.Context) {
+	if !s.pl.Can(moduleName, "create", c) {
+		_ = c.AbortWithError(http.StatusForbidden, exception.ErrorTextForbidden)
+		return
+	}
 	var user entity.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
@@ -78,6 +82,12 @@ func (s *Users) GetUsers(c *gin.Context) {
 
 // GetUser is a function uses to handle get user detail by UUID.
 func (s *Users) GetUser(c *gin.Context) {
+
+	if !s.pl.Can(moduleName, "detail", c) {
+		_ = c.AbortWithError(http.StatusForbidden, exception.ErrorTextForbidden)
+		return
+	}
+
 	var userEntity entity.User
 	if err := c.ShouldBindUri(&userEntity.UUID); err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextBadRequest)

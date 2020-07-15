@@ -5,6 +5,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 
@@ -12,27 +13,37 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const moduleName = "user"
+
 // Users is a struct defines the dependencies that will be used.
 type Users struct {
+	rs application.RoleAppInterface
 	us application.UserAppInterface
 	rd authorization.AuthInterface
 	tk authorization.TokenInterface
+	pl middleware.PolicyInterface
 }
 
 // NewUsers is constructor will initialize user handler.
 func NewUsers(
-	us application.UserAppInterface,
+	ds *persistence.Repositories,
 	rd authorization.AuthInterface,
 	tk authorization.TokenInterface) *Users {
 	return &Users{
-		us: us,
+		rs: ds.Role,
+		us: ds.User,
 		rd: rd,
 		tk: tk,
+		pl: middleware.NewPolicy(ds.User, ds.Role, tk),
 	}
 }
 
 // SaveUser is a function uses to handle create a new user.
 func (s *Users) SaveUser(c *gin.Context) {
+	if !s.pl.Can(moduleName, "create", c) {
+		_ = c.AbortWithError(http.StatusForbidden, exception.ErrorTextForbidden)
+		return
+	}
 	var user entity.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
@@ -55,6 +66,10 @@ func (s *Users) SaveUser(c *gin.Context) {
 
 // GetUsers is a function uses to handle get user list.
 func (s *Users) GetUsers(c *gin.Context) {
+	if !s.pl.Can(moduleName, "read", c) {
+		_ = c.AbortWithError(http.StatusForbidden, exception.ErrorTextForbidden)
+		return
+	}
 	var users entity.Users
 	var err error
 	users, meta, err := s.us.GetUsers(c)
@@ -67,6 +82,10 @@ func (s *Users) GetUsers(c *gin.Context) {
 
 // GetUser is a function uses to handle get user detail by UUID.
 func (s *Users) GetUser(c *gin.Context) {
+	if !s.pl.Can(moduleName, "detail", c) {
+		_ = c.AbortWithError(http.StatusForbidden, exception.ErrorTextForbidden)
+		return
+	}
 	var userEntity entity.User
 	if err := c.ShouldBindUri(&userEntity.UUID); err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextBadRequest)
