@@ -47,8 +47,6 @@ func NewTranslation(
 	bundle.MustLoadMessageFile(languageFile)
 	localizer := i18n.NewLocalizer(bundle, translation.Language, translation.Language)
 
-	fmt.Println(translation)
-
 	translatedMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    translation.Message,
