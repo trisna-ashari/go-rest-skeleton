@@ -6,14 +6,14 @@ import (
 
 // All will seeds all defined seeder.
 func All() []seed.Seed {
-	b := Prepare()
+	b := prepare()
 	return b
 }
 
-// Prepare will prepare fake data based on entity's faker struct.
-func Prepare() []seed.Seed {
-	roleFactories := RoleFactory()
-	userFactories := UserFactory()
+// prepare will prepare fake data based on entity's faker struct.
+func prepare() []seed.Seed {
+	roleFactories := roleFactory()
+	userFactories := userFactory()
 
 	var (
 		allFactories []seed.Seed

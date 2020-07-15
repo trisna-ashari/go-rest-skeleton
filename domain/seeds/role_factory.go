@@ -14,20 +14,20 @@ type role struct {
 	name string
 }
 
-// RoleFactory is a function uses to create []seed.Seed.
-func RoleFactory() []seed.Seed {
+// roleFactory is a function uses to create []seed.Seed.
+func roleFactory() []seed.Seed {
 	roles := []role{
 		{UUID: uuid.New().String(), name: "Administrator"},
 		{UUID: uuid.New().String(), name: "User"},
 	}
 
 	fakerFactories := make([]seed.Seed, 2)
-	for i, role := range roles {
-		role := role
+	for i, r := range roles {
+		cr := r
 		fakerFactories[i] = seed.Seed{
-			Name: fmt.Sprintf("Create %s", role.name),
+			Name: fmt.Sprintf("Create %s", cr.name),
 			Run: func(db *gorm.DB) error {
-				err := CreateRole(db, role.UUID, role.name)
+				err := createRole(db, cr.UUID, cr.name)
 				return err
 			},
 		}

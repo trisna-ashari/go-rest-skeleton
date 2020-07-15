@@ -7,8 +7,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// CreateUser will create fake user and insert into DB.
-func CreateUser(
+// createUser will create fake user and insert into DB.
+func createUser(
 	db *gorm.DB,
 	UUID string,
 	firstName string,
