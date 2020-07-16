@@ -3,7 +3,7 @@ package authorization
 import (
 	"go-rest-skeleton/infrastructure/config"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // JWTAuth is represent needed dependencies.
