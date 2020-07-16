@@ -25,7 +25,7 @@ func NewWelcomeHandler(ur repository.UserRepository, tk authorization.TokenInter
 
 // Index will handle user request.
 func (s *Welcome) Index(c *gin.Context) {
-	metadata, errExtract := s.tk.ExtractTokenMetadata(c.Request)
+	metadata, errExtract := s.tk.ExtractTokenMetadata(c)
 	if errExtract == nil {
 		UUID := metadata.UUID
 		userData, err := s.ur.GetUser(UUID)
