@@ -72,7 +72,7 @@ air
 ```shell script
 ├── application
 ├── domain
-│   ├── entity
+│   ├── tableEntity
 │   ├── repository
 │   ├── seeds
 ├── infrastructure
@@ -86,7 +86,7 @@ air
 │   │   ├── v1.0       // handler version 1.0
 │   │   │   ├── ...
 │   │   │   ├── cr
-│   │   │   └── user
+│   │   │   └── userEntity
 │   │   └── v2.0       // hanlder version 2.0
 │   │   │   └── ...
 │   └── middleware
@@ -152,7 +152,7 @@ This is an example of response with meta pagination including `page`, `per_page`
             "phone": "107-398-4261"
         }
     ],
-    "message": "Successfully get user list",
+    "message": "Successfully get userEntity list",
     "meta": {
         "page": 2,
         "per_page": 2,
@@ -195,7 +195,7 @@ Coming Soon
 ### Role Based Access Permission
 There is builtin middleware called `policy`. It a middleware uses to handle access permission for each URI based on (method on the handler). This `policy` works by defined `cr` and `permission`.
 
-- Each `user` can have more than one cr.
+- Each `userEntity` can have more than one cr.
 - Each `cr` can have multiple permissions.
 - Based on database to achieve dynamic and custom roles.
 
@@ -250,9 +250,9 @@ Yes, `logger` is very useful in development process. This skeleton has built in 
 
 This is examples of what logger prints:
 ```shell script
-8:05AM INF Request ip=127.0.0.1 latency=1.110047 method=GET path=/api/v1/external/welcome payloads={} status=200 user-agent=PostmanRuntime/7.26.1
-8:05PM INF Request ip=127.0.0.1 latency=87.734547 method=POST path=/api/v1/external/login payloads={"email":"me@example.com","password":"123456"} status=200 user-agent=curl/7.68.0
-8:06AM INF Request ip=127.0.0.1 latency=2.405021 method=GET path=/api/v1/external/profile payloads={} status=200 user-agent=PostmanRuntime/7.26.1
+8:05AM INF Request ip=127.0.0.1 latency=1.110047 method=GET path=/api/v1/external/welcome payloads={} status=200 userEntity-agent=PostmanRuntime/7.26.1
+8:05PM INF Request ip=127.0.0.1 latency=87.734547 method=POST path=/api/v1/external/login payloads={"email":"me@example.com","password":"123456"} status=200 userEntity-agent=curl/7.68.0
+8:06AM INF Request ip=127.0.0.1 latency=2.405021 method=GET path=/api/v1/external/profile payloads={} status=200 userEntity-agent=PostmanRuntime/7.26.1
 ```
 
 ### Test
@@ -260,7 +260,7 @@ Coming Soon
 
 ## Documentation
 ### Entities
-Entities represent each table schema on this skeleton. All entities stored in [domain/entity](domain/entity). Entities can contains definition of schema or structure, method, and validations. 
+Entities represent each table schema on this skeleton. All entities stored in [domain/tableEntity](domain/tableEntity). Entities can contains definition of schema or structure, method, and validations. 
 
 
 Here is current available entities:
@@ -458,20 +458,20 @@ api:
 | Method | URI Path                      | Description                                               |
 |:------:|-------------------------------|-----------------------------------------------------------|
 | `POST` | /api/v1/external/auth/login   | Perform login with `email` and `password`                 |
-| `POST` | /api/v1/external/auth/logout  | Perform logout for authenticated user with `access_token` |
+| `POST` | /api/v1/external/auth/logout  | Perform logout for authenticated userEntity with `access_token` |
 | `POST` | /api/v1/external/auth/refresh | Retrieve new `access_token` with `refresh_token`          |
-| `GET`  | /api/v1/external/auth/profile | Retrieve `current authenticated user` profile             |
-| `PUT`  | /api/v1/external/auth/profile | Update `current authenticated user` profile               |
+| `GET`  | /api/v1/external/auth/profile | Retrieve `current authenticated userEntity` profile             |
+| `PUT`  | /api/v1/external/auth/profile | Update `current authenticated userEntity` profile               |
 | `GET`  | /api/v1/external/auth/switch-language | Change `language` preference by `language code`   |
 
 ##### User API
 | Method | URI Path                      | Description                                               |
 |:------:|-------------------------------|-----------------------------------------------------------|
-| `POST` | /api/v1/external/users        | Retrieve user list                                        |
-| `GET`  | /api/v1/external/users        | Retrieve user detail                                      |
-| `POST` | /api/v1/external/users/:uuid  | Create a new user                                         |
-| `PUT`  | /api/v1/external/users/:uuid  | Update specified user with `uuid`                         |
-|`DELETE`| /api/v1/external/users/:uuid  | Delete specified user with `uuid`                         |
+| `POST` | /api/v1/external/users        | Retrieve userEntity list                                        |
+| `GET`  | /api/v1/external/users        | Retrieve userEntity detail                                      |
+| `POST` | /api/v1/external/users/:uuid  | Create a new userEntity                                         |
+| `PUT`  | /api/v1/external/users/:uuid  | Update specified userEntity with `uuid`                         |
+|`DELETE`| /api/v1/external/users/:uuid  | Delete specified userEntity with `uuid`                         |
 
 ##### Role API
 | Method | URI Path                      | Description                                               |

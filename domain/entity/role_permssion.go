@@ -2,7 +2,7 @@ package entity
 
 // RolePermission represent schema of table user_roles.
 type RolePermission struct {
-	UUID           string     `gorm:"size:36;not null;unique_index;" json:"uuid"`
+	UUID           string     `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
 	RoleUUID       string     `gorm:"size:100;not null;" json:"role_uuid"`
 	PermissionUUID string     `gorm:"size:100;not null;" json:"permission_uuid"`
 	Permission     Permission `gorm:"foreignKey:UUID;association_foreignKey:PermissionUUID"`

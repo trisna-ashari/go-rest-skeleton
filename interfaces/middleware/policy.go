@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
-	"go-rest-skeleton/infrastructure/authorization"
+	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/exception"
 	"net/http"
 
@@ -12,32 +11,29 @@ import (
 
 // Policy represent required dependencies.
 type Policy struct {
-	au application.UserAppInterface
-	ar application.RoleAppInterface
-	tk authorization.TokenInterface
+	au repository.UserRepository
+	ar repository.RoleRepository
 }
 
 var _ PolicyInterface = &Policy{}
 
 // PolicyInterface is an interface.
 type PolicyInterface interface {
-	Can(module string, action string, c *gin.Context) bool
+	Can(action string, c *gin.Context) bool
 }
 
 // NewPolicy is constructor will initialize policy.
 func NewPolicy(
-	au application.UserAppInterface,
-	ar application.RoleAppInterface,
-	tk authorization.TokenInterface) *Policy {
+	au repository.UserRepository,
+	ar repository.RoleRepository) *Policy {
 	return &Policy{
 		au: au,
 		ar: ar,
-		tk: tk,
 	}
 }
 
 // Can is a function uses to verify access.
-func (p *Policy) Can(module string, action string, c *gin.Context) bool {
+func (p *Policy) Can(action string, c *gin.Context) bool {
 	UUID, exists := c.Get("UUID")
 	if !exists {
 		c.Set("ErrorTracingCode", exception.ErrorCodeITMIPO001)
@@ -55,7 +51,7 @@ func (p *Policy) Can(module string, action string, c *gin.Context) bool {
 		var permission entity.Permission
 		for _, rolePermission := range rolePermissions {
 			permission = rolePermission.Permission
-			if permission.ModuleKey == module && permission.PermissionKey == action {
+			if permission.PermissionKey == action {
 				hasPermission = true
 				return hasPermission
 			}

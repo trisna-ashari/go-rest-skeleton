@@ -1,0 +1,62 @@
+version: '3'
+services:
+  app:
+    container_name: go_rest_skeleton
+    build: .
+    ports:
+      - 8888:8888
+    env_file:
+      - .env
+    restart: on-failure
+    volumes:
+      - api:/usr/src/app/
+    depends_on:
+      - mysql_container
+    networks:
+      - network_service
+
+  mysql_container:
+    image: mysql:5.6
+    container_name: mysql_service
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_HOST=${DB_HOST}
+      - MYSQL_ROOT_PORT=${DB_PORT}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    networks:
+      - network_service
+    expose:
+      - 3306
+
+  redis_container:
+    image: redis
+    container_name: redis_service
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    expose:
+      - 6379
+    networks:
+      - network_service
+
+  adminer_container:
+    image: adminer:latest
+    container_name: adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql_container
+    ports:
+      - 8080:8080
+
+volumes:
+  api:
+
+networks:
+  network_service:
+    driver: bridge

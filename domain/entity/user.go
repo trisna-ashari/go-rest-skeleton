@@ -15,7 +15,7 @@ import (
 
 // User represent schema of table users.
 type User struct {
-	UUID      string     `gorm:"size:36;not null;unique_index;" json:"uuid"`
+	UUID      string     `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
 	FirstName string     `gorm:"size:100;not null;" json:"first_name"`
 	LastName  string     `gorm:"size:100;not null;" json:"last_name"`
 	Email     string     `gorm:"size:100;not null;unique;index:email" json:"email"`
@@ -82,8 +82,9 @@ func (u *User) BeforeSave() error {
 	if err != nil {
 		return err
 	}
-
-	u.UUID = generateUUID.String()
+	if u.UUID == "" {
+		u.UUID = generateUUID.String()
+	}
 	u.Password = string(hashPassword)
 	return nil
 }
@@ -147,6 +148,31 @@ func (u *User) ValidateSaveUser(c *gin.Context) map[string]string {
 	if u.Password != "" && len(u.Password) < 6 {
 		errMsgData["Field"] = "email"
 		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_password_length", errMsgData)
+	}
+	if u.Email == "" {
+		errMsgData["Field"] = "email"
+		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+	}
+	if u.Email != "" {
+		if err = checkmail.ValidateFormat(u.Email); err != nil {
+			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
+		}
+	}
+	return errMsg
+}
+
+// ValidateUpdateUser will validate create a new user request.
+func (u *User) ValidateUpdateUser(c *gin.Context) map[string]string {
+	var errMsg = make(map[string]string)
+	var errMsgData = make(map[string]interface{})
+	var err error
+	if u.FirstName == "" {
+		errMsgData["Field"] = "first_name"
+		errMsg["first_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+	}
+	if u.LastName == "" {
+		errMsgData["Field"] = "last_name"
+		errMsg["last_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
 	}
 	if u.Email == "" {
 		errMsgData["Field"] = "email"

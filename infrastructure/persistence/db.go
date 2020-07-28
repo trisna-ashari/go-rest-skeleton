@@ -42,12 +42,13 @@ func NewRepositories(config config.DBConfig) (*Repositories, error) {
 			config.DBName,
 		)
 	}
+	fmt.Println(dbURL)
 
 	db, err := gorm.Open(config.DBDriver, dbURL)
 	if err != nil {
 		return nil, err
 	}
-	db.LogMode(true)
+	db.LogMode(config.DBLog)
 
 	return &Repositories{
 		Permission: NewPermissionRepository(db),
@@ -65,6 +66,7 @@ func (s *Repositories) Close() error {
 // AutoMigrate will migrate all tables.
 func (s *Repositories) AutoMigrate() error {
 	return s.db.AutoMigrate(
+		&entity.Module{},
 		&entity.Permission{},
 		&entity.Role{},
 		&entity.RolePermission{},

@@ -5,7 +5,7 @@ import (
 	"go-rest-skeleton/infrastructure/exception"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // AuthInterface is an interface.

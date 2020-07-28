@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/twinj/uuid"
@@ -80,27 +80,26 @@ func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 }
 
 // TokenValid is a function uses to validate token.
-func TokenValid(c *gin.Context, t *Token) error {
+func TokenValid(c *gin.Context, t *Token) (*AccessDetails, error) {
 	token, err := VerifyToken(c)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	metadata, errExtract := t.ExtractTokenMetadata(c)
 	if errExtract != nil {
-		return errExtract
+		return nil, errExtract
 	}
 
 	_, err = t.rd.Get(t.rd.Context(), metadata.TokenUUID).Result()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
-		return err
+		return nil, err
 	}
 
-	c.Set("UUID", metadata.UUID)
-	return nil
+	return metadata, nil
 }
 
 // VerifyToken is a function to verify token.

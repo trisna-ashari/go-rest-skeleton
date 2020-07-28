@@ -2,7 +2,7 @@ package entity
 
 // Permission represent schema of table permission.
 type Permission struct {
-	UUID          string `gorm:"size:36;not null;unique_index;" json:"uuid"`
+	UUID          string `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
 	ModuleKey     string `gorm:"size:100;not null;" json:"module_key"`
 	PermissionKey string `gorm:"size:100;not null;" json:"permission_key"`
 }

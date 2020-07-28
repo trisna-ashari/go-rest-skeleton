@@ -27,6 +27,11 @@ type Config struct {
 	SkipPathRegexp *regexp.Regexp
 }
 
+type responseBodyWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
 func makeSkip(newConfig Config) map[string]struct{} {
 	var skip map[string]struct{}
 	if length := len(newConfig.SkipPath); length > 0 {
@@ -82,6 +87,21 @@ func getRequestBody(c *gin.Context) []byte {
 	return bodyBytes
 }
 
+func (r responseBodyWriter) Write(b []byte) (int, error) {
+	r.body.Write(b)
+	return r.ResponseWriter.Write(b)
+}
+
+func getResponseBody(c *gin.Context) []byte {
+	w := &responseBodyWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+	c.Writer = w
+	c.Next()
+	if c.Writer.Status() >= http.StatusBadRequest {
+		return []byte("{}")
+	}
+	return w.body.Bytes()
+}
+
 func printLogger(c *gin.Context, l zerolog.Logger, m string) {
 	switch {
 	case c.Writer.Status() >= http.StatusBadRequest && c.Writer.Status() < http.StatusInternalServerError:
@@ -120,8 +140,11 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 
 		requestHeader := getRequestHeader(c)
 		requestBody := getRequestBody(c)
+		requestID := c.Writer.Header().Get("X-Request-Id")
+		responseBody := getResponseBody(c)
 
 		c.Next()
+
 		track := options.AllowSetting
 
 		if _, ok := skip[path]; ok {
@@ -153,8 +176,10 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 				Str("ip", c.ClientIP()).
 				Dur("latency", latency).
 				Str("user-agent", c.Request.UserAgent()).
+				Str("request-id", requestID).
 				RawJSON("headers", requestHeader).
 				RawJSON("payloads", requestBody).
+				RawJSON("response", responseBody).
 				Logger()
 
 			printLogger(c, dumpLogger, msg)

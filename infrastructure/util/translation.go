@@ -43,7 +43,7 @@ func NewTranslation(
 		translation.DefaultMessage = messageString
 	}
 
-	languageFile := fmt.Sprintf("languages/global.%s.yaml", translation.Language)
+	languageFile := fmt.Sprintf("%s/languages/global.%s.yaml", RootDir(), translation.Language)
 	bundle.MustLoadMessageFile(languageFile)
 	localizer := i18n.NewLocalizer(bundle, translation.Language, translation.Language)
 

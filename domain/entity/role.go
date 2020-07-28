@@ -4,7 +4,7 @@ import "time"
 
 // Role represent schema of table roles.
 type Role struct {
-	UUID           string           `gorm:"size:36;not null;unique_index;" json:"uuid"`
+	UUID           string           `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
 	Name           string           `gorm:"size:100;not null;" json:"name"`
 	CreatedAt      time.Time        `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	CreatedBy      int              `gorm:"default:null" json:"created_by,omitempty"`

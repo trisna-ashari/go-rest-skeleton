@@ -44,6 +44,21 @@ var ErrorTextRoleNotFound = errors.New("role.not_found")
 // ErrorTextUserNotFound is an error representing user not found in database.
 var ErrorTextUserNotFound = errors.New("user.not_found")
 
+// ErrorTextUserInvalidUUID is an error representing UUID not found in database.
+var ErrorTextUserInvalidUUID = errors.New("user.invalid_uuid")
+
+// ErrorTextUserInvalidPassword is an error representing hashed password not match with stored in database.
+var ErrorTextUserInvalidPassword = errors.New("user.invalid_password")
+
+// ErrorTextUserEmailNotRegistered is an error representing email already is not exists in database.
+var ErrorTextUserEmailNotRegistered = errors.New("user.email_not_registered")
+
+// ErrorTextUserEmailAlreadyTaken is an error representing email already exists in database.
+var ErrorTextUserEmailAlreadyTaken = errors.New("user.email_already_taken")
+
+// ErrorTextPerPage is an error representing request per page over the limit.
+var ErrorTextPerPage = errors.New("api.msg.error.per_page")
+
 // ErrorCodeIFAUGA001 is an error represent represent given authorization via request headers
 // is not valid.
 // Or does not send authorization.

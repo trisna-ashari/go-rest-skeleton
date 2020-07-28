@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"go-rest-skeleton/infrastructure/util"
+	"strings"
 
-	"github.com/ansel1/merry"
 	"github.com/gin-gonic/gin"
 )
 
@@ -62,25 +62,29 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 
 		// Form the response
 		response := errOutput{Message: err.Error(), Args: map[string]interface{}{}}
-		for key, val := range merry.Values(err) {
-			if key == "message" || key == "http status code" {
-				continue
-			}
-			if argKey, ok := key.(string); ok {
-				response.Args[argKey] = val
-			}
-		}
 
 		// Set error code, data, error tracing code
 		errHTTPCode := c.Writer.Status()
 		errData, _ := c.Get("data")
+		errArgs, _ := c.Get("args")
+		errMessageData := make(map[string]interface{})
 		errTracingCode, _ := c.Get("errorTracingCode")
 		response.ErrorHTTPCode = errHTTPCode
 		response.Data = errData
-		response.ErrorTracingCode = errTracingCode.(string)
+		if errTracingCode != nil {
+			response.ErrorTracingCode = errTracingCode.(string)
+		}
+		if errArgs != nil {
+			for _, arg := range strings.Split(errArgs.(string), ";") {
+				splitArg := strings.Split(arg, ":")
+				argKey := splitArg[0]
+				argVal := splitArg[1]
+				errMessageData[argKey] = argVal
+			}
+		}
 
 		// Set translations
-		translatedMessage, language := util.NewTranslation(c, "error", response.Message, map[string]interface{}{})
+		translatedMessage, language := util.NewTranslation(c, "error", response.Message, errMessageData)
 		c.Header("Accept-Language", language)
 
 		// If environment is production
@@ -94,11 +98,6 @@ func (r *ResponseOptions) Handler() gin.HandlerFunc {
 
 		// Set message
 		response.Message = translatedMessage
-
-		// Add the error's stack if Debug is enabled
-		if r.DebugMode {
-			response.Args[`stack`] = merry.Stacktrace(err)
-		}
 
 		// Log the error
 		if r.LogFunc != nil {

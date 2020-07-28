@@ -12,6 +12,7 @@ api:
       field_is_required: "Isian {{.Field}} wajib diisi"
       invalid_email: "Email tidak valid"
       invalid_password_length: "Panjang minimal password harus 6 karakter"
+      per_page: "Setiap Pemintaan Dibatasi Maksimum {{.Max}} Per Halaman"
     success:
       successfully_login: "Berhasil Masuk"
       successfully_logout: "Berhasil Keluar"
@@ -21,6 +22,7 @@ api:
       successfully_get_user_list: "Berhasil Mendapatkan Daftar User"
       successfully_get_user_detail: "Berhasil Mendapatkan Rincian User"
       successfully_create_user: "Berhasil Menambahkan User Baru"
+      ok: "OK"
 role:
   not_found: "Role Tidak Ditemukan"
 user:

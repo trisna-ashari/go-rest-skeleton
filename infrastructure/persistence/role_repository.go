@@ -40,7 +40,7 @@ func (r RoleRepo) DeleteRole(role *entity.Role) error {
 // GetRole will return a role.
 func (r RoleRepo) GetRole(uuid string) (*entity.Role, error) {
 	var role entity.Role
-	err := r.db.Debug().Where("uuid = ?", uuid).Take(&role).Error
+	err := r.db.Where("uuid = ?", uuid).Take(&role).Error
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (r RoleRepo) GetRole(uuid string) (*entity.Role, error) {
 // GetRolePermissions will return user roles.
 func (r *RoleRepo) GetRolePermissions(uuid string) ([]entity.RolePermission, error) {
 	var permission []entity.RolePermission
-	err := r.db.Debug().Preload("Permission").Where("role_uuid = ?", uuid).Find(&permission).Error
+	err := r.db.Preload("Permission").Where("role_uuid = ?", uuid).Find(&permission).Error
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +68,8 @@ func (r RoleRepo) GetRoles(c *gin.Context) ([]entity.Role, interface{}, error) {
 	var total int
 	var roles []entity.Role
 	parameters := repository.NewParameters(c)
-	errTotal := r.db.Debug().Find(&roles).Count(&total).Error
-	errList := r.db.Debug().Limit(parameters.Limit).Offset(parameters.Offset).Find(&roles).Error
+	errTotal := r.db.Find(&roles).Count(&total).Error
+	errList := r.db.Limit(parameters.Limit).Offset(parameters.Offset).Find(&roles).Error
 	if errTotal != nil {
 		return nil, nil, errTotal
 	}

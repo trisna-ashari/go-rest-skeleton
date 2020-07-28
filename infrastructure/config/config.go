@@ -14,6 +14,18 @@ type DBConfig struct {
 	DBUser     string
 	DBName     string
 	DBPassword string
+	DBLog      bool
+}
+
+// DBTestConfig represent db test config keys
+type DBTestConfig struct {
+	DBDriver   string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBName     string
+	DBPassword string
+	DBLog      bool
 }
 
 // RedisConfig represent redis config keys.
@@ -32,6 +44,7 @@ type KeyConfig struct {
 // Config represent config keys.
 type Config struct {
 	DBConfig
+	DBTestConfig
 	RedisConfig
 	KeyConfig
 	AppEnvironment  string
@@ -51,8 +64,18 @@ func New() *Config {
 			DBHost:     getEnv("DB_HOST", "localhost"),
 			DBPort:     getEnv("DB_POST", "3306"),
 			DBUser:     getEnv("DB_USER", "root"),
-			DBName:     getEnv("DB_NAME", "go-rest-skeleton"),
+			DBName:     getEnv("DB_NAME", "go_rest_skeleton"),
 			DBPassword: getEnv("DB_PASSWORD", ""),
+			DBLog:      getEnvAsBool("ENABLE_LOGGER", true),
+		},
+		DBTestConfig: DBTestConfig{
+			DBDriver:   getEnv("TEST_DB_DRIVER", "mysql"),
+			DBHost:     getEnv("TEST_DB_HOST", "localhost"),
+			DBPort:     getEnv("TEST_DB_POST", "3306"),
+			DBUser:     getEnv("TEST_DB_USER", "root"),
+			DBName:     getEnv("TEST_DB_NAME", "go_rest_skeleton_test"),
+			DBPassword: getEnv("TEST_DB_PASSWORD", ""),
+			DBLog:      getEnvAsBool("ENABLE_LOGGER", true),
 		},
 		RedisConfig: RedisConfig{
 			RedisHost:     getEnv("REDIS_HOST", "127.0.0.1"),

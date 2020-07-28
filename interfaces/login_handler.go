@@ -88,9 +88,9 @@ func (au *Authenticate) Login(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	u, userErr := au.us.GetUserByEmailAndPassword(user)
-	if userErr != nil {
-		c.Set("data", userErr)
+	u, errDesc, _ := au.us.GetUserByEmailAndPassword(user)
+	if errDesc != nil {
+		c.Set("data", errDesc)
 		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
 		return
 	}

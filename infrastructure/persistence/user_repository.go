@@ -10,7 +10,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
 
@@ -28,31 +27,68 @@ func NewUserRepository(db *gorm.DB) *UserRepo {
 var _ repository.UserRepository = &UserRepo{}
 
 // SaveUser will create a new user.
-func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string) {
-	dbErr := map[string]string{}
-	err := r.db.Debug().Create(&user).Error
+func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string, error) {
+	errDesc := map[string]string{}
+	err := r.db.Create(&user).Error
 	if err != nil {
 		//If the email is already taken
 		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "Duplicate") {
-			dbErr["email_taken"] = "email already taken"
-			return nil, dbErr
+			errDesc["email"] = exception.ErrorTextUserEmailAlreadyTaken.Error()
+			return nil, errDesc, exception.ErrorTextUnprocessableEntity
 		}
-		//any other db error
-		dbErr["db_error"] = "database error"
-		return nil, dbErr
+		return nil, errDesc, exception.ErrorTextAnErrorOccurred
 	}
-	return user, nil
+	return user, nil, nil
+}
+
+// UpdateUser will create a new user.
+func (r *UserRepo) UpdateUser(uuid string, user *entity.User) (*entity.User, map[string]string, error) {
+	errDesc := map[string]string{}
+	userData := &entity.User{
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Phone:     user.Phone,
+	}
+	err := r.db.First(&user, "uuid = ?", uuid).Updates(userData).Error
+	if err != nil {
+		//If record not found
+		if gorm.IsRecordNotFoundError(err) {
+			errDesc["uuid"] = exception.ErrorTextUserInvalidUUID.Error()
+			return nil, errDesc, exception.ErrorTextUserNotFound
+		}
+		//If the email is already taken
+		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "Duplicate") {
+			errDesc["email"] = exception.ErrorTextUserEmailAlreadyTaken.Error()
+			return nil, errDesc, exception.ErrorTextUnprocessableEntity
+		}
+		return nil, errDesc, exception.ErrorTextAnErrorOccurred
+	}
+	return user, nil, nil
+}
+
+// DeleteUser will return user detail.
+func (r *UserRepo) DeleteUser(uuid string) error {
+	var user entity.User
+	err := r.db.Where("uuid = ?", uuid).Take(&user).Delete(&user).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return exception.ErrorTextUserNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // GetUser will return user detail.
 func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Debug().Where("uuid = ?", uuid).Take(&user).Error
+	err := r.db.Where("uuid = ?", uuid).Take(&user).Error
 	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, exception.ErrorTextUserNotFound
+		}
 		return nil, err
-	}
-	if gorm.IsRecordNotFoundError(err) {
-		return nil, exception.ErrorTextUserNotFound
 	}
 	return &user, nil
 }
@@ -60,12 +96,12 @@ func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 // GetUserRoles will return user roles.
 func (r *UserRepo) GetUserRoles(uuid string) ([]entity.UserRole, error) {
 	var roles []entity.UserRole
-	err := r.db.Debug().Preload("Role").Where("user_uuid = ?", uuid).Find(&roles).Error
+	err := r.db.Preload("Role").Where("user_uuid = ?", uuid).Find(&roles).Error
 	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, exception.ErrorTextUserNotFound
+		}
 		return nil, err
-	}
-	if gorm.IsRecordNotFoundError(err) {
-		return nil, exception.ErrorTextUserNotFound
 	}
 	return roles, nil
 }
@@ -73,56 +109,51 @@ func (r *UserRepo) GetUserRoles(uuid string) ([]entity.UserRole, error) {
 // GetUserWithRoles will return user detail with roles.
 func (r *UserRepo) GetUserWithRoles(uuid string) (*entity.User, error) {
 	var user entity.User
-	err := r.db.Debug().Preload("UserRoles.Role").Where("uuid = ?", uuid).Take(&user).Error
+	err := r.db.Preload("UserRoles.Role").Where("uuid = ?", uuid).Take(&user).Error
 	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, exception.ErrorTextUserNotFound
+		}
 		return nil, err
-	}
-	if gorm.IsRecordNotFoundError(err) {
-		return nil, exception.ErrorTextUserNotFound
 	}
 	return &user, nil
 }
 
 // GetUsers will return user list.
-func (r *UserRepo) GetUsers(c *gin.Context) ([]entity.User, interface{}, error) {
+func (r *UserRepo) GetUsers(p *repository.Parameters) ([]entity.User, interface{}, error) {
 	var total int
 	var users []entity.User
-	parameters := repository.NewParameters(c)
-	errTotal := r.db.Debug().Find(&users).Count(&total).Error
-	errList := r.db.Debug().Limit(parameters.Limit).Offset(parameters.Offset).Find(&users).Error
+	errTotal := r.db.Find(&users).Count(&total).Error
+	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&users).Error
 	if errTotal != nil {
 		return nil, nil, errTotal
 	}
 	if errList != nil {
 		return nil, nil, errList
 	}
-	if gorm.IsRecordNotFoundError(errList) {
-		return nil, nil, errList
-	}
-	meta := repository.NewMeta(parameters, total)
+	meta := repository.NewMeta(p, total)
 	return users, meta, nil
 }
 
 // GetUserByEmailAndPassword will find user by email and password.
-func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[string]string) {
+func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[string]string, error) {
 	var user entity.User
-	dbErr := map[string]string{}
-	err := r.db.Debug().Where("email = ?", u.Email).Take(&user).Error
-	if gorm.IsRecordNotFoundError(err) {
-		dbErr["email"] = "user not found"
-		return nil, dbErr
-	}
+	errDesc := map[string]string{}
+	err := r.db.Where("email = ?", u.Email).Take(&user).Error
 	if err != nil {
-		dbErr["db_error"] = "database error"
-		return nil, dbErr
+		if gorm.IsRecordNotFoundError(err) {
+			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
+			return nil, errDesc, exception.ErrorTextUserNotFound
+		}
+		return nil, errDesc, err
 	}
 
 	err = security.VerifyPassword(user.Password, u.Password)
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			dbErr["password"] = "incorrect password"
-			return nil, dbErr
+			errDesc["password"] = exception.ErrorTextUserInvalidPassword.Error()
+			return nil, errDesc, err
 		}
 	}
-	return &user, nil
+	return &user, nil, nil
 }

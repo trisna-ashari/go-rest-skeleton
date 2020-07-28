@@ -3,6 +3,7 @@ package authorization
 import (
 	"encoding/base64"
 	"go-rest-skeleton/domain/entity"
+	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/exception"
 	"strings"
 
@@ -17,13 +18,17 @@ const (
 type Gateway struct {
 	ba *BasicAuth
 	ja *JWTAuth
+	US repository.UserRepository
+	RS repository.RoleRepository
 }
 
 // NewAuthGateway is a constructor.
-func NewAuthGateway(ba *BasicAuth, ja *JWTAuth) *Gateway {
+func NewAuthGateway(ba *BasicAuth, ja *JWTAuth, us repository.UserRepository, rs repository.RoleRepository) *Gateway {
 	return &Gateway{
 		ba: ba,
 		ja: ja,
+		US: us,
+		RS: rs,
 	}
 }
 
@@ -53,7 +58,7 @@ func AuthGateway(g *Gateway, c *gin.Context) (*entity.User, error) {
 				Email:    email,
 				Password: password,
 			}
-			userFound, errBasic := g.ba.us.GetUserByEmailAndPassword(&user)
+			userFound, errBasic, _ := g.ba.us.GetUserByEmailAndPassword(&user)
 			if errBasic != nil {
 				c.Set("errorTracingCode", exception.ErrorCodeIFAUGA004)
 				return userAuth, exception.ErrorTextUnauthorized
@@ -70,11 +75,13 @@ func AuthGateway(g *Gateway, c *gin.Context) (*entity.User, error) {
 	if authType[0] == "Bearer" {
 		bearerToken := strings.Split(auth, " ")
 		if len(bearerToken) == authorizationLen {
-			errJWT := TokenValid(c, g.ja.tk)
+			accessDetails, errJWT := TokenValid(c, g.ja.tk)
 			if errJWT != nil {
 				c.Set("errorTracingCode", exception.ErrorCodeIFAUGA005)
 				return userAuth, exception.ErrorTextUnauthorized
 			}
+
+			c.Set("UUID", accessDetails.UUID)
 		}
 	}
 

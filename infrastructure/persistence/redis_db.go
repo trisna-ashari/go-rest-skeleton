@@ -4,7 +4,7 @@ import (
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/config"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
 )
 
 // RedisService represent it self.

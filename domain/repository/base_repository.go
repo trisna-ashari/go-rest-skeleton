@@ -1,10 +1,15 @@
 package repository
 
 import (
+	"fmt"
+	"go-rest-skeleton/infrastructure/exception"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+const maxPerPage = 25
 
 // Parameters represent it self.
 type Parameters struct {
@@ -17,9 +22,9 @@ type Parameters struct {
 
 // Meta represent it self.
 type Meta struct {
-	PerPage int
-	Page    int
-	Total   interface{}
+	PerPage int         `json:"per_page"`
+	Page    int         `json:"page"`
+	Total   interface{} `json:"total"`
 }
 
 // NewParameters construct Parameters from request.
@@ -27,6 +32,12 @@ func NewParameters(c *gin.Context) *Parameters {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "5"))
 	order := c.DefaultQuery("order", "desc")
+
+	if perPage > maxPerPage {
+		c.Set("args", fmt.Sprintf("Max:%d", maxPerPage))
+		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextPerPage)
+	}
+
 	var offset int
 	var limit int
 	if page <= 1 {

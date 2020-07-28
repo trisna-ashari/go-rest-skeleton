@@ -12,6 +12,7 @@ api:
       field_is_required: "Field {{.Field}} is required"
       invalid_email: "Please provide valid email"
       invalid_password_length: "Password should be at least 6 characters"
+      per_page: "Each Request Maximum is {{.Max}} Records Per Page"
     success:
       successfully_login: "Successfully Login"
       successfully_logout: "Successfully Logout"
@@ -21,6 +22,9 @@ api:
       successfully_get_user_list: "Successfully Get User List"
       successfully_get_user_detail: "Successfully Get User Detail"
       successfully_create_user: "Successfully Create a New User"
+      successfully_update_user: "Successfully Update User"
+      successfully_delete_user: "Successfully Delete User"
+      ok: "OK"
 role:
   not_found: "Role not found"
 user:
