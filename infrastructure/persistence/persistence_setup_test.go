@@ -1,12 +1,14 @@
-package persistence
+package persistence_test
 
 import (
 	"fmt"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/config"
+	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/infrastructure/util"
 	"log"
+	"testing"
 
 	"github.com/bxcodec/faker"
 
@@ -18,51 +20,59 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// DBConn is a function.
-func DBConn() (*gorm.DB, error) {
+const (
+	driverMysql    = "mysql"
+	driverPostgres = "postgres"
+)
+
+type entities struct {
+	entity interface{}
+}
+
+// SkipThis is a function.
+func SkipThis(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip this test")
+	}
+}
+
+func InitConfig() *config.Config {
 	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
 		log.Println("no .env file provided")
 	}
 
-	conf := config.New()
+	return config.New()
+}
+
+// DBConn is a function.
+func DBConn() (*gorm.DB, error) {
+	conf := InitConfig()
 	return DBConnSetup(conf.DBTestConfig)
 }
 
-// DBServices is a function.
-func DBServices() (*Repositories, error) {
-	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
-		log.Println("no .env file provided")
-	}
-
-	conf := config.New()
-	return DBServicesSetup(conf.DBTestConfig)
+// DBService is a function.
+func DBService() (*persistence.Repositories, error) {
+	conf := InitConfig()
+	return DBServiceSetup(conf.DBTestConfig)
 }
 
 // RedisConn is a function.
 func RedisConn() (*gorm.DB, error) {
-	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
-		log.Println("no .env file provided")
-	}
-
-	conf := config.New()
+	conf := InitConfig()
 	return DBConnSetup(conf.DBTestConfig)
 }
 
-// RedisServices is a function.
-func RedisServices() (*RedisService, error) {
-	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
-		log.Println("no .env file provided")
-	}
-
-	conf := config.New()
-	return RedisServicesSetup(conf.RedisConfig)
+// RedisService is a function.
+func RedisService() (*persistence.RedisService, error) {
+	conf := InitConfig()
+	return RedisServiceSetup(conf.RedisTestConfig)
 }
 
 // DBConnSetup is a function.
 func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 	dbURL := ""
 	switch config.DBDriver {
-	case "postgres":
+	case driverPostgres:
 		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
 			config.DBHost,
 			config.DBPort,
@@ -70,7 +80,7 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 			config.DBName,
 			config.DBPassword,
 		)
-	case "mysql":
+	case driverMysql:
 		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			config.DBUser,
 			config.DBPassword,
@@ -78,6 +88,17 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 			config.DBPort,
 			config.DBName,
 		)
+	}
+
+	entities := []entities{
+		{entity: &entity.Module{}},
+		{entity: &entity.Permission{}},
+		{entity: &entity.Role{}},
+		{entity: &entity.RolePermission{}},
+		{entity: &entity.StorageCategory{}},
+		{entity: &entity.StorageFile{}},
+		{entity: &entity.User{}},
+		{entity: &entity.UserRole{}},
 	}
 
 	db, err := gorm.Open(config.DBDriver, dbURL)
@@ -91,69 +112,61 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		&entity.Permission{},
 		&entity.Role{},
 		&entity.RolePermission{},
+		&entity.StorageCategory{},
+		&entity.StorageFile{},
 		&entity.User{},
 		&entity.UserRole{},
 	).Error
 	if err != nil {
 		return nil, err
 	}
+
+	for _, model := range entities {
+		err := db.Exec(fmt.Sprintf("TRUNCATE %s", db.NewScope(model.entity).TableName())).Error
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	return db, nil
 }
 
-// DBServicesSetup will initialize db connection and return repositories.
-func DBServicesSetup(config config.DBTestConfig) (*Repositories, error) {
-	dbURL := ""
-	switch config.DBDriver {
-	case "postgres":
-		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
-			config.DBHost,
-			config.DBPort,
-			config.DBUser,
-			config.DBName,
-			config.DBPassword,
-		)
-	case "mysql":
-		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			config.DBUser,
-			config.DBPassword,
-			config.DBHost,
-			config.DBPort,
-			config.DBName,
-		)
-	}
-
-	db, err := gorm.Open(config.DBDriver, dbURL)
+// DBServiceSetup will initialize db connection and return repositories.
+func DBServiceSetup(config config.DBTestConfig) (*persistence.Repositories, error) {
+	db, err := DBConnSetup(config)
 	if err != nil {
 		return nil, err
 	}
-	db.LogMode(false)
 
-	return &Repositories{
-		Permission: NewPermissionRepository(db),
-		Role:       NewRoleRepository(db),
-		User:       NewUserRepository(db),
-		db:         db,
+	return &persistence.Repositories{
+		Permission:      persistence.NewPermissionRepository(db),
+		Role:            persistence.NewRoleRepository(db),
+		StorageCategory: persistence.NewStorageCategoryRepository(db),
+		StorageFile:     persistence.NewStorageFileRepository(db),
+		User:            persistence.NewUserRepository(db),
+		DB:              db,
 	}, nil
 }
 
 // RedisConnSetup will initialize connection to redis server.
-func RedisConnSetup(config config.RedisConfig) (*redis.Client, error) {
+func RedisConnSetup(config config.RedisTestConfig) (*redis.Client, error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     config.RedisHost + ":" + config.RedisPort,
 		Password: config.RedisPassword,
-		DB:       10,
+		DB:       config.RedisDB,
 	})
+
 	return redisClient, nil
 }
 
 // RedisServiceSetup will initialize connection to redis server.
-func RedisServicesSetup(config config.RedisConfig) (*RedisService, error) {
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     config.RedisHost + ":" + config.RedisPort,
-		Password: config.RedisPassword,
-		DB:       10,
-	})
-	return &RedisService{
+func RedisServiceSetup(config config.RedisTestConfig) (*persistence.RedisService, error) {
+	redisClient, err := RedisConnSetup(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &persistence.RedisService{
 		Auth:   authorization.NewAuth(redisClient),
 		Client: redisClient,
 	}, nil
@@ -173,27 +186,24 @@ func seedUser(db *gorm.DB) (*entity.User, *entity.UserFaker, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return &user, &userFaker, nil
 }
 
 func seedRoles(db *gorm.DB) ([]entity.Role, error) {
 	roles := []entity.Role{
-		{
-			UUID: uuid.New().String(),
-			Name: "Administrator",
-		},
-		{
-			UUID: uuid.New().String(),
-			Name: "User",
-		},
+		{UUID: uuid.New().String(), Name: "Super Administrator"},
+		{UUID: uuid.New().String(), Name: "Administrator"},
+		{UUID: uuid.New().String(), Name: "User"},
 	}
-	var role entity.Role
+
 	for _, v := range roles {
-		role = v
-		err := db.Create(role).Error
+		role := v
+		err := db.Create(&role).Error
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return roles, nil
 }

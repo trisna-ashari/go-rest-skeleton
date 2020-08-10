@@ -11,6 +11,11 @@ type JWTAuth struct {
 	tk *Token
 }
 
+// JWTRefreshToken is a struct.
+type JWTRefreshToken struct {
+	RefreshToken string `json:"refresh_token" form:"refresh_token"`
+}
+
 // NewJWTAuth is a constructor.
 func NewJWTAuth(ck config.KeyConfig, rd *redis.Client) *JWTAuth {
 	tk := NewToken(ck, rd)

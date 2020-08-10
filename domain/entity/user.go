@@ -15,16 +15,17 @@ import (
 
 // User represent schema of table users.
 type User struct {
-	UUID      string     `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
-	FirstName string     `gorm:"size:100;not null;" json:"first_name"`
-	LastName  string     `gorm:"size:100;not null;" json:"last_name"`
-	Email     string     `gorm:"size:100;not null;unique;index:email" json:"email"`
-	Phone     string     `gorm:"size:100;" json:"phone,omitempty"`
-	Password  string     `gorm:"size:100;not null;index:password" json:"password"`
-	CreatedAt time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	UserRoles []UserRole `gorm:"foreignKey:UserUUID"`
+	UUID       string     `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
+	FirstName  string     `gorm:"size:100;not null;" json:"first_name"`
+	LastName   string     `gorm:"size:100;not null;" json:"last_name"`
+	Email      string     `gorm:"size:100;not null;unique;index:email" json:"email" form:"email"`
+	Phone      string     `gorm:"size:100;" json:"phone,omitempty"`
+	Password   string     `gorm:"size:100;not null;index:password" json:"password" form:"password"`
+	AvatarUUID string     `gorm:"size:36;" json:"avatar_uuid"`
+	CreatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
+	UserRoles  []UserRole `gorm:"foreignKey:UserUUID"`
 }
 
 // UserFaker represent content when generate fake data of user.
@@ -43,7 +44,7 @@ type Users []User
 // DetailUser represent format of detail user.
 type DetailUser struct {
 	UserFieldsForDetail
-	Role []interface{} `json:"roles,omitempty" groups:"detail"`
+	Role []interface{} `json:"roles,omitempty"`
 }
 
 // DetailUserList represent format of detail user for list.
@@ -54,11 +55,12 @@ type DetailUserList struct {
 
 // UserFieldsForDetail represent fields of detail user.
 type UserFieldsForDetail struct {
-	UUID      string `gorm:"size:36;not null;unique_index;" json:"uuid"`
-	FirstName string `gorm:"size:100;not null;" json:"first_name"`
-	LastName  string `gorm:"size:100;not null;" json:"last_name"`
-	Email     string `gorm:"size:100;not null;unique;index:email" json:"email"`
-	Phone     string `gorm:"size:100;" json:"phone,omitempty"`
+	UUID      string      `json:"uuid"`
+	FirstName string      `json:"first_name"`
+	LastName  string      `json:"last_name"`
+	Email     string      `json:"email"`
+	Phone     interface{} `json:"phone,omitempty"`
+	Avatar    interface{} `json:"avatar,omitempty"`
 }
 
 // UserFieldsForList represent fields of detail user for user list.
@@ -107,6 +109,22 @@ func (u *User) DetailUser() interface{} {
 			LastName:  u.LastName,
 			Email:     u.Email,
 			Phone:     u.Phone,
+			Avatar:    nil,
+		},
+		Role: UserRoles.GetUserRole(u.UserRoles),
+	}
+}
+
+// DetailUserAvatar will return formatted user detail of user.
+func (u *User) DetailUserAvatar(url interface{}) interface{} {
+	return &DetailUser{
+		UserFieldsForDetail: UserFieldsForDetail{
+			UUID:      u.UUID,
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Email:     u.Email,
+			Phone:     u.Phone,
+			Avatar:    url,
 		},
 		Role: UserRoles.GetUserRole(u.UserRoles),
 	}
@@ -146,8 +164,8 @@ func (u *User) ValidateSaveUser(c *gin.Context) map[string]string {
 		errMsg["password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
 	}
 	if u.Password != "" && len(u.Password) < 6 {
-		errMsgData["Field"] = "email"
-		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_password_length", errMsgData)
+		errMsgData["Field"] = "password"
+		errMsg["password"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_password_length", errMsgData)
 	}
 	if u.Email == "" {
 		errMsgData["Field"] = "email"

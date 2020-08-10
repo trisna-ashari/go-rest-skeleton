@@ -157,3 +157,20 @@ func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[
 	}
 	return &user, nil, nil
 }
+
+// UpdateUserAvatar will create a new user.
+func (r *UserRepo) UpdateUserAvatar(uuid string, user *entity.User) (*entity.User, map[string]string, error) {
+	errDesc := map[string]string{}
+	userData := &entity.User{
+		AvatarUUID: user.AvatarUUID,
+	}
+	err := r.db.First(&user, "uuid = ?", uuid).Updates(userData).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			errDesc["uuid"] = exception.ErrorTextUserInvalidUUID.Error()
+			return nil, errDesc, exception.ErrorTextUserNotFound
+		}
+		return nil, errDesc, exception.ErrorTextAnErrorOccurred
+	}
+	return user, nil, nil
+}

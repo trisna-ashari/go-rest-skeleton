@@ -1,4 +1,4 @@
-package middleware
+package middleware_test
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/infrastructure/util"
 	"log"
+	"testing"
 
 	"github.com/bxcodec/faker"
 
@@ -41,6 +42,12 @@ type Dependencies struct {
 	cf *config.Config
 }
 
+func SkipThis(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip this test")
+	}
+}
+
 func InitConfig() *config.Config {
 	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
 		log.Println("no .env file provided")
@@ -52,18 +59,18 @@ func InitConfig() *config.Config {
 func Setup() *Dependencies {
 	conf := InitConfig()
 	db, _ := DBConnSetup(conf.DBTestConfig)
-	rd, _ := RedisConnSetup(conf.RedisConfig)
-	dbServices, _ := DBServicesSetup(db)
-	redisServices, _ := RedisServicesSetup(rd)
+	rd, _ := RedisConnSetup(conf.RedisTestConfig)
+	dbService, _ := DBServiceSetup(db)
+	redisService, _ := RedisServiceSetup(rd)
 
-	authBasic := authorization.NewBasicAuth(dbServices.User)
-	authJWT := authorization.NewJWTAuth(conf.KeyConfig, redisServices.Client)
-	authGateway := authorization.NewAuthGateway(authBasic, authJWT, dbServices.User, dbServices.Role)
-	authToken := authorization.NewToken(conf.KeyConfig, redisServices.Client)
+	authBasic := authorization.NewBasicAuth(dbService.User)
+	authJWT := authorization.NewJWTAuth(conf.KeyConfig, redisService.Client)
+	authGateway := authorization.NewAuthGateway(authBasic, authJWT, dbService.User, dbService.Role)
+	authToken := authorization.NewToken(conf.KeyConfig, redisService.Client)
 
 	return &Dependencies{
-		db: dbServices.db,
-		rd: redisServices,
+		db: dbService.db,
+		rd: redisService,
 		ag: authGateway,
 		at: authToken,
 		cf: conf,
@@ -103,6 +110,8 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		&entity.Permission{},
 		&entity.Role{},
 		&entity.RolePermission{},
+		&entity.StorageCategory{},
+		&entity.StorageFile{},
 		&entity.User{},
 		&entity.UserRole{},
 	).Error
@@ -112,8 +121,8 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 	return db, nil
 }
 
-// DBServicesSetup will initialize db connection and return repositories.
-func DBServicesSetup(db *gorm.DB) (*Repositories, error) {
+// DBServiceSetup will initialize db connection and return repositories.
+func DBServiceSetup(db *gorm.DB) (*Repositories, error) {
 	return &Repositories{
 		Permission: persistence.NewPermissionRepository(db),
 		Role:       persistence.NewRoleRepository(db),
@@ -123,16 +132,16 @@ func DBServicesSetup(db *gorm.DB) (*Repositories, error) {
 }
 
 // RedisConnSetup will initialize redis connection and return redis client.
-func RedisConnSetup(config config.RedisConfig) (*redis.Client, error) {
+func RedisConnSetup(config config.RedisTestConfig) (*redis.Client, error) {
 	return redis.NewClient(&redis.Options{
 		Addr:     config.RedisHost + ":" + config.RedisPort,
 		Password: config.RedisPassword,
-		DB:       10,
+		DB:       config.RedisDB,
 	}), nil
 }
 
 // RedisServiceSetup will initialize connection to redis server.
-func RedisServicesSetup(rc *redis.Client) (*RedisService, error) {
+func RedisServiceSetup(rc *redis.Client) (*RedisService, error) {
 	return &RedisService{
 		Auth:   authorization.NewAuth(rc),
 		Client: rc,

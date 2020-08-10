@@ -15,9 +15,10 @@ import (
 
 // Router is a struct contains needed dependencies to init MainRouter().
 type Router struct {
-	conf          *config.Config
-	dbServices    *persistence.Repositories
-	redisServices *persistence.RedisService
+	conf           *config.Config
+	dbService      *persistence.Repositories
+	redisService   *persistence.RedisService
+	storageService *persistence.StorageService
 }
 
 // RouterAuthGateway is a struct contains needed dependencies to init Routes.
@@ -29,12 +30,14 @@ type RouterAuthGateway struct {
 // NewRouter is a constructor uses to construct Router.
 func NewRouter(
 	conf *config.Config,
-	dbServices *persistence.Repositories,
-	redisServices *persistence.RedisService) *Router {
+	dbService *persistence.Repositories,
+	redisService *persistence.RedisService,
+	storageService *persistence.StorageService) *Router {
 	return &Router{
-		conf:          conf,
-		dbServices:    dbServices,
-		redisServices: redisServices,
+		conf:           conf,
+		dbService:      dbService,
+		redisService:   redisService,
+		storageService: storageService,
 	}
 }
 
@@ -69,17 +72,17 @@ func (r *Router) Start() *gin.Engine {
 	}
 
 	// Init authorization
-	authBasic := authorization.NewBasicAuth(r.dbServices.User)
-	authJWT := authorization.NewJWTAuth(r.conf.KeyConfig, r.redisServices.Client)
-	authToken := authorization.NewToken(r.conf.KeyConfig, r.redisServices.Client)
-	authGateway := authorization.NewAuthGateway(authBasic, authJWT, r.dbServices.User, r.dbServices.Role)
+	authBasic := authorization.NewBasicAuth(r.dbService.User)
+	authJWT := authorization.NewJWTAuth(r.conf.KeyConfig, r.redisService.Client)
+	authToken := authorization.NewToken(r.conf.KeyConfig, r.redisService.Client)
+	authGateway := authorization.NewAuthGateway(authBasic, authJWT, r.dbService.User, r.dbService.Role)
 
 	// Init gin
 	if !r.conf.DebugMode {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	e := gin.Default()
-	e.Use(middleware.New(optResponse).Handler())
+	e.Use(middleware.NewResponse(optResponse).Handler())
 	e.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: r.conf.EnableRequestID}))
 	e.Use(middleware.CORS(middleware.CORSOptions{AllowSetting: r.conf.EnableCors}))
 	e.Use(middleware.SetLogger(middleware.LoggerOptions{AllowSetting: r.conf.EnableLogger}))
@@ -88,7 +91,7 @@ func (r *Router) Start() *gin.Engine {
 	// Init Routes
 	rg := NewRouterAuthGateway(authGateway, authToken)
 	authRoutes(e, r, rg)
-	devRoutes(e)
+	devRoutes(e, r)
 	roRoutes(e)
 	roleRoutes(e, r, rg)
 	userRoutes(e, r, rg)

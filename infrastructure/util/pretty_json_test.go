@@ -1,6 +1,7 @@
-package util
+package util_test
 
 import (
+	"go-rest-skeleton/infrastructure/util"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,7 +19,7 @@ func TestPrettyJSON(t *testing.T) {
 		Data:    nil,
 		Message: "OK",
 	}
-	json := PrettyJSON(data)
+	json := util.PrettyJSON(data)
 	expectedJSON := "{\n\t\"code\": 200,\n\t\"data\": null,\n\t\"message\": \"OK\"\n}\n"
 	assert.Equal(t, expectedJSON, json)
 }

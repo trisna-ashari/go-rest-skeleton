@@ -17,7 +17,7 @@ type DBConfig struct {
 	DBLog      bool
 }
 
-// DBTestConfig represent db test config keys
+// DBTestConfig represent db test config keys.
 type DBTestConfig struct {
 	DBDriver   string
 	DBHost     string
@@ -33,6 +33,23 @@ type RedisConfig struct {
 	RedisHost     string
 	RedisPort     string
 	RedisPassword string
+	RedisDB       int
+}
+
+// RedisTestConfig represent redis config keys.
+type RedisTestConfig struct {
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	RedisDB       int
+}
+
+// MinioConfig represent minio config keys.
+type MinioConfig struct {
+	Endpoint  string
+	AccessKey string
+	SecretKey string
+	Bucket    string
 }
 
 // KeyConfig represent key config keys.
@@ -46,6 +63,8 @@ type Config struct {
 	DBConfig
 	DBTestConfig
 	RedisConfig
+	RedisTestConfig
+	MinioConfig
 	KeyConfig
 	AppEnvironment  string
 	AppLanguage     string
@@ -81,6 +100,19 @@ func New() *Config {
 			RedisHost:     getEnv("REDIS_HOST", "127.0.0.1"),
 			RedisPort:     getEnv("REDIS_PORT", "6379"),
 			RedisPassword: getEnv("REDIS_PASSWORD", ""),
+			RedisDB:       getEnvAsInt("REDIS_DB", 0),
+		},
+		RedisTestConfig: RedisTestConfig{
+			RedisHost:     getEnv("TEST_REDIS_HOST", "127.0.0.1"),
+			RedisPort:     getEnv("TEST_REDIS_PORT", "6379"),
+			RedisPassword: getEnv("TEST_REDIS_PASSWORD", ""),
+			RedisDB:       getEnvAsInt("TEST_REDIS_DB", 10),
+		},
+		MinioConfig: MinioConfig{
+			Endpoint:  getEnv("MINIO_HOST", "127.0.0.1:9000"),
+			AccessKey: getEnv("MINIO_ACCESS_KEY", "minio"),
+			SecretKey: getEnv("MINIO_SECRET_KEY", "miniostorage"),
+			Bucket:    getEnv("MINIO_BUCKET", "go-rest-skeleton"),
 		},
 		KeyConfig: KeyConfig{
 			AppPrivateKey: getEnv("APP_PRIVATE_KEY", "default-private-key"),

@@ -5,7 +5,6 @@ import (
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/exception"
 
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
 
@@ -23,18 +22,39 @@ func NewRoleRepository(db *gorm.DB) *RoleRepo {
 var _ repository.RoleRepository = &RoleRepo{}
 
 // SaveRole will create a new role.
-func (r RoleRepo) SaveRole(role *entity.Role) (*entity.Role, map[string]string) {
+func (r RoleRepo) SaveRole(role *entity.Role) (*entity.Role, map[string]string, error) {
 	panic("implement me")
 }
 
 // UpdateRole will update specified role.
-func (r RoleRepo) UpdateRole(role *entity.Role) (*entity.Role, map[string]string) {
-	panic("implement me")
+func (r RoleRepo) UpdateRole(uuid string, role *entity.Role) (*entity.Role, map[string]string, error) {
+	errDesc := map[string]string{}
+	roleData := &entity.Role{
+		Name: role.Name,
+	}
+	err := r.db.First(&role, "uuid = ?", uuid).Updates(roleData).Error
+	if err != nil {
+		//If record not found
+		if gorm.IsRecordNotFoundError(err) {
+			errDesc["uuid"] = exception.ErrorTextRoleInvalidUUID.Error()
+			return nil, errDesc, exception.ErrorTextRoleNotFound
+		}
+		return nil, errDesc, exception.ErrorTextAnErrorOccurred
+	}
+	return role, nil, nil
 }
 
 // DeleteRole will delete role.
-func (r RoleRepo) DeleteRole(role *entity.Role) error {
-	panic("implement me")
+func (r RoleRepo) DeleteRole(uuid string) error {
+	var role entity.Role
+	err := r.db.Where("uuid = ?", uuid).Take(&role).Delete(&role).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return exception.ErrorTextUserNotFound
+		}
+		return err
+	}
+	return nil
 }
 
 // GetRole will return a role.
@@ -64,12 +84,11 @@ func (r *RoleRepo) GetRolePermissions(uuid string) ([]entity.RolePermission, err
 }
 
 // GetRoles will return role list.
-func (r RoleRepo) GetRoles(c *gin.Context) ([]entity.Role, interface{}, error) {
+func (r RoleRepo) GetRoles(p *repository.Parameters) ([]entity.Role, interface{}, error) {
 	var total int
 	var roles []entity.Role
-	parameters := repository.NewParameters(c)
 	errTotal := r.db.Find(&roles).Count(&total).Error
-	errList := r.db.Limit(parameters.Limit).Offset(parameters.Offset).Find(&roles).Error
+	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&roles).Error
 	if errTotal != nil {
 		return nil, nil, errTotal
 	}
@@ -79,6 +98,6 @@ func (r RoleRepo) GetRoles(c *gin.Context) ([]entity.Role, interface{}, error) {
 	if gorm.IsRecordNotFoundError(errList) {
 		return nil, nil, errList
 	}
-	meta := repository.NewMeta(parameters, total)
+	meta := repository.NewMeta(p, total)
 	return roles, meta, nil
 }

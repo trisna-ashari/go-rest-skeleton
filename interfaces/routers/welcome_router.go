@@ -15,6 +15,5 @@ func welcomeRoutes(e *gin.Engine) {
 
 	v1.GET("/welcome", welcomeV1.Index)
 
-	// Welcome
 	v2.GET("/welcome", welcomeV2.Index)
 }

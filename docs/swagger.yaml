@@ -1,0 +1,328 @@
+definitions:
+  middleware.errOutput:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      details:
+        additionalProperties: true
+        type: object
+      error_code:
+        type: string
+      message:
+        type: string
+    type: object
+  middleware.successOutput:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      message:
+        type: string
+      meta:
+        type: object
+    type: object
+host: localhost:8888
+info:
+  contact:
+    email: trisna.x2@gmail.com
+    name: Trisna Novi Ashari
+    url: https://github.com/trisna-ashari/go-rest-skeleton
+  description: This is a sample of RESTful api made by go-rest-skeleton
+  license:
+    name: MIT
+  title: Go-Rest-Skeleton API Example
+  version: "1.0"
+paths:
+  /api/ping:
+    get:
+      consumes:
+      - application/json
+      description: Check server response.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Ping server
+      tags:
+      - development
+  /api/secret:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve base64 encoded string of private key and public key through rest api.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Generate a secret
+      tags:
+      - development
+  /api/v1/external/language:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Change language preference.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: formData
+        name: language
+        required: true
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Switch language preference
+      tags:
+      - authentication
+  /api/v1/external/login:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Login by email and password.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: User password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Authentication login
+      tags:
+      - authentication
+  /api/v1/external/logout:
+    post:
+      description: Logout using Authorization Header.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - JWTAuth: []
+      summary: Authentication logout
+      tags:
+      - authentication
+  /api/v1/external/profile:
+    get:
+      description: Get current user profile using Authorization Header.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Authentication profile
+      tags:
+      - authentication
+  /api/v1/external/refresh:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Retrieve a new access_token using refresh token.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Refresh token from /login
+        in: formData
+        name: refresh_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Authentication refresh
+      tags:
+      - authentication
+schemes:
+- http
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: api_key
+    type: apiKey
+  BasicAuth:
+    type: basic
+  JWTAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

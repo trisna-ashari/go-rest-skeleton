@@ -21,6 +21,7 @@ type UserAppInterface interface {
 	GetUserRoles(UUID string) ([]entity.UserRole, error)
 	GetUserWithRoles(UUID string) (*entity.User, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
+	UpdateUserAvatar(string, *entity.User) (*entity.User, map[string]string, error)
 }
 
 // SaveUser is implementation of method SaveUser.
@@ -61,4 +62,8 @@ func (u *userApp) GetUsers(p *repository.Parameters) ([]entity.User, interface{}
 // GetUserByEmailAndPassword is implementation of method GetUserByEmailAndPassword.
 func (u *userApp) GetUserByEmailAndPassword(user *entity.User) (*entity.User, map[string]string, error) {
 	return u.us.GetUserByEmailAndPassword(user)
+}
+
+func (u *userApp) UpdateUserAvatar(UUID string, user *entity.User) (*entity.User, map[string]string, error) {
+	return u.us.UpdateUserAvatar(UUID, user)
 }

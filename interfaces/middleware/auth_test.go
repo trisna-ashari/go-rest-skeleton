@@ -1,8 +1,9 @@
-package middleware
+package middleware_test
 
 import (
 	"encoding/base64"
 	"fmt"
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,6 +13,8 @@ import (
 )
 
 func TestAuth_WithJWTAuth_Success(t *testing.T) {
+	SkipThis(t)
+
 	dp := Setup()
 	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
 	if connErr != nil {
@@ -32,7 +35,7 @@ func TestAuth_WithJWTAuth_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.GET("/test", Auth(dp.ag), func(c *gin.Context) {})
+	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", jwtAccessToken))
@@ -41,6 +44,8 @@ func TestAuth_WithJWTAuth_Success(t *testing.T) {
 }
 
 func TestAuth_WithJWTAuth_Failed(t *testing.T) {
+	SkipThis(t)
+
 	dp := Setup()
 	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
 	if connErr != nil {
@@ -57,7 +62,7 @@ func TestAuth_WithJWTAuth_Failed(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.GET("/test", Auth(dp.ag), func(c *gin.Context) {})
+	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", jwtAccessToken))
@@ -66,6 +71,8 @@ func TestAuth_WithJWTAuth_Failed(t *testing.T) {
 }
 
 func TestAuth_WithBasicAuth_Success(t *testing.T) {
+	SkipThis(t)
+
 	dp := Setup()
 	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
 	if connErr != nil {
@@ -80,7 +87,7 @@ func TestAuth_WithBasicAuth_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.GET("/test", Auth(dp.ag), func(c *gin.Context) {})
+	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth))
@@ -89,6 +96,8 @@ func TestAuth_WithBasicAuth_Success(t *testing.T) {
 }
 
 func TestAuth_WithBasicAuth_Failed(t *testing.T) {
+	SkipThis(t)
+
 	dp := Setup()
 	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
 	if connErr != nil {
@@ -103,7 +112,7 @@ func TestAuth_WithBasicAuth_Failed(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.GET("/test", Auth(dp.ag), func(c *gin.Context) {})
+	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth))
@@ -112,12 +121,14 @@ func TestAuth_WithBasicAuth_Failed(t *testing.T) {
 }
 
 func TestAuth_WithoutAuth_Failed(t *testing.T) {
+	SkipThis(t)
+
 	dp := Setup()
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.GET("/test", Auth(dp.ag), func(c *gin.Context) {})
+	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	r.ServeHTTP(w, c.Request)

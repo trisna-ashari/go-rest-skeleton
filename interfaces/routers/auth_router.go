@@ -1,14 +1,14 @@
 package routers
 
 import (
-	"go-rest-skeleton/interfaces"
+	"go-rest-skeleton/interfaces/handler"
 	"go-rest-skeleton/interfaces/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func authRoutes(e *gin.Engine, r *Router, rg *RouterAuthGateway) {
-	authenticate := interfaces.NewAuthenticate(r.dbServices.User, r.redisServices.Auth, rg.authToken)
+	authenticate := handler.NewAuthenticate(r.dbService.User, r.redisService.Auth, rg.authToken)
 
 	v1 := e.Group("/api/v1/external")
 

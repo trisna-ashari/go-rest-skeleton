@@ -2,31 +2,28 @@ package seeds
 
 import (
 	"fmt"
+	"go-rest-skeleton/domain/entity"
 
 	"github.com/jinzhu/gorm"
 
 	"github.com/google/uuid"
 )
 
-type role struct {
-	UUID string
-	name string
-}
-
 // roleFactory is a function uses to create []seed.Seed.
 func roleFactory() []Seed {
-	roles := []role{
-		{UUID: uuid.New().String(), name: "Administrator"},
-		{UUID: uuid.New().String(), name: "User"},
+	roles := []*entity.Role{
+		{UUID: uuid.New().String(), Name: "Super Administrator"},
+		{UUID: uuid.New().String(), Name: "Administrator"},
+		{UUID: uuid.New().String(), Name: "User"},
 	}
 
-	fakerFactories := make([]Seed, 2)
+	fakerFactories := make([]Seed, len(roles))
 	for i, r := range roles {
 		cr := r
 		fakerFactories[i] = Seed{
-			Name: fmt.Sprintf("Create %s", cr.name),
+			Name: fmt.Sprintf("Create %s", cr.Name),
 			Run: func(db *gorm.DB) error {
-				err := createRole(db, cr.UUID, cr.name)
+				_, err := createRole(db, cr)
 				return err
 			},
 		}

@@ -9,7 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const maxPerPage = 25
+const (
+	defaultPage    = 1
+	defaultPerPage = 5
+	maxPerPage     = 25
+)
 
 // Parameters represent it self.
 type Parameters struct {
@@ -29,8 +33,8 @@ type Meta struct {
 
 // NewParameters construct Parameters from request.
 func NewParameters(c *gin.Context) *Parameters {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "5"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", strconv.Itoa(defaultPage)))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", strconv.Itoa(defaultPerPage)))
 	order := c.DefaultQuery("order", "desc")
 
 	if perPage > maxPerPage {

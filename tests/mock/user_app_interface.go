@@ -15,6 +15,7 @@ type UserAppInterface struct {
 	GetUserRolesFn              func(UUID string) ([]entity.UserRole, error)
 	GetUserWithRolesFn          func(UUID string) (*entity.User, error)
 	GetUserByEmailAndPasswordFn func(*entity.User) (*entity.User, map[string]string, error)
+	UpdateUserAvatarFn          func(string, *entity.User) (*entity.User, map[string]string, error)
 }
 
 // SaveUser calls the SaveUserFn.
@@ -55,4 +56,9 @@ func (u *UserAppInterface) GetUserWithRoles(uuid string) (*entity.User, error) {
 // GetUserByEmailAndPassword calls the GetUserByEmailAndPasswordFn.
 func (u *UserAppInterface) GetUserByEmailAndPassword(user *entity.User) (*entity.User, map[string]string, error) {
 	return u.GetUserByEmailAndPasswordFn(user)
+}
+
+// UpdateUserAvatar calls the UpdateUserAvatarFn.
+func (u *UserAppInterface) UpdateUserAvatar(uuid string, user *entity.User) (*entity.User, map[string]string, error) {
+	return u.UpdateUserFn(uuid, user)
 }

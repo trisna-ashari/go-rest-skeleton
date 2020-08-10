@@ -13,19 +13,26 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres" // for postgres driver (optional)
 )
 
+const (
+	driverMysql    = "mysql"
+	driverPostgres = "postgres"
+)
+
 // Repositories represent it self.
 type Repositories struct {
-	Permission repository.PermissionRepository
-	Role       repository.RoleRepository
-	User       repository.UserRepository
-	db         *gorm.DB
+	Permission      repository.PermissionRepository
+	Role            repository.RoleRepository
+	StorageFile     repository.StorageFileRepository
+	StorageCategory repository.StorageCategoryRepository
+	User            repository.UserRepository
+	DB              *gorm.DB
 }
 
-// NewRepositories will initialize db connection and return repositories.
-func NewRepositories(config config.DBConfig) (*Repositories, error) {
+// NewDBConnection will initialize db connection.
+func NewDBConnection(config config.DBConfig) (*gorm.DB, error) {
 	dbURL := ""
 	switch config.DBDriver {
-	case "postgres":
+	case driverPostgres:
 		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
 			config.DBHost,
 			config.DBPort,
@@ -33,7 +40,7 @@ func NewRepositories(config config.DBConfig) (*Repositories, error) {
 			config.DBName,
 			config.DBPassword,
 		)
-	case "mysql":
+	case driverMysql:
 		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			config.DBUser,
 			config.DBPassword,
@@ -42,7 +49,6 @@ func NewRepositories(config config.DBConfig) (*Repositories, error) {
 			config.DBName,
 		)
 	}
-	fmt.Println(dbURL)
 
 	db, err := gorm.Open(config.DBDriver, dbURL)
 	if err != nil {
@@ -50,36 +56,66 @@ func NewRepositories(config config.DBConfig) (*Repositories, error) {
 	}
 	db.LogMode(config.DBLog)
 
+	return db, nil
+}
+
+// NewDBService will initialize db connection and return repositories.
+func NewDBService(config config.DBConfig) (*Repositories, error) {
+	db, err := NewDBConnection(config)
+	if err != nil {
+		return nil, err
+	}
+	db.LogMode(config.DBLog)
+
 	return &Repositories{
-		Permission: NewPermissionRepository(db),
-		Role:       NewRoleRepository(db),
-		User:       NewUserRepository(db),
-		db:         db,
+		Permission:      NewPermissionRepository(db),
+		Role:            NewRoleRepository(db),
+		StorageFile:     NewStorageFileRepository(db),
+		StorageCategory: NewStorageCategoryRepository(db),
+		User:            NewUserRepository(db),
+		DB:              db,
 	}, nil
 }
 
 // Close will closes the database connection.
 func (s *Repositories) Close() error {
-	return s.db.Close()
+	return s.DB.Close()
 }
 
 // AutoMigrate will migrate all tables.
 func (s *Repositories) AutoMigrate() error {
-	return s.db.AutoMigrate(
+	return s.DB.AutoMigrate(
 		&entity.Module{},
 		&entity.Permission{},
 		&entity.Role{},
 		&entity.RolePermission{},
+		&entity.StorageCategory{},
+		&entity.StorageFile{},
 		&entity.User{},
 		&entity.UserRole{},
 	).Error
 }
 
-// Seeds all seeders.
+// Seeds will run all seeders.
 func (s *Repositories) Seeds() error {
-	db := s.db
+	db := s.DB
 	var err error
 	for _, seed := range seeds.All() {
+		errSeed := seed.Run(db)
+		if errSeed != nil {
+			err = errSeed
+			log.Fatalf("Running seed '%s', failed with error: %s", seed.Name, err)
+		}
+	}
+
+	return err
+}
+
+// InitialSeeds will seeds predefined initial seeders.
+func (s *Repositories) InitialSeeds() error {
+	db := s.DB
+	var err error
+	for _, seed := range seeds.Init() {
 		errSeed := seed.Run(db)
 		if errSeed != nil {
 			err = errSeed

@@ -56,7 +56,7 @@ go run main.go
 or Enable hot reload with [Air](https://github.com/cosmtrek/air):
 
 ```shell script
-go get -u github.com/cosmtrek/air
+go get -r github.com/cosmtrek/air
 ```
 
 then simply run:

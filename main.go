@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "go-rest-skeleton/docs"
 	"go-rest-skeleton/infrastructure/config"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/cmd"
@@ -9,11 +10,35 @@ import (
 	"os"
 	"time"
 
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/joho/godotenv"
 )
 
+// @title Go-Rest-Skeleton API Example
+// @version 1.0
+// @description This is a sample of RESTful api made by go-rest-skeleton
+// @contact.name Trisna Novi Ashari
+// @contact.url https://github.com/trisna-ashari/go-rest-skeleton
+// @contact.email trisna.x2@gmail.com
+// @license.name MIT
+
+// @securityDefinitions.basic BasicAuth
+
+// @securityDefinitions.apikey JWTAuth
+// @in header
+// @name Authorization
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name api_key
+
+// @host localhost:8888
+// @schemes http
+// main init the go-rest-skeleton.
 func main() {
 	// Check .env file
 	if err := godotenv.Load(); err != nil {
@@ -26,29 +51,33 @@ func main() {
 	time.Local = timeLoc
 
 	// Connect to DB
-	dbServices, errDBServices := persistence.NewRepositories(conf.DBConfig)
-	if errDBServices != nil {
-		panic(errDBServices)
+	dbService, errDBService := persistence.NewDBService(conf.DBConfig)
+	if errDBService != nil {
+		panic(errDBService)
 	}
-	defer dbServices.Close()
+	defer dbService.Close()
 
 	// Init DB Migrate
-	errAutoMigrate := dbServices.AutoMigrate()
+	errAutoMigrate := dbService.AutoMigrate()
 	if errAutoMigrate != nil {
 		panic(errAutoMigrate)
 	}
 
 	// Connect to redis
-	redisServices, errRedis := persistence.NewRedisDB(conf.RedisConfig)
+	redisService, errRedis := persistence.NewRedisService(conf.RedisConfig)
 	if errRedis != nil {
 		panic(errRedis)
 	}
+
+	// Connect to storage service
+	storageService, _ := persistence.NewStorageService(conf.MinioConfig, dbService.DB)
 
 	// Init App
 	app := cmd.NewCli()
 	app.Action = func(c *cli.Context) error {
 		// Init Router
-		router := routers.NewRouter(conf, dbServices, redisServices).Start()
+		router := routers.NewRouter(conf, dbService, redisService, storageService).Start()
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		// Run app at defined port
 		appPort := os.Getenv("APP_PORT")
@@ -60,7 +89,7 @@ func main() {
 	}
 
 	// Init Cli
-	cliCommands := cmd.NewCommand(dbServices)
+	cliCommands := cmd.NewCommand(dbService)
 	app.Commands = cliCommands
 	err := app.Run(os.Args)
 	if err != nil {

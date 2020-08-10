@@ -17,10 +17,19 @@ func userFactory() []Seed {
 		if errFaker != nil {
 			fmt.Println(errFaker)
 		}
+
+		user := &entity.User{
+			UUID:      a.UUID,
+			FirstName: a.FirstName,
+			LastName:  a.LastName,
+			Email:     a.Email,
+			Phone:     a.Phone,
+			Password:  a.Password,
+		}
 		fakerFactories[i] = Seed{
 			Name: fmt.Sprintf("Create %s", a.FirstName),
 			Run: func(db *gorm.DB) error {
-				errDB := createUser(db, a.UUID, a.FirstName, a.LastName, a.Email, a.Phone, a.Password)
+				_, errDB := createUser(db, user)
 				return errDB
 			},
 		}

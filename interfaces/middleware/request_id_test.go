@@ -1,6 +1,7 @@
-package middleware
+package middleware_test
 
 import (
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +19,7 @@ func TestSetRequestID_WithRequestHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.Use(SetRequestID(RequestIDOptions{AllowSetting: true}))
+	r.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: true}))
 	r.GET("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
@@ -37,7 +38,7 @@ func TestSetRequestID_WithoutRequestHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.Use(SetRequestID(RequestIDOptions{AllowSetting: true}))
+	r.Use(middleware.SetRequestID(middleware.RequestIDOptions{AllowSetting: true}))
 	r.GET("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})

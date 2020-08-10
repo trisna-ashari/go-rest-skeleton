@@ -1,8 +1,9 @@
-package persistence
+package persistence_test
 
 import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
+	"go-rest-skeleton/infrastructure/persistence"
 	"testing"
 
 	"github.com/bxcodec/faker"
@@ -11,6 +12,8 @@ import (
 )
 
 func TestSaveUser_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -24,7 +27,7 @@ func TestSaveUser_Success(t *testing.T) {
 	user.Password = userFaker.Password
 	user.Phone = userFaker.Phone
 
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 
 	u, saveErr, _ := repo.SaveUser(&user)
 	assert.Nil(t, saveErr)
@@ -36,6 +39,8 @@ func TestSaveUser_Success(t *testing.T) {
 }
 
 func TestUpdateUser_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -44,7 +49,7 @@ func TestUpdateUser_Success(t *testing.T) {
 	if seedErr != nil {
 		t.Fatalf("want non error, got %#v", seedErr)
 	}
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 	userData := entity.User{
 		FirstName: "Updated " + userFaker.FirstName,
 		LastName:  "Updated " + userFaker.LastName,
@@ -59,6 +64,8 @@ func TestUpdateUser_Success(t *testing.T) {
 }
 
 func TestDeleteUser_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -67,13 +74,15 @@ func TestDeleteUser_Success(t *testing.T) {
 	if seedErr != nil {
 		t.Fatalf("want non error, got %#v", seedErr)
 	}
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 	getErr := repo.DeleteUser(user.UUID)
 
 	assert.Nil(t, getErr)
 }
 
 func TestGetUser_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -82,7 +91,7 @@ func TestGetUser_Success(t *testing.T) {
 	if seedErr != nil {
 		t.Fatalf("want non error, got %#v", seedErr)
 	}
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 	u, getErr := repo.GetUser(user.UUID)
 
 	assert.Nil(t, getErr)
@@ -93,6 +102,8 @@ func TestGetUser_Success(t *testing.T) {
 }
 
 func TestGetUsers_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -101,7 +112,7 @@ func TestGetUsers_Success(t *testing.T) {
 	if seedErr != nil {
 		t.Fatalf("want non error, got %#v", seedErr)
 	}
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 	params := repository.Parameters{
 		Offset:  0,
 		Limit:   1,
@@ -116,6 +127,8 @@ func TestGetUsers_Success(t *testing.T) {
 }
 
 func TestGetUserByEmailAndPassword_Success(t *testing.T) {
+	SkipThis(t)
+
 	conn, connErr := DBConn()
 	if connErr != nil {
 		t.Fatalf("want non error, got %#v", connErr)
@@ -124,7 +137,7 @@ func TestGetUserByEmailAndPassword_Success(t *testing.T) {
 	if seedErr != nil {
 		t.Fatalf("want non error, got %#v", seedErr)
 	}
-	repo := NewUserRepository(conn)
+	repo := persistence.NewUserRepository(conn)
 	userEmailAndPassword := entity.User{Email: user.Email, Password: userFaker.Password}
 	u, _, getErr := repo.GetUserByEmailAndPassword(&userEmailAndPassword)
 

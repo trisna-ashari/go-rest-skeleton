@@ -1,4 +1,4 @@
-package interfaces
+package handler
 
 import (
 	"go-rest-skeleton/infrastructure/security"
@@ -17,6 +17,17 @@ func NewSecretHandler() *SecretHandler {
 	return &SecretHandler{}
 }
 
+// @Summary Generate a secret
+// @Description Retrieve base64 encoded string of private key and public key through rest api.
+// @Tags development
+// @Accept  json
+// @Produce  json
+// @Param Accept-Language header string false "Language code" Enums(en, id) default(id)
+// @Success 200 {object} middleware.successOutput
+// @Failure 400 {string} middleware.errOutput
+// @Failure 404 {object} middleware.errOutput
+// @Failure 500 {object} middleware.errOutput
+// @Router /api/secret [get]
 // GenerateSecret will return base64 encoded string of private key and public key through rest api.
 func (s *SecretHandler) GenerateSecret(c *gin.Context) {
 	secretPriPubKey, err := security.GenerateSecret()

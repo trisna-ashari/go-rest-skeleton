@@ -7,9 +7,7 @@ import (
 )
 
 // createRole will create predefined role and insert into DB.
-func createRole(db *gorm.DB, UUID string, name string) error {
-	return db.Create(&entity.Role{
-		UUID: UUID,
-		Name: name,
-	}).Error
+func createRole(db *gorm.DB, role *entity.Role) (*entity.Role, error) {
+	err := db.Create(role).Error
+	return role, err
 }

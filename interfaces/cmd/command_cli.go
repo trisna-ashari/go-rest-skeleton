@@ -10,7 +10,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func NewCommand(dbServices *persistence.Repositories) []*cli.Command {
+// NewCommand construct a CLI commands.
+func NewCommand(dbService *persistence.Repositories) []*cli.Command {
 	return []*cli.Command{
 		{
 			Name:  "create:secret",
@@ -25,10 +26,21 @@ func NewCommand(dbServices *persistence.Repositories) []*cli.Command {
 			},
 		},
 		{
+			Name:  "db:init",
+			Usage: "run predefined database initial seeder",
+			Action: func(c *cli.Context) error {
+				err := dbService.InitialSeeds()
+				if err != nil {
+					log.Println(err)
+				}
+				return nil
+			},
+		},
+		{
 			Name:  "db:seed",
 			Usage: "run predefined database seeder",
 			Action: func(c *cli.Context) error {
-				err := dbServices.Seeds()
+				err := dbService.Seeds()
 				if err != nil {
 					log.Println(err)
 				}

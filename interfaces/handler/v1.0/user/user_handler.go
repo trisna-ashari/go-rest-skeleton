@@ -6,21 +6,28 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/storage"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	fileCategory = storage.CategoryAvatar
+)
+
 // Users is a struct defines the dependencies that will be used.
 type Users struct {
 	us application.UserAppInterface
+	ss application.StorageAppInterface
 }
 
 // NewUsers is constructor will initialize user handler.
-func NewUsers(us application.UserAppInterface) *Users {
+func NewUsers(us application.UserAppInterface, ss application.StorageAppInterface) *Users {
 	return &Users{
 		us: us,
+		ss: ss,
 	}
 }
 
@@ -40,10 +47,6 @@ func (s *Users) SaveUser(c *gin.Context) {
 	newUser, errDesc, errException := s.us.SaveUser(&userEntity)
 	if errException != nil {
 		c.Set("data", errDesc)
-		if errors.Is(errException, exception.ErrorTextUserNotFound) {
-			_ = c.AbortWithError(http.StatusNotFound, errException)
-			return
-		}
 		if errors.Is(errException, exception.ErrorTextUnprocessableEntity) {
 			_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
 			return
@@ -89,7 +92,7 @@ func (s *Users) UpdateUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
 		return
 	}
-	c.Status(http.StatusCreated)
+	c.Status(http.StatusOK)
 	middleware.Formatter(c, updatedUser.DetailUser(), "api.msg.success.successfully_update_user", nil)
 }
 
@@ -145,5 +148,53 @@ func (s *Users) GetUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, user.DetailUser(), "api.msg.success.successfully_get_user_detail", nil)
+	avatarURL, errAvatar := s.ss.GetFile(user.AvatarUUID)
+	if errAvatar != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, errAvatar)
+		return
+	}
+	middleware.Formatter(c, user.DetailUserAvatar(avatarURL), "api.msg.success.successfully_get_user_detail", nil)
+}
+
+func (s *Users) UpdateAvatar(c *gin.Context) {
+	UUID, exists := c.Get("UUID")
+	if !exists {
+		_ = c.AbortWithError(http.StatusUnauthorized, exception.ErrorTextUnauthorized)
+		return
+	}
+
+	avatar, err := c.FormFile("avatar")
+	if err != nil {
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, err)
+		return
+	}
+	var userEntity entity.User
+	avatarData, _, errException := s.ss.UploadFile(avatar, fileCategory)
+	if errException != nil {
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
+		return
+	}
+
+	userEntity.AvatarUUID = avatarData
+	updatedUser, errDesc, errException := s.us.UpdateUserAvatar(UUID.(string), &userEntity)
+	if errException != nil {
+		c.Set("data", errDesc)
+		if errors.Is(errException, exception.ErrorTextUserNotFound) {
+			_ = c.AbortWithError(http.StatusNotFound, errException)
+			return
+		}
+		if errors.Is(errException, exception.ErrorTextUnprocessableEntity) {
+			_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
+		return
+	}
+	avatarURL, errAvatar := s.ss.GetFile(updatedUser.AvatarUUID)
+	if errAvatar != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, errAvatar)
+		return
+	}
+	c.Status(http.StatusOK)
+	middleware.Formatter(c, updatedUser.DetailUserAvatar(avatarURL), "api.msg.success.successfully_update_avatar", nil)
 }

@@ -1,6 +1,7 @@
-package middleware
+package middleware_test
 
 import (
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,7 +14,7 @@ func TestCORS_WithAcceptedHTTPMethod(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.Use(CORS(CORSOptions{AllowSetting: true}))
+	r.Use(middleware.CORS(middleware.CORSOptions{AllowSetting: true}))
 	r.GET("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
@@ -31,7 +32,7 @@ func TestCORS_OptionsHTTPMethod(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.Use(CORS(CORSOptions{AllowSetting: true}))
+	r.Use(middleware.CORS(middleware.CORSOptions{AllowSetting: true}))
 	r.OPTIONS("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})

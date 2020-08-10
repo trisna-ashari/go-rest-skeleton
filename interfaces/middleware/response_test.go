@@ -1,7 +1,8 @@
-package middleware
+package middleware_test
 
 import (
 	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ import (
 
 func TestResponseOptions_Handler(t *testing.T) {
 	conf := InitConfig()
-	optResponse := ResponseOptions{
+	optResponse := middleware.ResponseOptions{
 		Environment:     conf.AppEnvironment,
 		DebugMode:       conf.DebugMode,
 		DefaultLanguage: conf.AppLanguage,
@@ -25,7 +26,7 @@ func TestResponseOptions_Handler(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
-	r.Use(New(optResponse).Handler())
+	r.Use(middleware.NewResponse(optResponse).Handler())
 	r.GET("/test", func(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
 	})

@@ -41,6 +41,15 @@ var ErrorTextRefreshTokenIsExpired = errors.New("api.msg.error.refresh_token_exp
 // ErrorTextRoleNotFound is an error representing role not found in database.
 var ErrorTextRoleNotFound = errors.New("role.not_found")
 
+// ErrorTextRoleInvalidUUID is an error representing UUID not found in database.
+var ErrorTextRoleInvalidUUID = errors.New("role.invalid_uuid")
+
+// ErrorTextStorageCategoryNotFound is an error representing storage_category not found in database.
+var ErrorTextStorageCategoryNotFound = errors.New("storage_category.not_found")
+
+// ErrorTextStorageFileNotFound is an error representing storage_file not found in database.
+var ErrorTextStorageFileNotFound = errors.New("storage_file.not_found")
+
 // ErrorTextUserNotFound is an error representing user not found in database.
 var ErrorTextUserNotFound = errors.New("user.not_found")
 
@@ -55,6 +64,15 @@ var ErrorTextUserEmailNotRegistered = errors.New("user.email_not_registered")
 
 // ErrorTextUserEmailAlreadyTaken is an error representing email already exists in database.
 var ErrorTextUserEmailAlreadyTaken = errors.New("user.email_already_taken")
+
+// ErrorTextUploadCannotOpenFile is an error representing uploaded file can not opened by system.
+var ErrorTextUploadCannotOpenFile = errors.New("api.msg.error.cannot_open_file")
+
+// ErrorTextUploadInvalidSize is an error representing uploaded file size is greater than allowed maximum size.
+var ErrorTextUploadInvalidSize = errors.New("api.msg.error.upload_invalid_size")
+
+// ErrorTextUploadInvalidFileType is an error representing uploaded file has invalid file type.
+var ErrorTextUploadInvalidFileType = errors.New("api.msg.error.upload_invalid_file_type")
 
 // ErrorTextPerPage is an error representing request per page over the limit.
 var ErrorTextPerPage = errors.New("api.msg.error.per_page")

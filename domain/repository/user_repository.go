@@ -14,4 +14,5 @@ type UserRepository interface {
 	GetUserWithRoles(string) (*entity.User, error)
 	GetUsers(parameters *Parameters) ([]entity.User, interface{}, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
+	UpdateUserAvatar(string, *entity.User) (*entity.User, map[string]string, error)
 }

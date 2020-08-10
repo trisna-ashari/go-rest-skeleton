@@ -1,6 +1,7 @@
-package middleware
+package middleware_test
 
 import (
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,14 +11,14 @@ import (
 )
 
 func TestFormatter(t *testing.T) {
-	expectedResponse := "{\"code\":200,\"data\":null,\"message\":\"OK\"}"
+	expectedResponse := `{"code":200,"data":null,"message":"OK"}`
 	var actualResponse string
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", func(c *gin.Context) {
-		Formatter(c, nil, "api.msg.success.ok", nil)
+		middleware.Formatter(c, nil, "api.msg.success.ok", nil)
 	})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)

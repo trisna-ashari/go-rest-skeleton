@@ -1,6 +1,7 @@
-package middleware
+package middleware_test
 
 import (
+	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +18,7 @@ func TestAPIVersion_URLContainsAPIPrefix(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
-	router.Use(APIVersion())
+	router.Use(middleware.APIVersion())
 	v1 := router.Group("/api/v1/external")
 	v1.GET("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)
@@ -36,7 +37,7 @@ func TestAPIVersion_URLDoesNotContainsAPIPrefix(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, router := gin.CreateTestContext(w)
-	router.Use(APIVersion())
+	router.Use(middleware.APIVersion())
 	v1 := router.Group("/api/external")
 	v1.GET("/test", func(c *gin.Context) {
 		c.Status(http.StatusOK)

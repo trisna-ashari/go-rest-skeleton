@@ -1,5 +1,10 @@
 package seeds
 
+// Init will seeds initial seeder.
+func Init() []Seed {
+	return initFactory()
+}
+
 // All will seeds all defined seeder.
 func All() []Seed {
 	b := prepare()

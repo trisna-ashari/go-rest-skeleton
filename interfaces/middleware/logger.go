@@ -73,6 +73,26 @@ func getRequestHeader(c *gin.Context) []byte {
 	return headerBytes
 }
 
+func getRequestForm(c *gin.Context) []byte {
+	var formBytes []byte
+	var rawForm = make(map[string]interface{})
+	formData, _ := c.MultipartForm()
+	if formData != nil {
+		for formKey, formValue := range formData.Value {
+			if len(formValue) == 1 {
+				rawForm[formKey] = formValue[0]
+			}
+		}
+	}
+
+	formBytes, err := json.Marshal(rawForm)
+	if err != nil {
+		return formBytes
+	}
+
+	return formBytes
+}
+
 func getRequestBody(c *gin.Context) []byte {
 	var bodyBytes []byte
 	if c.Request.Body != nil {
@@ -140,6 +160,7 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 
 		requestHeader := getRequestHeader(c)
 		requestBody := getRequestBody(c)
+		requestForm := getRequestForm(c)
 		requestID := c.Writer.Header().Get("X-Request-Id")
 		responseBody := getResponseBody(c)
 
@@ -178,7 +199,8 @@ func SetLogger(options LoggerOptions, config ...Config) gin.HandlerFunc {
 				Str("user-agent", c.Request.UserAgent()).
 				Str("request-id", requestID).
 				RawJSON("headers", requestHeader).
-				RawJSON("payloads", requestBody).
+				RawJSON("request-payload", requestBody).
+				RawJSON("request-form", requestForm).
 				RawJSON("response", responseBody).
 				Logger()
 

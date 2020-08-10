@@ -1,0 +1,89 @@
+version: '3'
+services:
+  app_test:
+    container_name: go_rest_skeleton_test
+    build:
+      context: .
+      dockerfile: ./Dockerfile.test
+    ports:
+      - 8888:8888
+#    env_file:
+#      - .env
+    environment:
+      - APP_ENV=${APP_ENV}
+      - APP_PORT=${APP_PORT}
+      - APP_LANG=${APP_LANG}
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - TEST_DB_HOST=mysql_test_service
+      - TEST_REDIS_HOST=redis_test_service
+      - TEST_REDIS_PORT=${TEST_REDIS_PORT}
+      - TEST_REDIS_PASSWORD=
+      - TEST_REDIS_DB=${TEST_REDIS_DB}
+      - ENABLE_REQUEST_ID=${ENABLE_REQUEST_ID}
+      - ENABLE_LOGGER=${ENABLE_LOGGER}
+      - ENABLE_CORS=${ENABLE_CORS}
+      - APP_PRIVATE_KEY=${APP_PRIVATE_KEY}
+      - APP_PUBLIC_KEY=${APP_PUBLIC_KEY}
+      - MINIO_HOST=${MINIO_HOST}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    restart: on-failure
+    volumes:
+      - api:/usr/src/app/
+    depends_on:
+      - mysql_test_container
+      - redis_test_container
+      - minio_test_container
+    networks:
+      - network_test_service
+
+  mysql_test_container:
+    image: mysql:5.6
+    container_name: mysql_test_service
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_HOST=${TEST_DB_HOST}
+      - MYSQL_ROOT_PORT=${TEST_DB_PORT}
+      - MYSQL_USER=${TEST_DB_USER}
+      - MYSQL_PASSWORD=${TEST_DB_PASSWORD}
+      - MYSQL_DATABASE=${TEST_DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${TEST_DB_PASSWORD}
+    networks:
+      - network_test_service
+    expose:
+      - 3306
+
+  redis_test_container:
+    image: redis
+    container_name: redis_test_service
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    expose:
+      - 6379
+    networks:
+      - network_test_service
+
+  minio_test_container:
+    image: 'bitnami/minio:latest'
+    container_name: minio_test_service
+    ports:
+      - 9000:9000
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_DEFAULT_BUCKETS=${MINIO_BUCKET}
+    networks:
+      - network_test_service
+
+volumes:
+  api:
+
+networks:
+  network_test_service:
+    driver: bridge

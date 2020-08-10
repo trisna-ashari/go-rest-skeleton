@@ -35,8 +35,8 @@ type successOutput struct {
 	Meta            interface{} `json:"meta,omitempty"`
 }
 
-// New will initialize response middleware.
-func New(o ResponseOptions) *ResponseOptions {
+// NewResponse will initialize response middleware.
+func NewResponse(o ResponseOptions) *ResponseOptions {
 	return &ResponseOptions{
 		DebugMode:       o.DebugMode,
 		DefaultLanguage: o.DefaultLanguage,

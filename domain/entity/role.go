@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
 
 // Role represent schema of table roles.
 type Role struct {
@@ -74,4 +78,18 @@ func (roles Roles) DetailRoles() []interface{} {
 		result[index] = role.DetailRoleList()
 	}
 	return result
+}
+
+// ValidateSaveRole will validate create a new role request.
+func (r *Role) ValidateSaveRole(c *gin.Context) map[string]string {
+	var errMsg = make(map[string]string)
+
+	return errMsg
+}
+
+// ValidateUpdateRole will validate update role request.
+func (r *Role) ValidateUpdateRole(c *gin.Context) map[string]string {
+	var errMsg = make(map[string]string)
+
+	return errMsg
 }

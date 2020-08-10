@@ -5,13 +5,42 @@ services:
     build: .
     ports:
       - 8888:8888
-    env_file:
-      - .env
+#    env_file:
+#      - .env
+    environment:
+      - APP_ENV=${APP_ENV}
+      - APP_PORT=${APP_PORT}
+      - APP_LANG=${APP_LANG}
+      - APP_TIMEZONE=${APP_TIMEZONE}
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - TEST_REDIS_HOST=${TEST_REDIS_HOST}
+      - TEST_REDIS_PORT=${TEST_REDIS_PORT}
+      - TEST_REDIS_PASSWORD=${TEST_REDIS_PASSWORD}
+      - TEST_REDIS_DB=${TEST_REDIS_DB}
+      - MINIO_HOST=${MINIO_HOST}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - ENABLE_REQUEST_ID=${ENABLE_REQUEST_ID}
+      - ENABLE_LOGGER=${ENABLE_LOGGER}
+      - ENABLE_CORS=${ENABLE_CORS}
+      - APP_PRIVATE_KEY=${APP_PRIVATE_KEY}
+      - APP_PUBLIC_KEY=${APP_PUBLIC_KEY}
     restart: on-failure
     volumes:
       - api:/usr/src/app/
     depends_on:
       - mysql_container
+      - redis_container
     networks:
       - network_service
 
@@ -41,8 +70,20 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - network_service
     expose:
       - 6379
+
+  minio_container:
+    image: 'bitnami/minio:latest'
+    container_name: minio_service
+    ports:
+      - 9000:9000
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_DEFAULT_BUCKETS=${MINIO_BUCKET}
     networks:
       - network_service
 

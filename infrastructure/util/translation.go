@@ -20,6 +20,10 @@ type translationMessage struct {
 	Type           string
 }
 
+type TranslationLanguage struct {
+	Language string `json:"language" form:"language"`
+}
+
 // NewTranslation will translate message.
 func NewTranslation(
 	c *gin.Context,
@@ -45,9 +49,9 @@ func NewTranslation(
 
 	languageFile := fmt.Sprintf("%s/languages/global.%s.yaml", RootDir(), translation.Language)
 	bundle.MustLoadMessageFile(languageFile)
-	localizer := i18n.NewLocalizer(bundle, translation.Language, translation.Language)
+	translator := i18n.NewLocalizer(bundle, translation.Language, translation.Language)
 
-	translatedMessage := localizer.MustLocalize(&i18n.LocalizeConfig{
+	translatedMessage := translator.MustLocalize(&i18n.LocalizeConfig{
 		DefaultMessage: &i18n.Message{
 			ID:    translation.Message,
 			Other: translation.DefaultMessage,
