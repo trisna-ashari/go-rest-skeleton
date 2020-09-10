@@ -1,31 +1,50 @@
 api:
   msg:
     error:
-      an_error_occured: "An Error Occurred"
-      internal_server_error: "Internal Server Error"
-      not_found: "Not Found"
-      bad_request: "Bad Request"
-      unauthorized: "Unauthorized"
-      forbidden: "Forbidden"
-      unprocessable_entity: "Unprocessable Entity"
-      file_too_large: "File Too Large"
-      field_is_required: "Field {{.Field}} is required"
-      invalid_email: "Please provide valid email"
-      invalid_password_length: "Password should be at least 6 characters"
-      per_page: "Each Request Maximum is {{.Max}} Records Per Page"
+      common:
+        an_error_occured: "An Error Occurred"
+        internal_server_error: "Internal Server Error"
+        not_found: "Not Found"
+        bad_request: "Bad Request"
+        unauthorized: "Unauthorized"
+        forbidden: "Forbidden"
+        unprocessable_entity: "Unprocessable Entity"
+        file_too_large: "File Too Large"
+        field_is_required: "Field {{.Field}} Is Required"
+        per_page: "Each Request Maximum is {{.Max}} Records Per Page"
+      role:
+        not_found: "Role Not found"
+      user:
+        not_found: "User Not Found"
+        invalid_email: "Please Provide Valid Email"
+        email_not_registered: "Email Not Registered"
+        invalid_password_length: "Password Should Be At Least 6 Characters"
+        invalid_email_and_password: "Invalid Email And Password"
     success:
-      successfully_login: "Successfully Login"
-      successfully_logout: "Successfully Logout"
-      successfully_switch_language: "Successfully Switch Language"
-      successfully_refresh_token: "Successfully Get New Token"
-      successfully_get_profile: "Successfully Get Profile"
-      successfully_get_user_list: "Successfully Get User List"
-      successfully_get_user_detail: "Successfully Get User Detail"
-      successfully_create_user: "Successfully Create a New User"
-      successfully_update_user: "Successfully Update User"
-      successfully_delete_user: "Successfully Delete User"
-      ok: "OK"
-role:
-  not_found: "Role not found"
-user:
-  not_found: "User Not Found"
+      common:
+        ok: "OK"
+      dev:
+        successfully_generate_rsa_key: "Successfully Generate RSA Key For Application Key"
+      auth:
+        successfully_login: "Successfully Login"
+        successfully_logout: "Successfully Logout"
+        successfully_refresh_token: "Successfully Get New Token"
+        successfully_get_profile: "Successfully Get Profile"
+        successfully_send_email_forgot_password: "Successfully Sent Email For Reset Password"
+        successfully_reset_password: "Successfully Reset Password"
+      role:
+        successfully_get_role_list: "Successfully Get Role List"
+        successfully_get_role_detail: "Successfully Get Role Detail"
+        successfully_create_role: "Successfully Create a New Role"
+        successfully_update_role: "Successfully Update Role"
+        successfully_delete_role: "Successfully Delete Role"
+      user:
+        successfully_get_user_list: "Successfully Get User List"
+        successfully_get_user_detail: "Successfully Get User Detail"
+        successfully_create_user: "Successfully Create a New User"
+        successfully_update_user: "Successfully Update User"
+        successfully_update_user_avatar: "Successfully Update User Avatar"
+        successfully_delete_user: "Successfully Delete User"
+        successfully_get_user_preference: "Successfully Get Preference"
+        successfully_update_user_preference: "Successfully Update Preference"
+        successfully_reset_user_preference: "Successfully Reset Preference"

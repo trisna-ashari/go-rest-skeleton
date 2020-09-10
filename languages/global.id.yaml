@@ -1,29 +1,50 @@
 api:
   msg:
     error:
-      an_error_occured: "Terjadi Kesalahan"
-      internal_server_error: "Terjadi Kesalahan di Server"
-      not_found: "Tidak Ditemukan"
-      bad_request: "Permintaan Buruk"
-      unauthorized: "Permintaan Tidak Sah"
-      forbidden: "Dilarang"
-      unprocessable_entity: "Permintaan Tidak Dapat Diproses"
-      file_too_large: "Ukuran File Terlalu Besar"
-      field_is_required: "Isian {{.Field}} wajib diisi"
-      invalid_email: "Email tidak valid"
-      invalid_password_length: "Panjang minimal password harus 6 karakter"
-      per_page: "Setiap Pemintaan Dibatasi Maksimum {{.Max}} Per Halaman"
+      common:
+        an_error_occured: "Terjadi Kesalahan"
+        internal_server_error: "Terjadi Kesalahan di Server"
+        not_found: "Tidak Ditemukan"
+        bad_request: "Permintaan Buruk"
+        unauthorized: "Permintaan Tidak Sah"
+        forbidden: "Dilarang"
+        unprocessable_entity: "Permintaan Tidak Dapat Diproses"
+        file_too_large: "Ukuran File Terlalu Besar"
+        field_is_required: "Isian {{.Field}} Wajib Diisi"
+        per_page: "Setiap Pemintaan Dibatasi Maksimum {{.Max}} Per Halaman"
+      role:
+        not_found: "Role Tidak Ditemukan"
+      user:
+        not_found: "User Tidak Ditemukan"
+        invalid_email: "Email Tidak Valid"
+        email_not_registered: "Email Tidak Terdaftar"
+        invalid_password_length: "Panjang Minimal Kata Sandi Harus 6 Karakter"
+        invalid_email_and_password: "Email Dan Kata Sandi Tidak Valid"
     success:
-      successfully_login: "Berhasil Masuk"
-      successfully_logout: "Berhasil Keluar"
-      successfully_switch_language: "Berhasil Mengganti Bahasa"
-      successfully_refresh_token: "Berhasil Mendapatkan Token Baru"
-      successfully_get_profile: "Berhasil Mendapatkan Profil"
-      successfully_get_user_list: "Berhasil Mendapatkan Daftar User"
-      successfully_get_user_detail: "Berhasil Mendapatkan Rincian User"
-      successfully_create_user: "Berhasil Menambahkan User Baru"
-      ok: "OK"
-role:
-  not_found: "Role Tidak Ditemukan"
-user:
-  not_found: "User Tidak Ditemukan"
+      common:
+        ok: "OK"
+      dev:
+        successfully_generate_rsa_key: "Berhasil Membuat RSA Key Untuk Kunci Aplikasi"
+      auth:
+        successfully_login: "Berhasil Masuk"
+        successfully_logout: "Berhasil Keluar"
+        successfully_refresh_token: "Berhasil Mendapatkan Token Baru"
+        successfully_get_profile: "Berhasil Mendapatkan Profil"
+        successfully_send_email_forgot_password: "Berhasil Mengirim Email Untuk Mengatur Ulang Kata Sandi"
+        successfully_reset_password: "Berhasil Mengatur Ulang Kata Sandi"
+      role:
+        successfully_get_role_list: "Berhasil Mendapatkan Daftar Role"
+        successfully_get_role_detail: "Berhasil Mendapatkan Rincian Role"
+        successfully_create_role: "Berhasil Menambahkan Role Baru"
+        successfully_update_role: "Berhasil Memperbarui Role"
+        successfully_delete_role: "Berhasil Menghapus Role"
+      user:
+        successfully_get_user_list: "Berhasil Mendapatkan Daftar User"
+        successfully_get_user_detail: "Berhasil Mendapatkan Rincian User"
+        successfully_create_user: "Berhasil Menambahkan User Baru"
+        successfully_update_user: "Berhasil Memperbarui User"
+        successfully_update_user_avatar: "Berhasil Memperbarui Avatar User"
+        successfully_delete_user: "Berhasil Menghapus User"
+        successfully_get_user_preference: "Berhasil Mendapatkan Preferensi"
+        successfully_update_user_preference: "Berhasil Memperbarui Preferensi"
+        successfully_reset_user_preference: "Berhasil Memulihkan Preferensi"
