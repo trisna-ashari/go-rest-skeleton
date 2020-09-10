@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Role represent schema of table roles.
@@ -25,6 +26,15 @@ type RoleFaker struct {
 
 // Roles represent multiple role.
 type Roles []Role
+
+// BeforeSave handle uuid generation.
+func (r *Role) BeforeSave() error {
+	generateUUID := uuid.New()
+	if r.UUID == "" {
+		r.UUID = generateUUID.String()
+	}
+	return nil
+}
 
 // FieldsForRoleDetail represent fields for role detail.
 type FieldsForRoleDetail struct {

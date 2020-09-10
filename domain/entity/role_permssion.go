@@ -1,10 +1,12 @@
 package entity
 
-// RolePermission represent schema of table user_roles.
+import "github.com/google/uuid"
+
+// RolePermission represent schema of table role_permissions.
 type RolePermission struct {
 	UUID           string     `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
-	RoleUUID       string     `gorm:"size:100;not null;" json:"role_uuid"`
-	PermissionUUID string     `gorm:"size:100;not null;" json:"permission_uuid"`
+	RoleUUID       string     `gorm:"size:100;not null;index:role_uuid;" json:"role_uuid"`
+	PermissionUUID string     `gorm:"size:100;not null;index:permission_uuid;" json:"permission_uuid"`
 	Permission     Permission `gorm:"foreignKey:UUID;association_foreignKey:PermissionUUID"`
 }
 
@@ -17,6 +19,15 @@ type RolePermissionFaker struct {
 
 // RolePermissions represent multiple user_role.
 type RolePermissions []RolePermission
+
+// BeforeSave handle uuid generation.
+func (rp *RolePermission) BeforeSave() error {
+	generateUUID := uuid.New()
+	if rp.UUID == "" {
+		rp.UUID = generateUUID.String()
+	}
+	return nil
+}
 
 // GetRolePermission will return multiple role detail.
 func (rp RolePermissions) GetRolePermission() []interface{} {

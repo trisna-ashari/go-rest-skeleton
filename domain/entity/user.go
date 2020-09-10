@@ -15,17 +15,23 @@ import (
 
 // User represent schema of table users.
 type User struct {
-	UUID       string     `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
-	FirstName  string     `gorm:"size:100;not null;" json:"first_name"`
-	LastName   string     `gorm:"size:100;not null;" json:"last_name"`
-	Email      string     `gorm:"size:100;not null;unique;index:email" json:"email" form:"email"`
-	Phone      string     `gorm:"size:100;" json:"phone,omitempty"`
-	Password   string     `gorm:"size:100;not null;index:password" json:"password" form:"password"`
-	AvatarUUID string     `gorm:"size:36;" json:"avatar_uuid"`
-	CreatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt  time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
-	UserRoles  []UserRole `gorm:"foreignKey:UserUUID"`
+	UUID       string      `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
+	FirstName  string      `gorm:"size:100;not null;" json:"first_name"`
+	LastName   string      `gorm:"size:100;not null;" json:"last_name"`
+	Email      string      `gorm:"size:100;not null;unique;index:email" json:"email" form:"email"`
+	Phone      string      `gorm:"size:100;" json:"phone,omitempty"`
+	Password   string      `gorm:"size:100;not null;index:password" json:"password" form:"password"`
+	AvatarUUID string      `gorm:"size:36;" json:"avatar_uuid"`
+	CreatedAt  time.Time   `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt  time.Time   `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	DeletedAt  *time.Time  `json:"deleted_at,omitempty"`
+	UserRoles  []UserRole  `gorm:"foreignKey:UserUUID"`
+	UserLogins []UserLogin `gorm:"foreignKey:UserUUID"`
+}
+
+type UserResetPassword struct {
+	NewPassword     string `json:"new_password" form:"new_password"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password"`
 }
 
 // UserFaker represent content when generate fake data of user.
@@ -38,22 +44,22 @@ type UserFaker struct {
 	Password  string `faker:"password"`
 }
 
-// Users represent multiple user.
+// Users represent multiple User.
 type Users []User
 
-// DetailUser represent format of detail user.
+// DetailUser represent format of detail User.
 type DetailUser struct {
 	UserFieldsForDetail
 	Role []interface{} `json:"roles,omitempty"`
 }
 
-// DetailUserList represent format of detail user for list.
+// DetailUserList represent format of DetailUser for User list.
 type DetailUserList struct {
 	UserFieldsForDetail
 	UserFieldsForList
 }
 
-// UserFieldsForDetail represent fields of detail user.
+// UserFieldsForDetail represent fields of detail User.
 type UserFieldsForDetail struct {
 	UUID      string      `json:"uuid"`
 	FirstName string      `json:"first_name"`
@@ -63,7 +69,7 @@ type UserFieldsForDetail struct {
 	Avatar    interface{} `json:"avatar,omitempty"`
 }
 
-// UserFieldsForList represent fields of detail user for user list.
+// UserFieldsForList represent fields of detail User for User list.
 type UserFieldsForList struct {
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -238,6 +244,24 @@ func (u *User) ValidateForgotPassword(c *gin.Context) map[string]string {
 		if err = checkmail.ValidateFormat(u.Email); err != nil {
 			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
 		}
+	}
+	return errMsg
+}
+
+// ValidateResetPassword will validate reset password request.
+func (u *UserResetPassword) ValidateResetPassword(c *gin.Context) map[string]string {
+	var errMsg = make(map[string]string)
+	var errMsgData = make(map[string]interface{})
+	if u.NewPassword == "" {
+		errMsgData["Field"] = "new_password"
+		errMsg["new_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+	}
+	if u.ConfirmPassword == "" {
+		errMsgData["Field"] = "confirm_password"
+		errMsg["confirm_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+	}
+	if u.NewPassword != u.ConfirmPassword {
+		errMsg["confirm_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_does_not_match", errMsgData)
 	}
 	return errMsg
 }

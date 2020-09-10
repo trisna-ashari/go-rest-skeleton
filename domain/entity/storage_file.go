@@ -6,9 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
+// StorageFile represent schema of table storage_files.
 type StorageFile struct {
 	UUID         string     `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
-	CategoryUUID string     `gorm:"size:36;not null;" json:"category_uui"`
+	CategoryUUID string     `gorm:"size:36;not null;index:category_uuid;" json:"category_uui"`
 	OriginalName string     `gorm:"size:255;not null;" json:"original_name"`
 	Name         string     `gorm:"size:255;not null;" json:"name"`
 	Path         string     `gorm:"size:255;not null;" json:"path"`
@@ -19,15 +20,11 @@ type StorageFile struct {
 	DeletedAt    *time.Time `json:"deleted_at,omitempty"`
 }
 
-type File struct {
-	URL string
-}
-
 // BeforeSave handle uuid generation.
-func (sf *StorageFile) BeforeSave() error {
+func (m *StorageFile) BeforeSave() error {
 	generateUUID := uuid.New()
-	if sf.UUID == "" {
-		sf.UUID = generateUUID.String()
+	if m.UUID == "" {
+		m.UUID = generateUUID.String()
 	}
 	return nil
 }
