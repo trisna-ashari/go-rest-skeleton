@@ -5,7 +5,7 @@ import (
 	"go-rest-skeleton/domain/repository"
 )
 
-// UserAppInterface is an interface.
+// UserAppInterface is a mock of application.UserAppInterface.
 type UserAppInterface struct {
 	SaveUserFn                  func(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUserFn                func(string, *entity.User) (*entity.User, map[string]string, error)
@@ -14,6 +14,7 @@ type UserAppInterface struct {
 	GetUserFn                   func(UUID string) (*entity.User, error)
 	GetUserRolesFn              func(UUID string) ([]entity.UserRole, error)
 	GetUserWithRolesFn          func(UUID string) (*entity.User, error)
+	GetUserByEmailFn            func(*entity.User) (*entity.User, map[string]string, error)
 	GetUserByEmailAndPasswordFn func(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUserAvatarFn          func(string, *entity.User) (*entity.User, map[string]string, error)
 }
@@ -51,6 +52,11 @@ func (u *UserAppInterface) GetUserRoles(uuid string) ([]entity.UserRole, error) 
 // GetUserWithRoles calls the GetUserWithRolesFn.
 func (u *UserAppInterface) GetUserWithRoles(uuid string) (*entity.User, error) {
 	return u.GetUserWithRolesFn(uuid)
+}
+
+// GetUserByEmail calls the GetUserByEmailFn.
+func (u *UserAppInterface) GetUserByEmail(user *entity.User) (*entity.User, map[string]string, error) {
+	return u.GetUserByEmailFn(user)
 }
 
 // GetUserByEmailAndPassword calls the GetUserByEmailAndPasswordFn.

@@ -8,7 +8,11 @@ import (
 )
 
 func authRoutes(e *gin.Engine, r *Router, rg *RouterAuthGateway) {
-	authenticate := handler.NewAuthenticate(r.dbService.User, r.redisService.Auth, rg.authToken)
+	authenticate := handler.NewAuthenticate(
+		r.dbService.User,
+		r.redisService.Auth,
+		rg.authToken,
+		r.notificationService.Notification)
 
 	v1 := e.Group("/api/v1/external")
 
@@ -16,5 +20,6 @@ func authRoutes(e *gin.Engine, r *Router, rg *RouterAuthGateway) {
 	v1.POST("/login", authenticate.Login)
 	v1.POST("/logout", middleware.Auth(rg.authGateway), authenticate.Logout)
 	v1.POST("/refresh", authenticate.Refresh)
-	v1.POST("/language", middleware.Auth(rg.authGateway), authenticate.SwitchLanguage)
+	v1.POST("/password/forgot", authenticate.ForgotPassword)
+	v1.POST("/password/reset/:token", authenticate.ResetPassword)
 }

@@ -9,6 +9,7 @@ type userApp struct {
 	us repository.UserRepository
 }
 
+// userApp implement the UserAppInterface.
 var _ UserAppInterface = &userApp{}
 
 // UserAppInterface is an interface.
@@ -20,46 +21,52 @@ type UserAppInterface interface {
 	GetUser(UUID string) (*entity.User, error)
 	GetUserRoles(UUID string) ([]entity.UserRole, error)
 	GetUserWithRoles(UUID string) (*entity.User, error)
+	GetUserByEmail(*entity.User) (*entity.User, map[string]string, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUserAvatar(string, *entity.User) (*entity.User, map[string]string, error)
 }
 
-// SaveUser is implementation of method SaveUser.
+// SaveUser is an implementation of method SaveUser.
 func (u *userApp) SaveUser(user *entity.User) (*entity.User, map[string]string, error) {
 	return u.us.SaveUser(user)
 }
 
-// UpdateUser is implementation of method SaveUser.
+// UpdateUser is an implementation of method SaveUser.
 func (u *userApp) UpdateUser(UUID string, user *entity.User) (*entity.User, map[string]string, error) {
 	return u.us.UpdateUser(UUID, user)
 }
 
-// DeleteUser is implementation of method DeleteUser.
+// DeleteUser is an implementation of method DeleteUser.
 func (u *userApp) DeleteUser(UUID string) error {
 	return u.us.DeleteUser(UUID)
 }
 
-// GetUser is implementation of method GetUser.
+// GetUser is an implementation of method GetUser.
 func (u *userApp) GetUser(UUID string) (*entity.User, error) {
 	return u.us.GetUser(UUID)
 }
 
-// GetUserRoles is implementation of method GetUserWithRoles.
+// GetUserRoles is an implementation of method GetUserWithRoles.
 func (u *userApp) GetUserRoles(UUID string) ([]entity.UserRole, error) {
 	return u.us.GetUserRoles(UUID)
 }
 
-// GetUserWithRoles is implementation of method GetUserWithRoles.
+// GetUserWithRoles is an implementation of method GetUserWithRoles.
 func (u *userApp) GetUserWithRoles(UUID string) (*entity.User, error) {
 	return u.us.GetUser(UUID)
 }
 
-// GetUsers is implementation of method GetUsers.
+// GetUsers is an implementation of method GetUsers.
 func (u *userApp) GetUsers(p *repository.Parameters) ([]entity.User, interface{}, error) {
 	return u.us.GetUsers(p)
 }
 
-// GetUserByEmailAndPassword is implementation of method GetUserByEmailAndPassword.
+// GetUserByEmail is an implementation of method GetUserByEmail.
+func (u *userApp) GetUserByEmail(user *entity.User) (*entity.User, map[string]string, error) {
+	return u.us.GetUserByEmailAndPassword(user)
+}
+
+// GetUserByEmailAndPassword is an implementation of method GetUserByEmailAndPassword.
 func (u *userApp) GetUserByEmailAndPassword(user *entity.User) (*entity.User, map[string]string, error) {
 	return u.us.GetUserByEmailAndPassword(user)
 }
