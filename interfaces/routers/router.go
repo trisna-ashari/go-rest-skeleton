@@ -15,10 +15,11 @@ import (
 
 // Router is a struct contains needed dependencies to init MainRouter().
 type Router struct {
-	conf           *config.Config
-	dbService      *persistence.Repositories
-	redisService   *persistence.RedisService
-	storageService *persistence.StorageService
+	conf                *config.Config
+	dbService           *persistence.Repositories
+	redisService        *persistence.RedisService
+	storageService      *persistence.StorageService
+	notificationService *persistence.NotificationService
 }
 
 // RouterAuthGateway is a struct contains needed dependencies to init Routes.
@@ -32,12 +33,14 @@ func NewRouter(
 	conf *config.Config,
 	dbService *persistence.Repositories,
 	redisService *persistence.RedisService,
-	storageService *persistence.StorageService) *Router {
+	storageService *persistence.StorageService,
+	notificationService *persistence.NotificationService) *Router {
 	return &Router{
-		conf:           conf,
-		dbService:      dbService,
-		redisService:   redisService,
-		storageService: storageService,
+		conf:                conf,
+		dbService:           dbService,
+		redisService:        redisService,
+		storageService:      storageService,
+		notificationService: notificationService,
 	}
 }
 

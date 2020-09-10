@@ -72,11 +72,14 @@ func main() {
 	// Connect to storage service
 	storageService, _ := persistence.NewStorageService(conf.MinioConfig, dbService.DB)
 
+	// Init notification service
+	notificationService, _ := persistence.NewNotificationService(conf)
+
 	// Init App
 	app := cmd.NewCli()
 	app.Action = func(c *cli.Context) error {
 		// Init Router
-		router := routers.NewRouter(conf, dbService, redisService, storageService).Start()
+		router := routers.NewRouter(conf, dbService, redisService, storageService, notificationService).Start()
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		// Run app at defined port
