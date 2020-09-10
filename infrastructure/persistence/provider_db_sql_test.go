@@ -94,6 +94,7 @@ func TestAutoMigrate(t *testing.T) {
 	conf.DBConfig.DBName = conf.DBTestConfig.DBName
 	conf.DBConfig.DBUser = conf.DBTestConfig.DBUser
 	conf.DBConfig.DBPassword = conf.DBTestConfig.DBPassword
+	conf.DBConfig.DBLog = false
 	dbService, errDBService := persistence.NewDBService(conf.DBConfig)
 	if errDBService != nil {
 		t.Fatalf("want non error, got %#v", errDBService)
@@ -111,6 +112,7 @@ func TestSeeds(t *testing.T) {
 	conf.DBConfig.DBName = conf.DBTestConfig.DBName
 	conf.DBConfig.DBUser = conf.DBTestConfig.DBUser
 	conf.DBConfig.DBPassword = conf.DBTestConfig.DBPassword
+	conf.DBConfig.DBLog = false
 	dbService, errDBService := persistence.NewDBService(conf.DBConfig)
 	if errDBService != nil {
 		t.Fatalf("want non error, got %#v", errDBService)
@@ -128,6 +130,7 @@ func TestInitialSeeds(t *testing.T) {
 	conf.DBConfig.DBName = conf.DBTestConfig.DBName
 	conf.DBConfig.DBUser = conf.DBTestConfig.DBUser
 	conf.DBConfig.DBPassword = conf.DBTestConfig.DBPassword
+	conf.DBConfig.DBLog = false
 	dbService, errDBService := persistence.NewDBService(conf.DBConfig)
 	if errDBService != nil {
 		t.Fatalf("want non error, got %#v", errDBService)
