@@ -14,4 +14,4 @@ RUN go mod download
 COPY . .
 
 # Run tests
-CMD CGO_ENABLED=0 go test -v  ./... -p 1 -cover -coverprofile=coverage.out
+CMD CGO_ENABLED=0 go test -v  ./... -m 1 -cover -coverprofile=coverage.out
