@@ -5,6 +5,7 @@ import (
 	"runtime"
 )
 
+// RootDir returns relative path of current project.
 func RootDir() string {
 	_, b, _, ok := runtime.Caller(0)
 	if ok {
