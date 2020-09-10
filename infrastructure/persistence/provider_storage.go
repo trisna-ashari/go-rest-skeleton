@@ -12,7 +12,7 @@ import (
 
 // StorageService represent it self.
 type StorageService struct {
-	Storage storage.FileStorage
+	Storage storage.FileStorageInterface
 }
 
 // NewMinioConnection will initialize connection to minio server.
