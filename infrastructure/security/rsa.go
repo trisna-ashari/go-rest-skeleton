@@ -9,7 +9,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 )
 
 const (
