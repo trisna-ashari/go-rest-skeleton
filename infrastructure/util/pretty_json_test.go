@@ -13,13 +13,24 @@ type JSONString struct {
 	Message string      `json:"message"`
 }
 
-func TestPrettyJSON(t *testing.T) {
+func TestPrettyJSONWithoutIndent(t *testing.T) {
 	data := JSONString{
 		Code:    200,
 		Data:    nil,
 		Message: "OK",
 	}
-	json := util.PrettyJSON(data)
+	json := util.PrettyJSONWithoutIndent(data)
+	expectedJSON := "{\"code\":200,\"data\":null,\"message\":\"OK\"}\n"
+	assert.Equal(t, expectedJSON, json)
+}
+
+func TestPrettyJSONWithIndent(t *testing.T) {
+	data := JSONString{
+		Code:    200,
+		Data:    nil,
+		Message: "OK",
+	}
+	json := util.PrettyJSONWithIndent(data)
 	expectedJSON := "{\n\t\"code\": 200,\n\t\"data\": null,\n\t\"message\": \"OK\"\n}\n"
 	assert.Equal(t, expectedJSON, json)
 }
