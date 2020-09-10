@@ -25,6 +25,7 @@ type Repositories struct {
 	StorageFile     repository.StorageFileRepository
 	StorageCategory repository.StorageCategoryRepository
 	User            repository.UserRepository
+	UserPreference  repository.UserPreferenceRepository
 	DB              *gorm.DB
 }
 
@@ -73,6 +74,7 @@ func NewDBService(config config.DBConfig) (*Repositories, error) {
 		StorageFile:     NewStorageFileRepository(db),
 		StorageCategory: NewStorageCategoryRepository(db),
 		User:            NewUserRepository(db),
+		UserPreference:  NewUserPreferenceRepository(db),
 		DB:              db,
 	}, nil
 }
@@ -92,6 +94,7 @@ func (s *Repositories) AutoMigrate() error {
 		&entity.StorageCategory{},
 		&entity.StorageFile{},
 		&entity.User{},
+		&entity.UserPreference{},
 		&entity.UserRole{},
 	).Error
 }
