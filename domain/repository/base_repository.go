@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"net/http"
 	"strconv"
 
@@ -22,6 +22,7 @@ type Parameters struct {
 	PerPage int
 	Page    int
 	Order   string
+	Query   map[string]interface{}
 }
 
 // Meta represent it self.
