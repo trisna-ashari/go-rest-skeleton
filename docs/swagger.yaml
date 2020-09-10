@@ -1,4 +1,13 @@
 definitions:
+  entity.DetailUserPreference:
+    properties:
+      dark_mode:
+        type: boolean
+      language:
+        type: string
+      skip_tour:
+        type: boolean
+    type: object
   middleware.errOutput:
     properties:
       code:
@@ -99,47 +108,6 @@ paths:
       summary: Generate a secret
       tags:
       - development
-  /api/v1/external/language:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Change language preference.
-      parameters:
-      - default: id
-        description: Language code
-        enum:
-        - en
-        - id
-        in: formData
-        name: language
-        required: true
-        type: string
-      - description: Request id
-        in: header
-        name: Set-Request-Id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/middleware.successOutput'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/middleware.errOutput'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/middleware.errOutput'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/middleware.errOutput'
-      summary: Switch language preference
-      tags:
-      - authentication
   /api/v1/external/login:
     post:
       consumes:
@@ -179,8 +147,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "422":
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/middleware.errOutput'
         "500":
@@ -217,6 +193,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
         "404":
           description: Not Found
           schema:
@@ -230,6 +210,252 @@ paths:
       summary: Authentication logout
       tags:
       - authentication
+  /api/v1/external/password/forgot:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Retrieve an email contain link to reset password.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Email address
+        in: formData
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Authentication forgot password
+      tags:
+      - authentication
+  /api/v1/external/password/reset/{token}:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Set a new password.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Token from forgot password request
+        in: formData
+        name: token
+        required: true
+        type: string
+      - description: New password
+        in: formData
+        name: new_password
+        required: true
+        type: string
+      - description: Confirm password
+        in: formData
+        name: confirm_password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      summary: Authentication reset password
+      tags:
+      - authentication
+  /api/v1/external/preference:
+    get:
+      description: Get current user preference using Authorization Header.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: User preference
+      tags:
+      - preference
+    put:
+      consumes:
+      - application/json
+      description: Update current user preference using Authorization Header.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User preference
+        in: body
+        name: preference
+        required: true
+        schema:
+          $ref: '#/definitions/entity.DetailUserPreference'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Update user preference
+      tags:
+      - preference
+  /api/v1/external/preference/reset:
+    post:
+      description: Reset current user preference to default using Authorization Header.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Reset user preference
+      tags:
+      - preference
   /api/v1/external/profile:
     get:
       description: Get current user profile using Authorization Header.
@@ -255,6 +481,10 @@ paths:
             $ref: '#/definitions/middleware.successOutput'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/middleware.errOutput'
         "404":
@@ -305,6 +535,10 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/middleware.errOutput'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
         "500":
           description: Internal Server Error
           schema:
@@ -312,6 +546,379 @@ paths:
       summary: Authentication refresh
       tags:
       - authentication
+  /api/v1/external/users:
+    get:
+      description: Get list of existing users.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Get users
+      tags:
+      - users
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a new user.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User firstname
+        in: formData
+        name: first_name
+        required: true
+        type: string
+      - description: User lastname
+        in: formData
+        name: last_name
+        required: true
+        type: string
+      - description: User password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: User email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: User phone
+        in: formData
+        name: phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Create a new user
+      tags:
+      - users
+  /api/v1/external/users/{uuid}:
+    delete:
+      description: Delete an existing user.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Delete user
+      tags:
+      - users
+    get:
+      description: Get detail of existing user.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Get user
+      tags:
+      - users
+  /api/v1/external/users/{uuid}/avatar:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update user avatar of existing user.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: User Avatar
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Update user avatar
+      tags:
+      - users
+  /api/v1/external/users/uuid:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Update an existing user.
+      parameters:
+      - default: id
+        description: Language code
+        enum:
+        - en
+        - id
+        in: header
+        name: Accept-Language
+        type: string
+      - description: Request id
+        in: header
+        name: Set-Request-Id
+        type: string
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: User firstname
+        in: formData
+        name: first_name
+        required: true
+        type: string
+      - description: User lastname
+        in: formData
+        name: last_name
+        required: true
+        type: string
+      - description: User password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: User email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: User phone
+        in: formData
+        name: phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/middleware.successOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/middleware.errOutput'
+      security:
+      - BasicAuth: []
+      - JWTAuth: []
+      summary: Update user
+      tags:
+      - users
 schemes:
 - http
 securityDefinitions:
