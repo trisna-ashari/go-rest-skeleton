@@ -18,7 +18,7 @@ func TestFormatter(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", func(c *gin.Context) {
-		middleware.Formatter(c, nil, "api.msg.success.ok", nil)
+		middleware.Formatter(c, nil, "api.msg.success.common.ok", nil)
 	})
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
