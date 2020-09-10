@@ -16,13 +16,13 @@ func TestAuth_WithJWTAuth_Success(t *testing.T) {
 	SkipThis(t)
 
 	dp := Setup()
-	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConnSetup(dp.cf.DBTestConfig)
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, _, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, _, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 
 	jwtAuth, _ := dp.at.CreateToken(user.UUID)
@@ -47,13 +47,13 @@ func TestAuth_WithJWTAuth_Failed(t *testing.T) {
 	SkipThis(t)
 
 	dp := Setup()
-	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConnSetup(dp.cf.DBTestConfig)
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, _, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, _, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 
 	jwtAuth, _ := dp.at.CreateToken(user.UUID)
@@ -74,13 +74,13 @@ func TestAuth_WithBasicAuth_Success(t *testing.T) {
 	SkipThis(t)
 
 	dp := Setup()
-	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConnSetup(dp.cf.DBTestConfig)
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, userFaker, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, userFaker, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", user.Email, userFaker.Password)))
 
@@ -99,13 +99,13 @@ func TestAuth_WithBasicAuth_Failed(t *testing.T) {
 	SkipThis(t)
 
 	dp := Setup()
-	conn, connErr := DBConnSetup(dp.cf.DBTestConfig)
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConnSetup(dp.cf.DBTestConfig)
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, userFaker, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, userFaker, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", user.Email, "Wrong"+userFaker.Password)))
 
