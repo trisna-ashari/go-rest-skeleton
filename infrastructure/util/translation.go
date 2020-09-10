@@ -24,7 +24,7 @@ type TranslationLanguage struct {
 	Language string `json:"language" form:"language"`
 }
 
-// NewTranslation will translate message.
+// NewTranslation creates a new translationMessage.
 func NewTranslation(
 	c *gin.Context,
 	messageType string,
@@ -62,7 +62,19 @@ func NewTranslation(
 	return translatedMessage, translation.Language
 }
 
-// IsValidAcceptLanguage will validate given string is valid Accept-Language or not.
+// GetLanguage gets language from Accept-Language on request header. Default language is "en".
+func GetLanguage(c *gin.Context) string {
+	accept := c.GetHeader("Accept-Language")
+	if accept != "" {
+		if IsValidAcceptLanguage(accept) {
+			return accept
+		}
+	}
+
+	return "en"
+}
+
+// IsValidAcceptLanguage validates the given string is valid language or not.
 func IsValidAcceptLanguage(x string) bool {
 	a := translationLanguage{
 		Available: []string{"en", "id"},
