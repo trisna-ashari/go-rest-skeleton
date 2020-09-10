@@ -6,6 +6,8 @@ import (
 	"go-rest-skeleton/infrastructure/persistence"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/bxcodec/faker"
 
 	"github.com/stretchr/testify/assert"
@@ -14,9 +16,9 @@ import (
 func TestSaveUser_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
 	var user = entity.User{}
 	var userFaker = entity.UserFaker{}
@@ -29,8 +31,8 @@ func TestSaveUser_Success(t *testing.T) {
 
 	repo := persistence.NewUserRepository(conn)
 
-	u, saveErr, _ := repo.SaveUser(&user)
-	assert.Nil(t, saveErr)
+	u, _, errSave := repo.SaveUser(&user)
+	assert.NoError(t, errSave)
 	assert.EqualValues(t, u.Email, userFaker.Email)
 	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
 	assert.EqualValues(t, u.LastName, userFaker.LastName)
@@ -41,23 +43,24 @@ func TestSaveUser_Success(t *testing.T) {
 func TestUpdateUser_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, userFaker, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, userFaker, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
+
 	repo := persistence.NewUserRepository(conn)
 	userData := entity.User{
 		FirstName: "Updated " + userFaker.FirstName,
 		LastName:  "Updated " + userFaker.LastName,
 		Email:     "Updated " + userFaker.Email,
 	}
-	u, updateErr, _ := repo.UpdateUser(user.UUID, &userData)
+	u, _, errUpdate := repo.UpdateUser(user.UUID, &userData)
 
-	assert.Nil(t, updateErr)
+	assert.NoError(t, errUpdate)
 	assert.EqualValues(t, u.FirstName, "Updated "+userFaker.FirstName)
 	assert.EqualValues(t, u.LastName, "Updated "+userFaker.LastName)
 	assert.EqualValues(t, u.Email, "Updated "+userFaker.Email)
@@ -66,35 +69,35 @@ func TestUpdateUser_Success(t *testing.T) {
 func TestDeleteUser_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, _, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, _, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	repo := persistence.NewUserRepository(conn)
-	getErr := repo.DeleteUser(user.UUID)
+	errGet := repo.DeleteUser(user.UUID)
 
-	assert.Nil(t, getErr)
+	assert.NoError(t, errGet)
 }
 
 func TestGetUser_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, userFaker, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, userFaker, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	repo := persistence.NewUserRepository(conn)
-	u, getErr := repo.GetUser(user.UUID)
+	u, errGet := repo.GetUser(user.UUID)
 
-	assert.Nil(t, getErr)
+	assert.NoError(t, errGet)
 	assert.EqualValues(t, u.Email, userFaker.Email)
 	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
 	assert.EqualValues(t, u.LastName, userFaker.LastName)
@@ -104,13 +107,13 @@ func TestGetUser_Success(t *testing.T) {
 func TestGetUsers_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	_, _, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	_, _, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	repo := persistence.NewUserRepository(conn)
 	params := repository.Parameters{
@@ -120,30 +123,53 @@ func TestGetUsers_Success(t *testing.T) {
 		Page:    1,
 		Order:   "desc",
 	}
-	users, _, getErr := repo.GetUsers(&params)
+	users, _, errGet := repo.GetUsers(&params)
 
-	assert.Nil(t, getErr)
+	assert.NoError(t, errGet)
 	assert.EqualValues(t, len(users), 1)
 }
 
 func TestGetUserByEmailAndPassword_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	user, userFaker, seedErr := seedUser(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	user, userFaker, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	repo := persistence.NewUserRepository(conn)
 	userEmailAndPassword := entity.User{Email: user.Email, Password: userFaker.Password}
-	u, _, getErr := repo.GetUserByEmailAndPassword(&userEmailAndPassword)
+	u, _, errGet := repo.GetUserByEmailAndPassword(&userEmailAndPassword)
 
-	assert.Nil(t, getErr)
+	assert.NoError(t, errGet)
 	assert.EqualValues(t, u.Email, userFaker.Email)
 	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
 	assert.EqualValues(t, u.LastName, userFaker.LastName)
 	assert.EqualValues(t, u.Phone, userFaker.Phone)
+}
+
+func TestUpdateUserAvatar_Success(t *testing.T) {
+	SkipThis(t)
+
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
+	}
+	user, _, errSeed := seedUser(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
+	}
+
+	repo := persistence.NewUserRepository(conn)
+	avatarUUID := uuid.New().String()
+	userData := entity.User{
+		AvatarUUID: avatarUUID,
+	}
+	u, _, errUpdate := repo.UpdateUserAvatar(user.UUID, &userData)
+
+	assert.NoError(t, errUpdate)
+	assert.EqualValues(t, u.AvatarUUID, avatarUUID)
 }
