@@ -98,6 +98,7 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		{entity: &entity.StorageCategory{}},
 		{entity: &entity.StorageFile{}},
 		{entity: &entity.User{}},
+		{entity: &entity.UserPreference{}},
 		{entity: &entity.UserRole{}},
 	}
 
@@ -115,6 +116,7 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		&entity.StorageCategory{},
 		&entity.StorageFile{},
 		&entity.User{},
+		&entity.UserPreference{},
 		&entity.UserRole{},
 	).Error
 	if err != nil {
@@ -144,6 +146,7 @@ func DBServiceSetup(config config.DBTestConfig) (*persistence.Repositories, erro
 		StorageCategory: persistence.NewStorageCategoryRepository(db),
 		StorageFile:     persistence.NewStorageFileRepository(db),
 		User:            persistence.NewUserRepository(db),
+		UserPreference:  persistence.NewUserPreferenceRepository(db),
 		DB:              db,
 	}, nil
 }
@@ -190,6 +193,19 @@ func seedUser(db *gorm.DB) (*entity.User, *entity.UserFaker, error) {
 	return &user, &userFaker, nil
 }
 
+func seedRole(db *gorm.DB) (*entity.Role, error) {
+	role := entity.Role{
+		UUID: uuid.New().String(),
+		Name: "Example Role",
+	}
+	err := db.Create(&role).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
 func seedRoles(db *gorm.DB) ([]entity.Role, error) {
 	roles := []entity.Role{
 		{UUID: uuid.New().String(), Name: "Super Administrator"},
@@ -206,4 +222,18 @@ func seedRoles(db *gorm.DB) ([]entity.Role, error) {
 	}
 
 	return roles, nil
+}
+
+func seedUserPreference(db *gorm.DB) (*entity.UserPreference, error) {
+	var userPreference entity.UserPreference
+	userPreference.UUID = uuid.New().String()
+	userPreference.UserUUID = uuid.New().String()
+	userPreference.Preference = userPreference.BuildDefaultPreference()
+
+	err := db.Create(&userPreference).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &userPreference, nil
 }
