@@ -52,6 +52,14 @@ type MinioConfig struct {
 	Bucket    string
 }
 
+// SMTPConfig represent SMTP config keys.
+type SMTPConfig struct {
+	SMTPHost     string
+	SMTPPort     int
+	SMTPUsername string
+	SMTPPassword string
+}
+
 // KeyConfig represent key config keys.
 type KeyConfig struct {
 	AppPrivateKey string
@@ -65,6 +73,7 @@ type Config struct {
 	RedisConfig
 	RedisTestConfig
 	MinioConfig
+	SMTPConfig
 	KeyConfig
 	AppEnvironment  string
 	AppLanguage     string
@@ -113,6 +122,12 @@ func New() *Config {
 			AccessKey: getEnv("MINIO_ACCESS_KEY", "minio"),
 			SecretKey: getEnv("MINIO_SECRET_KEY", "miniostorage"),
 			Bucket:    getEnv("MINIO_BUCKET", "go-rest-skeleton"),
+		},
+		SMTPConfig: SMTPConfig{
+			SMTPHost:     getEnv("SMTP_HOST", ""),
+			SMTPPort:     getEnvAsInt("SMTP_PORT", 587),
+			SMTPUsername: getEnv("SMTP_USERNAME", ""),
+			SMTPPassword: getEnv("SMTP_PASSWORD", ""),
 		},
 		KeyConfig: KeyConfig{
 			AppPrivateKey: getEnv("APP_PRIVATE_KEY", "default-private-key"),
