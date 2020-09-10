@@ -1,7 +1,7 @@
 package middleware_test
 
 import (
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
 	"net/http/httptest"
