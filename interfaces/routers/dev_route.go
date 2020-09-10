@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/interfaces/handler"
 	"net/http"
 	"os"
