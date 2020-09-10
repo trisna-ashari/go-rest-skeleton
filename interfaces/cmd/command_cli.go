@@ -21,7 +21,7 @@ func NewCommand(dbService *persistence.Repositories) []*cli.Command {
 				if err != nil {
 					log.Println(err)
 				}
-				fmt.Println(util.PrettyJSON(secretPriPubKey))
+				fmt.Println(util.PrettyJSONWithIndent(secretPriPubKey))
 				return nil
 			},
 		},
