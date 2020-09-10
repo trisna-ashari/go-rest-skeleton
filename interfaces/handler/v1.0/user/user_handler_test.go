@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/infrastructure/util"
 	"go-rest-skeleton/tests/mock"
 	"log"
