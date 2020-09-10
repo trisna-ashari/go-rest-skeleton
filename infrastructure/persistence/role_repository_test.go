@@ -1,6 +1,7 @@
 package persistence_test
 
 import (
+	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/persistence"
 	"testing"
@@ -8,41 +9,80 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestUpdateRole_Success(t *testing.T) {
+	SkipThis(t)
+
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
+	}
+
+	role, errSeed := seedRole(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
+	}
+	repo := persistence.NewRoleRepository(conn)
+	roleData := entity.Role{Name: "Updated " + role.Name}
+
+	r, _, errUpdate := repo.UpdateRole(role.UUID, &roleData)
+	assert.NoError(t, errUpdate)
+	assert.EqualValues(t, r.Name, "Updated "+role.Name)
+}
+
+func TestSaveRole_Success(t *testing.T) {
+	SkipThis(t)
+
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
+	}
+
+	var role = entity.Role{}
+	role.Name = "Test Create Role"
+
+	repo := persistence.NewRoleRepository(conn)
+
+	r, _, errSave := repo.SaveRole(&role)
+	assert.NoError(t, errSave)
+	assert.NotNil(t, r.UUID)
+	assert.EqualValues(t, r.Name, role.Name)
+}
+
 func TestDeleteRole_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	roles, seedErr := seedRoles(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	roles, errSeed := seedRoles(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 
 	role := roles[0]
 	repo := persistence.NewRoleRepository(conn)
-	getErr := repo.DeleteRole(role.UUID)
+	errGet := repo.DeleteRole(role.UUID)
 
-	assert.Nil(t, getErr)
+	assert.Nil(t, errGet)
 }
 
 func TestGetRole_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	roles, seedErr := seedRoles(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	roles, errSeed := seedRoles(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	role := roles[0]
 	repo := persistence.NewRoleRepository(conn)
-	r, getErr := repo.GetRole(role.UUID)
+	r, errGet := repo.GetRole(role.UUID)
 
-	assert.Nil(t, getErr)
+	assert.Nil(t, errGet)
 	assert.EqualValues(t, r.UUID, role.UUID)
 	assert.EqualValues(t, r.Name, role.Name)
 }
@@ -50,13 +90,13 @@ func TestGetRole_Success(t *testing.T) {
 func TestGetRoles_Success(t *testing.T) {
 	SkipThis(t)
 
-	conn, connErr := DBConn()
-	if connErr != nil {
-		t.Fatalf("want non error, got %#v", connErr)
+	conn, errConn := DBConn()
+	if errConn != nil {
+		t.Fatalf("want non error, got %#v", errConn)
 	}
-	_, seedErr := seedRoles(conn)
-	if seedErr != nil {
-		t.Fatalf("want non error, got %#v", seedErr)
+	_, errSeed := seedRoles(conn)
+	if errSeed != nil {
+		t.Fatalf("want non error, got %#v", errSeed)
 	}
 	repo := persistence.NewRoleRepository(conn)
 	params := repository.Parameters{
@@ -66,8 +106,8 @@ func TestGetRoles_Success(t *testing.T) {
 		Page:    1,
 		Order:   "desc",
 	}
-	r, _, getErr := repo.GetRoles(&params)
+	r, _, errGet := repo.GetRoles(&params)
 
-	assert.Nil(t, getErr)
+	assert.Nil(t, errGet)
 	assert.EqualValues(t, len(r), 3)
 }
