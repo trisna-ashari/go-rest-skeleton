@@ -3,7 +3,7 @@ package persistence
 import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 
 	"github.com/jinzhu/gorm"
 )

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-rest-skeleton/infrastructure/message/success"
 	"go-rest-skeleton/infrastructure/security"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"
@@ -34,5 +35,5 @@ func (s *SecretHandler) GenerateSecret(c *gin.Context) {
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	middleware.Formatter(c, secretPriPubKey, "api.msg.success.successfully_generate_rsa_key", nil)
+	middleware.Formatter(c, secretPriPubKey, success.DevSuccessfullyGenerateRSAKey, nil)
 }

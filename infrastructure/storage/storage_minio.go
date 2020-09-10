@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"go-rest-skeleton/domain/entity"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -15,6 +15,7 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
+// MinioDriver represents it self.
 type MinioDriver struct {
 	client   *minio.Client
 	bucket   string
@@ -22,15 +23,18 @@ type MinioDriver struct {
 	testMode bool
 }
 
+// MinioDriver creates new MinioDriver.
 func NewMinioDriver(client *minio.Client, bucket string, db *gorm.DB) *MinioDriver {
 	return &MinioDriver{client: client, bucket: bucket, db: db}
 }
 
+// TestMode sets current MinioDriver run as test mode. Uses when running unit test or integration test.
 func (c MinioDriver) TestMode() *MinioDriver {
 	c.testMode = true
 	return &c
 }
 
+// UploadFile uploads the given file to minio server.
 func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error) {
 	var fileEntity entity.StorageFile
 	var fileCategory entity.StorageCategory
@@ -96,6 +100,7 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 	return fileEntity.UUID, nil, nil
 }
 
+// GetFile gets file from minio server and return signed URL.
 func (c *MinioDriver) GetFile(UUID string) (interface{}, error) {
 	var fileEntity entity.StorageFile
 	var fileCategory entity.StorageCategory
@@ -103,7 +108,7 @@ func (c *MinioDriver) GetFile(UUID string) (interface{}, error) {
 	err := c.db.Where("uuid = ?", UUID).Take(&fileEntity).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return nil, exception.ErrorTextStorageFileNotFound
+			return nil, nil
 		}
 		return nil, err
 	}
@@ -128,6 +133,7 @@ func (c *MinioDriver) GetFile(UUID string) (interface{}, error) {
 	return fileURL.String(), nil
 }
 
+// FormatFilePath formats file path by given fileName and category path.
 func (c MinioDriver) FormatFilePath(fileCategoryPath string, fileName string) string {
 	filePath := fileCategoryPath + "/" + fileName
 	if c.testMode {

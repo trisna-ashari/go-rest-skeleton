@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"bytes"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"io/ioutil"
 	"net/http"
 

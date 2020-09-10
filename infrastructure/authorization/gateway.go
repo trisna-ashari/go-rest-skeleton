@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"strings"
 
 	"github.com/gin-gonic/gin"

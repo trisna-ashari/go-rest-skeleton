@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"go-rest-skeleton/infrastructure/authorization"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

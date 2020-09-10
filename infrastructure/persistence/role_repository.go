@@ -3,7 +3,7 @@ package persistence
 import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 
 	"github.com/jinzhu/gorm"
 )
@@ -23,7 +23,12 @@ var _ repository.RoleRepository = &RoleRepo{}
 
 // SaveRole will create a new role.
 func (r RoleRepo) SaveRole(role *entity.Role) (*entity.Role, map[string]string, error) {
-	panic("implement me")
+	errDesc := map[string]string{}
+	err := r.db.Create(&role).Error
+	if err != nil {
+		return nil, errDesc, exception.ErrorTextAnErrorOccurred
+	}
+	return role, nil, nil
 }
 
 // UpdateRole will update specified role.

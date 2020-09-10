@@ -2,7 +2,7 @@ package authorization
 
 import (
 	"fmt"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"time"
 
 	"github.com/go-redis/redis/v8"

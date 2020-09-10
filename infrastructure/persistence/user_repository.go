@@ -4,7 +4,7 @@ import (
 	"errors"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
-	"go-rest-skeleton/infrastructure/exception"
+	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/infrastructure/security"
 	"strings"
 
@@ -135,6 +135,22 @@ func (r *UserRepo) GetUsers(p *repository.Parameters) ([]entity.User, interface{
 	return users, meta, nil
 }
 
+// GetUserByEmail will find user by email.
+func (r *UserRepo) GetUserByEmail(u *entity.User) (*entity.User, map[string]string, error) {
+	var user entity.User
+	errDesc := map[string]string{}
+	err := r.db.Where("email = ?", u.Email).Take(&user).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
+			return nil, errDesc, exception.ErrorTextUserEmailNotRegistered
+		}
+		return nil, errDesc, err
+	}
+
+	return &user, nil, nil
+}
+
 // GetUserByEmailAndPassword will find user by email and password.
 func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[string]string, error) {
 	var user entity.User
@@ -143,7 +159,7 @@ func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
-			return nil, errDesc, exception.ErrorTextUserNotFound
+			return nil, errDesc, exception.ErrorTextUserEmailNotRegistered
 		}
 		return nil, errDesc, err
 	}
@@ -152,7 +168,7 @@ func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			errDesc["password"] = exception.ErrorTextUserInvalidPassword.Error()
-			return nil, errDesc, err
+			return nil, errDesc, exception.ErrorTextUserInvalidUsernameAndPassword
 		}
 	}
 	return &user, nil, nil
