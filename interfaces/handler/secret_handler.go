@@ -2,8 +2,8 @@ package handler
 
 import (
 	"go-rest-skeleton/infrastructure/message/success"
-	"go-rest-skeleton/infrastructure/security"
 	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/security"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

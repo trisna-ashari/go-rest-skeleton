@@ -2,12 +2,12 @@ package middleware_test
 
 import (
 	"fmt"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/authorization"
-	"go-rest-skeleton/infrastructure/config"
 	"go-rest-skeleton/infrastructure/persistence"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/util"
 	"log"
 	"testing"
 

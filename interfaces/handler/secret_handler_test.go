@@ -2,9 +2,9 @@ package handler_test
 
 import (
 	"encoding/json"
-	"go-rest-skeleton/infrastructure/security"
-	"go-rest-skeleton/infrastructure/util"
 	"go-rest-skeleton/interfaces/handler"
+	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/security"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,7 +29,7 @@ func TestGenerateSecret_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &secretData)

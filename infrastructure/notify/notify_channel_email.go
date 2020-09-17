@@ -3,7 +3,7 @@ package notify
 import (
 	"bytes"
 	"fmt"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/util"
 	"html/template"
 	"log"
 

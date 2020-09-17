@@ -1,13 +1,11 @@
 package entity
 
 import (
-	"go-rest-skeleton/infrastructure/security"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/infrastructure/message/exception"
+	"go-rest-skeleton/pkg/security"
 	"html"
 	"strings"
 	"time"
-
-	"github.com/gin-gonic/gin"
 
 	"github.com/badoux/checkmail"
 	"github.com/google/uuid"
@@ -153,115 +151,171 @@ func (u *User) DetailUserList() interface{} {
 }
 
 // ValidateSaveUser will validate create a new user request.
-func (u *User) ValidateSaveUser(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (u *User) ValidateSaveUser() []exception.ErrorForm {
+	var errMsg []exception.ErrorForm
 	var errMsgData = make(map[string]interface{})
 	var err error
 	if u.FirstName == "" {
 		errMsgData["Field"] = "first_name"
-		errMsg["first_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "first_name",
+			Msg:   "api.msg.error.user.field_first_name_is_required",
+			Data:  errMsgData})
 	}
 	if u.LastName == "" {
 		errMsgData["Field"] = "last_name"
-		errMsg["last_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "last_name",
+			Msg:   "api.msg.error.user.field_last_name_is_required",
+			Data:  errMsgData})
 	}
 	if u.Password == "" {
 		errMsgData["Field"] = "password"
-		errMsg["password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "password",
+			Msg:   "api.msg.error.user.field_password_is_required",
+			Data:  errMsgData})
 	}
 	if u.Password != "" && len(u.Password) < 6 {
 		errMsgData["Field"] = "password"
-		errMsg["password"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_password_length", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "password",
+			Msg:   "api.msg.error.invalid_password_length",
+			Data:  errMsgData})
 	}
 	if u.Email == "" {
 		errMsgData["Field"] = "email"
-		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "email",
+			Msg:   "api.msg.error.user.field_email_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email != "" {
 		if err = checkmail.ValidateFormat(u.Email); err != nil {
-			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
+			errMsg = append(errMsg, exception.ErrorForm{
+				Field: "email",
+				Msg:   "api.msg.error.invalid_email"})
 		}
 	}
 	return errMsg
 }
 
 // ValidateUpdateUser will validate create a new user request.
-func (u *User) ValidateUpdateUser(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (u *User) ValidateUpdateUser() []exception.ErrorForm {
+	var errMsg []exception.ErrorForm
 	var errMsgData = make(map[string]interface{})
 	var err error
 	if u.FirstName == "" {
 		errMsgData["Field"] = "first_name"
-		errMsg["first_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "first_name",
+			Msg:   "api.msg.error.user.field_first_name_is_required",
+			Data:  errMsgData})
 	}
 	if u.LastName == "" {
 		errMsgData["Field"] = "last_name"
-		errMsg["last_name"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "last_name",
+			Msg:   "api.msg.error.user.field_last_name_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email == "" {
 		errMsgData["Field"] = "email"
-		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "email",
+			Msg:   "api.msg.error.user.field_email_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email != "" {
 		if err = checkmail.ValidateFormat(u.Email); err != nil {
-			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
+			errMsg = append(errMsg, exception.ErrorForm{
+				Field: "email",
+				Msg:   "api.msg.error.invalid_email"})
 		}
 	}
 	return errMsg
 }
 
 // ValidateLogin will validate login request.
-func (u *User) ValidateLogin(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (u *User) ValidateLogin() []exception.ErrorForm {
+	var errMsg []exception.ErrorForm
 	var errMsgData = make(map[string]interface{})
 	var err error
 	if u.Password == "" {
-		errMsgData["Field"] = "password"
-		errMsg["password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsgData["Field"] = "email"
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "email",
+			Msg:   "api.msg.error.user.field_email_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email == "" {
-		errMsgData["Field"] = "email"
-		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsgData["Field"] = "password"
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "password",
+			Msg:   "api.msg.error.user.field_password_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email != "" {
 		if err = checkmail.ValidateFormat(u.Email); err != nil {
-			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
+			errMsg = append(errMsg, exception.ErrorForm{
+				Field: "email",
+				Msg:   "api.msg.error.invalid_email"})
 		}
 	}
 	return errMsg
 }
 
 // ValidateForgotPassword will validate forgot password request.
-func (u *User) ValidateForgotPassword(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (u *User) ValidateForgotPassword() []exception.ErrorForm {
+	var errMsg []exception.ErrorForm
 	var errMsgData = make(map[string]interface{})
 	var err error
 	if u.Email == "" {
 		errMsgData["Field"] = "email"
-		errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "email",
+			Msg:   "api.msg.error.user.field_email_is_required",
+			Data:  errMsgData})
 	}
 	if u.Email != "" {
 		if err = checkmail.ValidateFormat(u.Email); err != nil {
-			errMsg["email"], _ = util.NewTranslation(c, "error", "api.msg.error.invalid_email", errMsgData)
+			errMsg = append(errMsg, exception.ErrorForm{
+				Field: "email",
+				Msg:   "api.msg.error.invalid_email"})
 		}
 	}
 	return errMsg
 }
 
 // ValidateResetPassword will validate reset password request.
-func (u *UserResetPassword) ValidateResetPassword(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (u *UserResetPassword) ValidateResetPassword() []exception.ErrorForm {
+	var errMsg []exception.ErrorForm
 	var errMsgData = make(map[string]interface{})
 	if u.NewPassword == "" {
 		errMsgData["Field"] = "new_password"
-		errMsg["new_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "new_password",
+			Msg:   "api.msg.error.user.field_new_password_is_required",
+			Data:  errMsgData})
 	}
 	if u.ConfirmPassword == "" {
 		errMsgData["Field"] = "confirm_password"
-		errMsg["confirm_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_is_required", errMsgData)
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "confirm_password",
+			Msg:   "api.msg.error.user.field_confirm_password_is_required",
+			Data:  errMsgData})
 	}
 	if u.NewPassword != u.ConfirmPassword {
-		errMsg["confirm_password"], _ = util.NewTranslation(c, "error", "api.msg.error.field_does_not_match", errMsgData)
+		errMsgData["Field"] = "new_password"
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "new_password",
+			Msg:   "api.msg.error.user.field_new_and_confirm_password_does_not_match",
+			Data:  errMsgData})
+		errMsgData["Field"] = "confirm_password"
+		errMsg = append(errMsg, exception.ErrorForm{
+			Field: "confirm_password",
+			Msg:   "api.msg.error.user.field_new_and_confirm_password_does_not_match",
+			Data:  errMsgData})
 	}
 	return errMsg
 }

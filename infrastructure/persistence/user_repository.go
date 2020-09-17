@@ -5,7 +5,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
-	"go-rest-skeleton/infrastructure/security"
+	"go-rest-skeleton/pkg/security"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"

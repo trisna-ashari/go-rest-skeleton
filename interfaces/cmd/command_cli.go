@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"go-rest-skeleton/infrastructure/persistence"
-	"go-rest-skeleton/infrastructure/security"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/security"
 	"log"
 
 	"github.com/urfave/cli/v2"
@@ -21,7 +21,7 @@ func NewCommand(dbService *persistence.Repositories) []*cli.Command {
 				if err != nil {
 					log.Println(err)
 				}
-				fmt.Println(util.PrettyJSONWithIndent(secretPriPubKey))
+				fmt.Println(json_formatter.PrettyJSONWithIndent(secretPriPubKey))
 				return nil
 			},
 		},
