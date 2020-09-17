@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/translation"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +16,7 @@ func Formatter(c *gin.Context, data interface{}, message string, meta interface{
 		response.Message = message
 	}
 
-	translatedMessage, language := util.NewTranslation(c, "error", response.Message, map[string]interface{}{})
+	translatedMessage, language := translation.NewTranslation(c, "error", response.Message, map[string]interface{}{})
 	response.Message = translatedMessage
 
 	c.Header("Accept-Language", language)

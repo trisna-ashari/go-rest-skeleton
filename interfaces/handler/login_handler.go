@@ -8,8 +8,8 @@ import (
 	"go-rest-skeleton/infrastructure/message/success"
 	"go-rest-skeleton/infrastructure/notify"
 	"go-rest-skeleton/infrastructure/notify/notification"
-	"go-rest-skeleton/infrastructure/util"
 	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/translation"
 	"net/http"
 	"os"
 
@@ -91,9 +91,10 @@ func (au *Authenticate) Login(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	validateUser := user.ValidateLogin(c)
-	if len(validateUser) > 0 {
-		c.Set("data", validateUser)
+	validateErr := user.ValidateLogin()
+	if len(validateErr) > 0 {
+		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -116,10 +117,6 @@ func (au *Authenticate) Login(c *gin.Context) {
 	userData := make(map[string]interface{})
 	userData["access_token"] = ts.AccessToken
 	userData["refresh_token"] = ts.RefreshToken
-	userData["uuid"] = u.UUID
-	userData["first_name"] = u.FirstName
-	userData["last_name"] = u.LastName
-	userData["language"] = os.Getenv("APP_LANG")
 
 	middleware.Formatter(c, userData, success.AuthSuccessfullyLogin, nil)
 }
@@ -266,9 +263,10 @@ func (au *Authenticate) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	validateUser := user.ValidateForgotPassword(c)
-	if len(validateUser) > 0 {
-		c.Set("data", validateUser)
+	validateErr := user.ValidateForgotPassword()
+	if len(validateErr) > 0 {
+		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -280,7 +278,7 @@ func (au *Authenticate) ForgotPassword(c *gin.Context) {
 	}
 
 	nOptions := notify.NotificationOptions{URLPath: "token"}
-	nForgotPassword := notification.NewForgotPassword(userData, au.ni, util.GetLanguage(c), nOptions)
+	nForgotPassword := notification.NewForgotPassword(userData, au.ni, translation.GetLanguage(c), nOptions)
 	err := nForgotPassword.Send()
 	if len(err) > 0 {
 		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextAnErrorOccurred)

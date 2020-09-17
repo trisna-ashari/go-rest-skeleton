@@ -1,7 +1,8 @@
-package util
+package translation
 
 import (
 	"fmt"
+	"go-rest-skeleton/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -47,7 +48,7 @@ func NewTranslation(
 		translation.DefaultMessage = messageString
 	}
 
-	languageFile := fmt.Sprintf("%s/languages/global.%s.yaml", RootDir(), translation.Language)
+	languageFile := fmt.Sprintf("%s/languages/global.%s.yaml", util.RootDir(), translation.Language)
 	bundle.MustLoadMessageFile(languageFile)
 	translator := i18n.NewLocalizer(bundle, translation.Language, translation.Language)
 
