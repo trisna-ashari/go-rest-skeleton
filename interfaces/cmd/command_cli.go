@@ -26,6 +26,17 @@ func NewCommand(dbService *persistence.Repositories) []*cli.Command {
 			},
 		},
 		{
+			Name:  "db:migrate",
+			Usage: "run database migration",
+			Action: func(c *cli.Context) error {
+				err := dbService.AutoMigrate()
+				if err != nil {
+					log.Println(err)
+				}
+				return nil
+			},
+		},
+		{
 			Name:  "db:init",
 			Usage: "run predefined database initial seeder",
 			Action: func(c *cli.Context) error {
