@@ -1,7 +1,7 @@
 package security_test
 
 import (
-	"go-rest-skeleton/infrastructure/security"
+	"go-rest-skeleton/pkg/security"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
