@@ -1,4 +1,4 @@
-package util
+package json_formatter
 
 import (
 	"bytes"

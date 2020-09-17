@@ -11,5 +11,5 @@ func RootDir() string {
 	if ok {
 		return filepath.Join(filepath.Dir(b), "../..")
 	}
-	return empty
+	return ""
 }

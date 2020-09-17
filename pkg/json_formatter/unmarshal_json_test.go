@@ -1,7 +1,7 @@
-package util_test
+package json_formatter_test
 
 import (
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/json_formatter"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,7 +24,7 @@ func TestResponseDecoder(t *testing.T) {
 
 	c.Request, _ = http.NewRequest("GET", "/test", nil)
 	r.ServeHTTP(w, c.Request)
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 
 	assert.EqualValues(t, response["code"], http.StatusOK)
 	assert.Nil(t, response["data"])

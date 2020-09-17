@@ -1,7 +1,7 @@
 package util_test
 
 import (
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/util"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
