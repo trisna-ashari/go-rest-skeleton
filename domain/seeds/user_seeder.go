@@ -41,6 +41,17 @@ func userFactory() []Seed {
 
 // createUser will create fake user and insert into DB.
 func createUser(db *gorm.DB, user *entity.User) (*entity.User, error) {
-	err := db.Create(user).Error
+	var userExists entity.User
+	err := db.Where("email = ?", user.Email).Take(&userExists).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			err := db.Create(user).Error
+			if err != nil {
+				return user, err
+			}
+			return user, err
+		}
+		return user, err
+	}
 	return user, err
 }

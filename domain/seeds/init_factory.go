@@ -1,9 +1,8 @@
 package seeds
 
 import (
-	"go-rest-skeleton/domain/entity"
-
 	"github.com/jinzhu/gorm"
+	"go-rest-skeleton/domain/entity"
 
 	"github.com/google/uuid"
 )
@@ -17,7 +16,7 @@ var (
 		UUID:      uuid.New().String(),
 		FirstName: "Trisna",
 		LastName:  "Ashari",
-		Email:     "trisna.x22@gmail.com",
+		Email:     "trisna.x2@gmail.com",
 		Phone:     "01234567890",
 		Password:  "123456",
 	}
@@ -43,6 +42,36 @@ var (
 		UUID:     uuid.New().String(),
 		UserUUID: user.UUID,
 		RoleUUID: role.UUID,
+	}
+	storageCategory = []*entity.StorageCategory{
+		{
+			UUID:      uuid.New().String(),
+			Slug:      "avatar",
+			Path:      "avatar",
+			Name:      "Avatar",
+			MimeTypes: "image/jpg,image/jpeg,image/png,image/bmp,image/gif",
+		},
+		{
+			UUID:      uuid.New().String(),
+			Slug:      "document",
+			Path:      "document",
+			Name:      "Document",
+			MimeTypes: "application/pdf",
+		},
+		{
+			UUID:      uuid.New().String(),
+			Slug:      "file",
+			Path:      "file",
+			Name:      "File",
+			MimeTypes: "application/pdf",
+		},
+		{
+			UUID:      uuid.New().String(),
+			Slug:      "thumbnail",
+			Path:      "thumbnail",
+			Name:      "Thumbnail",
+			MimeTypes: "image/png",
+		},
 	}
 )
 
@@ -74,13 +103,33 @@ func (is *InitFactory) generateRoleSeeder() *InitFactory {
 	return is
 }
 
-func (is *InitFactory) generateRolePermissionsSeeder() *InitFactory {
+func (is *InitFactory) generatePermissionsSeeder() *InitFactory {
 	for _, p := range permissions {
 		cp := p
 		is.seeders = append(is.seeders, Seed{
 			Name: "Create initial permission",
 			Run: func(db *gorm.DB) error {
 				_, errDB := createPermission(db, cp)
+				return errDB
+			},
+		})
+	}
+
+	return is
+}
+
+func (is *InitFactory) generateRolePermissionsSeeder() *InitFactory {
+	for _, p := range permissions {
+		cp := p
+		crp := &entity.RolePermission{
+			UUID:           uuid.New().String(),
+			RoleUUID:       role.UUID,
+			PermissionUUID: cp.UUID,
+		}
+		is.seeders = append(is.seeders, Seed{
+			Name: "Create initial permission",
+			Run: func(db *gorm.DB) error {
+				_, errDB := createRolePermission(db, crp)
 				return errDB
 			},
 		})
@@ -101,12 +150,29 @@ func (is *InitFactory) generateUserRoleSeeder() *InitFactory {
 	return is
 }
 
+func (is *InitFactory) generateStorageCategorySeeder() *InitFactory {
+	for _, sc := range storageCategory {
+		csc := sc
+		is.seeders = append(is.seeders, Seed{
+			Name: "Create initial storage category",
+			Run: func(db *gorm.DB) error {
+				_, errDB := createStorageCategory(db, csc)
+				return errDB
+			},
+		})
+	}
+
+	return is
+}
+
 func initFactory() []Seed {
 	initialSeeds := newInitFactory()
 	initialSeeds.GenerateUserSeeder()
 	initialSeeds.generateRoleSeeder()
+	initialSeeds.generatePermissionsSeeder()
 	initialSeeds.generateRolePermissionsSeeder()
 	initialSeeds.generateUserRoleSeeder()
+	initialSeeds.generateStorageCategorySeeder()
 
 	return initialSeeds.seeders
 }

@@ -8,6 +8,17 @@ import (
 
 // createRole will create predefined role and insert into DB.
 func createRole(db *gorm.DB, role *entity.Role) (*entity.Role, error) {
-	err := db.Create(role).Error
+	var roleExists entity.Role
+	err := db.Where("name = ?", role.Name).Take(&roleExists).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			err := db.Create(role).Error
+			if err != nil {
+				return role, err
+			}
+			return role, err
+		}
+		return role, err
+	}
 	return role, err
 }
