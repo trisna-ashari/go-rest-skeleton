@@ -3,9 +3,10 @@ package handler_test
 import (
 	"encoding/json"
 	"fmt"
-	"go-rest-skeleton/infrastructure/config"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/interfaces/handler"
+	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -39,7 +40,7 @@ func TestPing_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &pingData)
@@ -69,7 +70,7 @@ func TestPing_Failed(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &pingData)

@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"go-rest-skeleton/infrastructure/config"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/infrastructure/storage"
 
 	"github.com/jinzhu/gorm"

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"go-rest-skeleton/infrastructure/config"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/middleware"
 	"net/http"

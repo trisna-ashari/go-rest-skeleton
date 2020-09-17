@@ -1,8 +1,8 @@
 package main
 
 import (
+	"go-rest-skeleton/config"
 	_ "go-rest-skeleton/docs"
-	"go-rest-skeleton/infrastructure/config"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/interfaces/cmd"
 	"go-rest-skeleton/interfaces/routers"

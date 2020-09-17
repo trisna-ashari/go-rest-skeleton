@@ -2,8 +2,8 @@ package persistence
 
 import (
 	"context"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/infrastructure/authorization"
-	"go-rest-skeleton/infrastructure/config"
 
 	"github.com/go-redis/redis/v8"
 )

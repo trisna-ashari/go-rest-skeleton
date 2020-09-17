@@ -2,10 +2,10 @@ package persistence
 
 import (
 	"fmt"
+	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/domain/seeds"
-	"go-rest-skeleton/infrastructure/config"
 	"log"
 
 	"github.com/jinzhu/gorm"

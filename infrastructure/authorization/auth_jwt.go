@@ -1,7 +1,7 @@
 package authorization
 
 import (
-	"go-rest-skeleton/infrastructure/config"
+	"go-rest-skeleton/config"
 
 	"github.com/go-redis/redis/v8"
 )
