@@ -23,7 +23,7 @@ func (w S3Driver) TestMode() *S3Driver {
 	return &w
 }
 
-func (w *S3Adapter) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error) {
+func (w *S3Adapter) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{}) {
 	return w.S3Driver.UploadFile(file, category)
 }
 
@@ -38,8 +38,8 @@ type S3Driver struct {
 	testMode bool
 }
 
-func (w *S3Driver) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error) {
-	return uuid.New().String(), nil, nil
+func (w *S3Driver) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{}) {
+	return uuid.New().String(), nil, nil, nil
 }
 
 func (w *S3Driver) GetFile(UUID string) (interface{}, error) {

@@ -36,7 +36,7 @@ type FileName struct {
 
 // FileStorageInterface is an interface. Needs to be implemented in StorageDriver.
 type FileStorageInterface interface {
-	UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error)
+	UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{})
 	GetFile(UUID string) (interface{}, error)
 }
 

@@ -35,20 +35,20 @@ func (c MinioDriver) TestMode() *MinioDriver {
 }
 
 // UploadFile uploads the given file to minio server.
-func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error) {
+func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{}) {
 	var fileEntity entity.StorageFile
 	var fileCategory entity.StorageCategory
 	var fileAllowed bool
 
 	fileOpen, err := file.Open()
 	if err != nil {
-		return "", nil, exception.ErrorTextUploadCannotOpenFile
+		return "", nil, exception.ErrorTextStorageUploadCannotOpenFile, nil
 	}
 	defer fileOpen.Close()
 
 	fileSize := file.Size
 	if fileSize > int64(MaxSize) {
-		return "", nil, exception.ErrorTextUploadInvalidSize
+		return "", nil, exception.ErrorTextStorageUploadInvalidSize, fmt.Sprintf("Size:%d", MaxSize/1000000)
 	}
 
 	buffer := make([]byte, fileSize)
@@ -58,20 +58,22 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 	err = c.db.Where("slug = ?", category).Take(&fileCategory).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
-			return "", nil, exception.ErrorTextStorageCategoryNotFound
+			return "", nil, exception.ErrorTextStorageCategoryNotFound, nil
 		}
-		return "", nil, err
+		return "", nil, err, nil
 	}
 
 	fileMimeTypes := strings.Split(fileCategory.MimeTypes, ",")
 	fileAllowed = false
 	for _, v := range fileMimeTypes {
+		fmt.Println(fileType)
+		fmt.Println(v)
 		if strings.HasPrefix(fileType, v) {
 			fileAllowed = true
 		}
 	}
 	if !fileAllowed {
-		return "", nil, exception.ErrorTextUploadInvalidFileType
+		return "", nil, exception.ErrorTextStorageUploadInvalidFileType, fmt.Sprintf("Type:%s", fileCategory.MimeTypes)
 	}
 
 	fileOriginalName := file.Filename
@@ -83,7 +85,7 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 	fileMetaData := minio.PutObjectOptions{ContentType: fileType, CacheControl: cacheControl, UserMetadata: userMetaData}
 	_, err = c.client.PutObject(context.Background(), c.bucket, filePath, fileBytes, fileSize, fileMetaData)
 	if err != nil {
-		return "", nil, err
+		return "", nil, err, nil
 	}
 
 	fileEntity.CategoryUUID = fileCategory.UUID
@@ -94,10 +96,10 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 	fileEntity.Path = filePath
 	err = c.db.Create(&fileEntity).Error
 	if err != nil {
-		return "", nil, err
+		return "", nil, err, nil
 	}
 
-	return fileEntity.UUID, nil, nil
+	return fileEntity.UUID, nil, nil, nil
 }
 
 // GetFile gets file from minio server and return signed URL.

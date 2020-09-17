@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"go-rest-skeleton/infrastructure/storage"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/util"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -68,7 +69,7 @@ func TestUploadFile_Success(t *testing.T) {
 			t.Fatalf("want non error, got %#v", errGetFile)
 		}
 
-		fileName, _, errException := storageService.Storage.UploadFile(file, "avatar")
+		fileName, _, errException, _ := storageService.Storage.UploadFile(file, "avatar")
 		if errException != nil {
 			t.Fatalf("want non error, got %#v", errException)
 		}
@@ -83,7 +84,7 @@ func TestUploadFile_Success(t *testing.T) {
 	c.Request, _ = http.NewRequest("POST", "/upload", requestBody)
 	c.Request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 	r.ServeHTTP(w, c.Request)
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 
 	assert.NotNil(t, response["data"])
 }
@@ -139,7 +140,7 @@ func TestGetFile_Success(t *testing.T) {
 			t.Fatalf("want non error, got %#v", errGetFile)
 		}
 
-		fileName, _, errException := storageService.Storage.UploadFile(file, "avatar")
+		fileName, _, errException, _ := storageService.Storage.UploadFile(file, "avatar")
 		if errException != nil {
 			t.Fatalf("want non error, got %#v", errException)
 		}
@@ -154,7 +155,7 @@ func TestGetFile_Success(t *testing.T) {
 	c.Request, _ = http.NewRequest("POST", "/upload", requestBody)
 	c.Request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 	r.ServeHTTP(w, c.Request)
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 
 	fileUUID := response["data"].(string)
 	url, errGetURL := storageService.Storage.GetFile(fileUUID)

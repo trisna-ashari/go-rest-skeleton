@@ -7,7 +7,8 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
-	"go-rest-skeleton/infrastructure/util"
+	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/util"
 	"go-rest-skeleton/tests/mock"
 	"log"
 	"net/http"
@@ -59,7 +60,7 @@ func TestSaveUser_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
@@ -121,7 +122,7 @@ func TestSaveUser_InvalidData(t *testing.T) {
 		r.ServeHTTP(w, req)
 
 		validationErr := make(map[string]string)
-		response := util.ResponseDecoder(w.Body)
+		response := json_formatter.ResponseDecoder(w.Body)
 		data, _ := json.Marshal(response["data"])
 
 		err = json.Unmarshal(data, &validationErr)
@@ -182,7 +183,7 @@ func TestUpdateUser_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
@@ -234,7 +235,7 @@ func TestGetUser_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
@@ -285,7 +286,7 @@ func TestGetUsers_Success(t *testing.T) {
 	}
 	r.ServeHTTP(w, req)
 
-	response := util.ResponseDecoder(w.Body)
+	response := json_formatter.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 	meta, _ := json.Marshal(response["meta"])
 

@@ -60,9 +60,10 @@ func (s *Users) SaveUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	validateErr := userEntity.ValidateSaveUser(c)
+	validateErr := userEntity.ValidateSaveUser()
 	if len(validateErr) > 0 {
-		c.Set("data", validateErr)
+		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -115,9 +116,10 @@ func (s *Users) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	validateErr := userEntity.ValidateUpdateUser(c)
+	validateErr := userEntity.ValidateUpdateUser()
 	if len(validateErr) > 0 {
-		c.Set("data", validateErr)
+		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -279,8 +281,14 @@ func (s *Users) UpdateAvatar(c *gin.Context) {
 		return
 	}
 	var userEntity entity.User
-	avatarData, _, errException := s.ss.UploadFile(avatar, fileCategory)
+	avatarData, _, errException, errArgs := s.ss.UploadFile(avatar, fileCategory)
 	if errException != nil {
+		if errors.Is(errException, exception.ErrorTextStorageUploadInvalidSize) {
+			c.Set("args", errArgs)
+		}
+		if errors.Is(errException, exception.ErrorTextStorageUploadInvalidFileType) {
+			c.Set("args", errArgs)
+		}
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
 		return
 	}

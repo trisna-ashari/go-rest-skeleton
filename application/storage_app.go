@@ -14,12 +14,12 @@ var _ StorageAppInterface = &storageApp{}
 
 // StorageAppInterface is an interface.
 type StorageAppInterface interface {
-	UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error)
+	UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{})
 	GetFile(UUID string) (interface{}, error)
 }
 
 // UploadFile is an implementation of method UploadFile.
-func (s storageApp) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error) {
+func (s storageApp) UploadFile(file *multipart.FileHeader, category string) (string, map[string]string, error, interface{}) {
 	return s.ss.UploadFile(file, category)
 }
 
