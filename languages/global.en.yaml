@@ -10,11 +10,26 @@ api:
         forbidden: "Forbidden"
         unprocessable_entity: "Unprocessable Entity"
         file_too_large: "File Too Large"
-        field_is_required: "Field {{.Field}} Is Required"
         per_page: "Each Request Maximum is {{.Max}} Records Per Page"
       role:
         not_found: "Role Not found"
+      storage:
+        category:
+          not_found: "Category Not Found"
+        file:
+          not_found: "File Not Found"
+          cannot_open_file: "Cannot Open File"
+          invalid_file_size: "File Size Must Be Less Than {{.Size}} MB"
+          invalid_file_type: "Allowed File Types Are: {{.Type}}"
       user:
+        field_first_name_is_required: "Field First Name Is Required"
+        field_last_name_is_required: "Field Last Name Is Required"
+        field_email_is_required: "Field Email Is Required"
+        field_phone_is_required: "Field Phone Is Required"
+        field_password_is_required: "Field Password Is Required"
+        field_new_password_is_required: "Field New Password Is Required"
+        field_confirm_password_is_required: "Field Confirm Password Is Required"
+        field_new_and_confirm_password_does_not_match: "Field New Password And Confirm Password Does Not Match"
         not_found: "User Not Found"
         invalid_email: "Please Provide Valid Email"
         email_not_registered: "Email Not Registered"

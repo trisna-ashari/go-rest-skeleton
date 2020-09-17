@@ -10,11 +10,26 @@ api:
         forbidden: "Dilarang"
         unprocessable_entity: "Permintaan Tidak Dapat Diproses"
         file_too_large: "Ukuran File Terlalu Besar"
-        field_is_required: "Isian {{.Field}} Wajib Diisi"
         per_page: "Setiap Pemintaan Dibatasi Maksimum {{.Max}} Per Halaman"
       role:
         not_found: "Role Tidak Ditemukan"
+      storage:
+        category:
+          not_found: "Kategori Tidak Ditemukan"
+        file:
+          not_found: "File Tidak Ditemukan"
+          cannot_open_file: "File Tidak Dapat Dibuka"
+          invalid_file_size: "Ukuran File Tidak Boleh Lebih Dari {{.Size}} MB"
+          invalid_file_type: "Jenis File Yang Diperbolehkan: {{.Type}}"
       user:
+        field_first_name_is_required: "Isian Nama Awal Wajib Diisi"
+        field_last_name_is_required: "Isian Nama Akhir Wajib Diisi"
+        field_email_is_required: "Isian Alamat Email Wajib Diisi"
+        field_phone_is_required: "Isian Nomor HP Wajib Diisi"
+        field_password_is_required: "Isian Kata Sandi Wajib Diisi"
+        field_new_password_is_required: "Isian Kata Sandi Baru Wajib Diisi"
+        field_confirm_password_is_required: "Isian Konfirmasi Kata Sandi Wajib Diisi"
+        field_new_and_confirm_password_does_not_match: "Isian Kata Sandi Baru dan Konfirmasi Kata Sandi Tidak Cocok"
         not_found: "User Tidak Ditemukan"
         invalid_email: "Email Tidak Valid"
         email_not_registered: "Email Tidak Terdaftar"
