@@ -1,4 +1,4 @@
-package json_formatter
+package encoder
 
 import (
 	"bytes"

@@ -1,7 +1,7 @@
-package json_formatter_test
+package encoder_test
 
 import (
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +19,7 @@ func TestPrettyJSONWithoutIndent(t *testing.T) {
 		Data:    nil,
 		Message: "OK",
 	}
-	json := json_formatter.PrettyJSONWithoutIndent(data)
+	json := encoder.PrettyJSONWithoutIndent(data)
 	expectedJSON := "{\"code\":200,\"data\":null,\"message\":\"OK\"}\n"
 	assert.Equal(t, expectedJSON, json)
 }
@@ -30,7 +30,7 @@ func TestPrettyJSONWithIndent(t *testing.T) {
 		Data:    nil,
 		Message: "OK",
 	}
-	json := json_formatter.PrettyJSONWithIndent(data)
+	json := encoder.PrettyJSONWithIndent(data)
 	expectedJSON := "{\n\t\"code\": 200,\n\t\"data\": null,\n\t\"message\": \"OK\"\n}\n"
 	assert.Equal(t, expectedJSON, json)
 }
