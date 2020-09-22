@@ -25,8 +25,8 @@ func NewForgotPassword(
 		Name string
 		URL  string
 	}{
-		Name: receiver.FirstName,
-		URL:  "http://trivaapps.com" + options.URLPath,
+		Name: receiver.Name,
+		URL:  "http://trivaapps.com/" + options.URLPath,
 	}
 
 	return &ForgotPassword{

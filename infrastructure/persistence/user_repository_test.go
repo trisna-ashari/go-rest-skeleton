@@ -24,8 +24,7 @@ func TestSaveUser_Success(t *testing.T) {
 	var userFaker = entity.UserFaker{}
 	_ = faker.FakeData(&userFaker)
 	user.Email = userFaker.Email
-	user.FirstName = userFaker.FirstName
-	user.LastName = userFaker.LastName
+	user.Name = userFaker.Name
 	user.Password = userFaker.Password
 	user.Phone = userFaker.Phone
 
@@ -34,8 +33,7 @@ func TestSaveUser_Success(t *testing.T) {
 	u, _, errSave := repo.SaveUser(&user)
 	assert.NoError(t, errSave)
 	assert.EqualValues(t, u.Email, userFaker.Email)
-	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
-	assert.EqualValues(t, u.LastName, userFaker.LastName)
+	assert.EqualValues(t, u.Name, userFaker.Name)
 	assert.EqualValues(t, u.Phone, userFaker.Phone)
 	assert.NotEqual(t, u.Password, userFaker.Password)
 }
@@ -54,15 +52,13 @@ func TestUpdateUser_Success(t *testing.T) {
 
 	repo := persistence.NewUserRepository(conn)
 	userData := entity.User{
-		FirstName: "Updated " + userFaker.FirstName,
-		LastName:  "Updated " + userFaker.LastName,
-		Email:     "Updated " + userFaker.Email,
+		Name:  "Updated " + userFaker.Name,
+		Email: "Updated " + userFaker.Email,
 	}
 	u, _, errUpdate := repo.UpdateUser(user.UUID, &userData)
 
 	assert.NoError(t, errUpdate)
-	assert.EqualValues(t, u.FirstName, "Updated "+userFaker.FirstName)
-	assert.EqualValues(t, u.LastName, "Updated "+userFaker.LastName)
+	assert.EqualValues(t, u.Name, "Updated "+userFaker.Name)
 	assert.EqualValues(t, u.Email, "Updated "+userFaker.Email)
 }
 
@@ -99,8 +95,7 @@ func TestGetUser_Success(t *testing.T) {
 
 	assert.NoError(t, errGet)
 	assert.EqualValues(t, u.Email, userFaker.Email)
-	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
-	assert.EqualValues(t, u.LastName, userFaker.LastName)
+	assert.EqualValues(t, u.Name, userFaker.Name)
 	assert.EqualValues(t, u.Phone, userFaker.Phone)
 }
 
@@ -146,8 +141,7 @@ func TestGetUserByEmailAndPassword_Success(t *testing.T) {
 
 	assert.NoError(t, errGet)
 	assert.EqualValues(t, u.Email, userFaker.Email)
-	assert.EqualValues(t, u.FirstName, userFaker.FirstName)
-	assert.EqualValues(t, u.LastName, userFaker.LastName)
+	assert.EqualValues(t, u.Name, userFaker.Name)
 	assert.EqualValues(t, u.Phone, userFaker.Phone)
 }
 

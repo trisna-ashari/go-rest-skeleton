@@ -9,8 +9,15 @@ type userApp struct {
 	us repository.UserRepository
 }
 
+type userAuthApp struct {
+	us repository.UserRepository
+}
+
 // userApp implement the UserAppInterface.
 var _ UserAppInterface = &userApp{}
+
+// userAuthApp implement the UserAuthAppInterface.
+var _ UserAuthAppInterface = &userApp{}
 
 // UserAppInterface is an interface.
 type UserAppInterface interface {
@@ -24,6 +31,14 @@ type UserAppInterface interface {
 	GetUserByEmail(*entity.User) (*entity.User, map[string]string, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUserAvatar(string, *entity.User) (*entity.User, map[string]string, error)
+}
+
+type UserAuthAppInterface interface {
+	UpdateUser(string, *entity.User) (*entity.User, map[string]string, error)
+	GetUser(UUID string) (*entity.User, error)
+	GetUserWithRoles(UUID string) (*entity.User, error)
+	GetUserByEmail(*entity.User) (*entity.User, map[string]string, error)
+	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
 }
 
 // SaveUser is an implementation of method SaveUser.

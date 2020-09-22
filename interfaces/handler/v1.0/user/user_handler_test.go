@@ -7,7 +7,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"go-rest-skeleton/pkg/util"
 	"go-rest-skeleton/tests/mock"
 	"log"
@@ -30,47 +30,45 @@ func TestSaveUser_Success(t *testing.T) {
 	var storageApp mock.StorageAppInterface
 	userHandler := NewUsers(&userApp, &storageApp)
 	userJSON := `{
-		"first_name": "Example",
-		"last_name": "User",
+		"name": "Example",
 		"email": "example@test.com",
-		"phone": "0123456789",
+		"phone": "+6285725833220",
 		"password": "password"
 	}`
 	UUID := uuid.New().String()
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.POST("/users", userHandler.SaveUser)
 
 	userApp.SaveUserFn = func(user *entity.User) (*entity.User, map[string]string, error) {
 		return &entity.User{
-			UUID:      UUID,
-			FirstName: "Example",
-			LastName:  "User",
-			Email:     "example@test.com",
-			Phone:     "0123456789",
+			UUID:  UUID,
+			Name:  "Example",
+			Email: "example@test.com",
+			Phone: "+6285725833220",
 		}, nil, nil
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "/api/v1/external/users", bytes.NewBufferString(userJSON))
+	var err error
+	c.Request, err = http.NewRequest(http.MethodPost, "/api/v1/external/users", bytes.NewBufferString(userJSON))
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
 
 	assert.Equal(t, w.Code, http.StatusCreated)
 	assert.EqualValues(t, userData.UUID, UUID)
-	assert.EqualValues(t, userData.FirstName, "Example")
-	assert.EqualValues(t, userData.LastName, "User")
+	assert.EqualValues(t, userData.Name, "Example")
 	assert.EqualValues(t, userData.Email, "example@test.com")
-	assert.EqualValues(t, userData.Phone, "0123456789")
+	assert.EqualValues(t, userData.Phone, "+6285725833220")
 }
 
 func TestSaveUser_InvalidData(t *testing.T) {
@@ -79,19 +77,19 @@ func TestSaveUser_InvalidData(t *testing.T) {
 		statusCode int
 	}{
 		{
-			inputJSON:  `{"first_name": "", "last_name": "User","email": "example@test.com","password": "password"}`,
+			inputJSON:  `{"name": "", "email": "example@test.com","password": "password"}`,
 			statusCode: 422,
 		},
 		{
-			inputJSON:  `{"first_name": "victor", "last_name": "","email": "example@test.com","password": "password"}`,
+			inputJSON:  `{"name": "victor", "email": "example@test.com","password": "password"}`,
 			statusCode: 422,
 		},
 		{
-			inputJSON:  `{"first_name": "victor", "last_name": "User","email": "","password": "password"}`,
+			inputJSON:  `{"name": "victor", "email": "","password": "password"}`,
 			statusCode: 422,
 		},
 		{
-			inputJSON:  `{"first_name": "victor", "last_name": "User","email": "example@test.com","password": ""}`,
+			inputJSON:  `{"name": "victor", "email": "example@test.com","password": ""}`,
 			statusCode: 422,
 		},
 		{
@@ -99,7 +97,7 @@ func TestSaveUser_InvalidData(t *testing.T) {
 			statusCode: 422,
 		},
 		{
-			inputJSON:  `{"first_name": 1234, "last_name": "User","email": "example@test.com","password": "password"}`,
+			inputJSON:  `{"name": 1234, "email": "example@test.com","password": "password"}`,
 			statusCode: 422,
 		},
 	}
@@ -111,18 +109,19 @@ func TestSaveUser_InvalidData(t *testing.T) {
 
 		gin.SetMode(gin.TestMode)
 		w := httptest.NewRecorder()
-		_, r := gin.CreateTestContext(w)
+		c, r := gin.CreateTestContext(w)
 		v1 := r.Group("/api/v1/external/")
 		v1.POST("/users", userHandler.SaveUser)
 
-		req, err := http.NewRequest(http.MethodPost, "/api/v1/external/users", bytes.NewBufferString(v.inputJSON))
+		var err error
+		c.Request, err = http.NewRequest(http.MethodPost, "/api/v1/external/users", bytes.NewBufferString(v.inputJSON))
 		if err != nil {
 			t.Errorf("this is the error: %v\n", err)
 		}
-		r.ServeHTTP(w, req)
+		r.ServeHTTP(w, c.Request)
 
 		validationErr := make(map[string]string)
-		response := json_formatter.ResponseDecoder(w.Body)
+		response := encoder.ResponseDecoder(w.Body)
 		data, _ := json.Marshal(response["data"])
 
 		err = json.Unmarshal(data, &validationErr)
@@ -130,19 +129,6 @@ func TestSaveUser_InvalidData(t *testing.T) {
 			t.Errorf("error unmarshalling error %s\n", err)
 		}
 		assert.Equal(t, w.Code, v.statusCode)
-
-		if validationErr["email"] != "" {
-			assert.Equal(t, validationErr["email"], "Field email is required")
-		}
-		if validationErr["first_name"] != "" {
-			assert.Equal(t, validationErr["first_name"], "Field first_name is required")
-		}
-		if validationErr["last_name"] != "" {
-			assert.Equal(t, validationErr["last_name"], "Field last_name is required")
-		}
-		if validationErr["password"] != "" {
-			assert.Equal(t, validationErr["password"], "Field password is required")
-		}
 	}
 }
 
@@ -153,47 +139,45 @@ func TestUpdateUser_Success(t *testing.T) {
 	var storageApp mock.StorageAppInterface
 	userHandler := NewUsers(&userApp, &storageApp)
 	userJSON := `{
-		"first_name": "Example",
-		"last_name": "User",
+		"name": "Example",
 		"email": "example@test.com",
-		"phone": "0123456789",
+		"phone": "+6285725833220",
 		"password": "password"
 	}`
 	UUID := uuid.New().String()
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.PUT("/users/:uuid", userHandler.UpdateUser)
 
 	userApp.UpdateUserFn = func(UUID string, user *entity.User) (*entity.User, map[string]string, error) {
 		return &entity.User{
-			UUID:      UUID,
-			FirstName: "Example",
-			LastName:  "User",
-			Email:     "example@test.com",
-			Phone:     "0123456789",
+			UUID:  UUID,
+			Name:  "Example",
+			Email: "example@test.com",
+			Phone: "+6285725833220",
 		}, nil, nil
 	}
 
-	req, err := http.NewRequest(http.MethodPut, "/api/v1/external/users/"+UUID, bytes.NewBufferString(userJSON))
+	var err error
+	c.Request, err = http.NewRequest(http.MethodPut, "/api/v1/external/users/"+UUID, bytes.NewBufferString(userJSON))
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
 
 	assert.Equal(t, w.Code, http.StatusOK)
 	assert.EqualValues(t, userData.UUID, UUID)
-	assert.EqualValues(t, userData.FirstName, "Example")
-	assert.EqualValues(t, userData.LastName, "User")
+	assert.EqualValues(t, userData.Name, "Example")
 	assert.EqualValues(t, userData.Email, "example@test.com")
-	assert.EqualValues(t, userData.Phone, "0123456789")
+	assert.EqualValues(t, userData.Phone, "+6285725833220")
 }
 
 // TestGetUser_Success Test.
@@ -211,15 +195,14 @@ func TestGetUser_Success(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.GET("/users/:uuid", userHandler.GetUser)
 
 	userApp.GetUserFn = func(string) (*entity.User, error) {
 		return &entity.User{
 			UUID:       UUID,
-			FirstName:  "Example",
-			LastName:   "User",
+			Name:       "Example",
 			Email:      "example@test.com",
 			AvatarUUID: UUID,
 		}, nil
@@ -229,21 +212,21 @@ func TestGetUser_Success(t *testing.T) {
 		return UUID, nil
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "/api/v1/external/users/"+UUID, nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/external/users/"+UUID, nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &userData)
 
 	assert.Equal(t, w.Code, http.StatusOK)
 	assert.EqualValues(t, userData.UUID, UUID)
-	assert.EqualValues(t, userData.FirstName, "Example")
-	assert.EqualValues(t, userData.LastName, "User")
+	assert.EqualValues(t, userData.Name, "Example")
 	assert.EqualValues(t, userData.Email, "example@test.com")
 }
 
@@ -258,35 +241,34 @@ func TestGetUsers_Success(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.GET("/users", userHandler.GetUsers)
 	userApp.GetUsersFn = func(params *repository.Parameters) ([]entity.User, interface{}, error) {
 		users := []entity.User{
 			{
-				UUID:      UUID,
-				FirstName: "Example 1",
-				LastName:  "User 1",
-				Email:     "example1@test.com",
+				UUID:  UUID,
+				Name:  "Example 1",
+				Email: "example1@test.com",
 			},
 			{
-				UUID:      UUID,
-				FirstName: "Example 2",
-				LastName:  "User 2",
-				Email:     "example2@test.com",
+				UUID:  UUID,
+				Name:  "Example 2",
+				Email: "example2@test.com",
 			},
 		}
-		meta := repository.NewMeta(params, len(users))
+		meta := repository.NewMeta(params, int64(len(users)))
 		return users, meta, nil
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "/api/v1/external/users", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/external/users", nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 	meta, _ := json.Marshal(response["meta"])
 
@@ -309,7 +291,7 @@ func TestDeleteUser_Success(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.DELETE("/users/:uuid", userHandler.DeleteUser)
 
@@ -317,11 +299,12 @@ func TestDeleteUser_Success(t *testing.T) {
 		return nil
 	}
 
-	req, err := http.NewRequest(http.MethodDelete, "/api/v1/external/users/"+UUID, nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodDelete, "/api/v1/external/users/"+UUID, nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, w.Code, http.StatusOK)
 }
@@ -335,7 +318,7 @@ func TestDeleteUser_Failed_UserNotFound(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/external/")
 	v1.DELETE("/users/:uuid", userHandler.DeleteUser)
 
@@ -343,11 +326,12 @@ func TestDeleteUser_Failed_UserNotFound(t *testing.T) {
 		return exception.ErrorTextUserNotFound
 	}
 
-	req, err := http.NewRequest(http.MethodDelete, "/api/v1/external/users/"+UUID, nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodPost, "/api/v1/external/users/"+UUID, nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, w.Code, http.StatusNotFound)
 }

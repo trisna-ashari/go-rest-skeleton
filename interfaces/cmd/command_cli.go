@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"go-rest-skeleton/infrastructure/persistence"
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"go-rest-skeleton/pkg/security"
 	"log"
 
@@ -21,7 +21,7 @@ func NewCommand(dbService *persistence.Repositories) []*cli.Command {
 				if err != nil {
 					log.Println(err)
 				}
-				fmt.Println(json_formatter.PrettyJSONWithIndent(secretPriPubKey))
+				fmt.Println(encoder.PrettyJSONWithIndent(secretPriPubKey))
 				return nil
 			},
 		},
