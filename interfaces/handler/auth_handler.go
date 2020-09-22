@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
@@ -8,7 +9,9 @@ import (
 	"go-rest-skeleton/infrastructure/message/success"
 	"go-rest-skeleton/infrastructure/notify"
 	"go-rest-skeleton/infrastructure/notify/notification"
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/interfaces/service"
+	"go-rest-skeleton/pkg/response"
+	"go-rest-skeleton/pkg/security"
 	"go-rest-skeleton/pkg/translation"
 	"net/http"
 	"os"
@@ -19,7 +22,7 @@ import (
 
 // Authenticate is a struct to store interfaces.
 type Authenticate struct {
-	us application.UserAppInterface
+	aa service.AuthService
 	rd authorization.AuthInterface
 	tk authorization.TokenInterface
 	ni application.NotifyAppInterface
@@ -27,12 +30,12 @@ type Authenticate struct {
 
 // NewAuthenticate will initialize authenticate interface for login handler.
 func NewAuthenticate(
-	uApp application.UserAppInterface,
+	aa service.AuthService,
 	rd authorization.AuthInterface,
 	tk authorization.TokenInterface,
 	ni application.NotifyAppInterface) *Authenticate {
 	return &Authenticate{
-		us: uApp,
+		aa: aa,
 		rd: rd,
 		tk: tk,
 		ni: ni,
@@ -47,11 +50,11 @@ func NewAuthenticate(
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/profile [get]
 // Profile will return detail user of current logged in user.
 func (au *Authenticate) Profile(c *gin.Context) {
@@ -61,9 +64,9 @@ func (au *Authenticate) Profile(c *gin.Context) {
 		return
 	}
 
-	userData, _ := au.us.GetUserWithRoles(UUID.(string))
+	userData, _ := au.aa.GetUserWithRoles(UUID.(string))
 
-	middleware.Formatter(c, userData.DetailUser(), success.AuthSuccessfullyGetProfile, nil)
+	response.NewSuccess(c, userData.DetailUser(), success.AuthSuccessfullyGetProfile).JSON()
 }
 
 // @Summary Authentication login
@@ -75,12 +78,12 @@ func (au *Authenticate) Profile(c *gin.Context) {
 // @Param Set-Request-Id header string false "Request id"
 // @Param email formData string true "User email"
 // @Param password formData string true "User password"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 422 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 422 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/login [post]
 // Login will handle login request.
 func (au *Authenticate) Login(c *gin.Context) {
@@ -93,12 +96,12 @@ func (au *Authenticate) Login(c *gin.Context) {
 	}
 	validateErr := user.ValidateLogin()
 	if len(validateErr) > 0 {
-		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
 		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	u, _, errException := au.us.GetUserByEmailAndPassword(user)
+	u, _, errException := au.aa.GetUserByEmailAndPassword(user)
 	if errException != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, errException)
 		return
@@ -118,7 +121,7 @@ func (au *Authenticate) Login(c *gin.Context) {
 	userData["access_token"] = ts.AccessToken
 	userData["refresh_token"] = ts.RefreshToken
 
-	middleware.Formatter(c, userData, success.AuthSuccessfullyLogin, nil)
+	response.NewSuccess(c, userData, success.AuthSuccessfullyLogin).JSON()
 }
 
 // @Summary Authentication logout
@@ -128,11 +131,11 @@ func (au *Authenticate) Login(c *gin.Context) {
 // @Security JWTAuth
 // @Param Accept-Language header string false "Language code" Enums(en, id) default(id)
 // @Param Set-Request-Id header string false "Request id"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/logout [post]
 // Logout will handle logout request.
 func (au *Authenticate) Logout(c *gin.Context) {
@@ -149,7 +152,7 @@ func (au *Authenticate) Logout(c *gin.Context) {
 		return
 	}
 
-	middleware.Formatter(c, nil, success.AuthSuccessfullyLogout, nil)
+	response.NewSuccess(c, nil, success.AuthSuccessfullyLogout).JSON()
 }
 
 // @Summary Authentication refresh
@@ -159,11 +162,11 @@ func (au *Authenticate) Logout(c *gin.Context) {
 // @Produce json
 // @Param Accept-Language header string false "Language code" Enums(en, id) default(id)
 // @Param refresh_token formData string true "Refresh token from /login"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 422 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 422 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/refresh [post]
 // Refresh will handle request to generate new pairs of refresh and access tokens.
 func (au *Authenticate) Refresh(c *gin.Context) {
@@ -239,7 +242,7 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 		"refresh_token": ts.RefreshToken,
 	}
 
-	middleware.Formatter(c, tokens, success.AuthSuccessfullyRefreshToken, nil)
+	response.NewSuccess(c, tokens, success.AuthSuccessfullyRefreshToken).JSON()
 }
 
 // @Summary Authentication forgot password
@@ -249,11 +252,11 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 // @Produce json
 // @Param Accept-Language header string false "Language code" Enums(en, id) default(id)
 // @Param email formData string true "Email address"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 422 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 422 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/password/forgot [post]
 // ForgotPassword will handle request to send email contain link to reset password.
 func (au *Authenticate) ForgotPassword(c *gin.Context) {
@@ -265,19 +268,25 @@ func (au *Authenticate) ForgotPassword(c *gin.Context) {
 
 	validateErr := user.ValidateForgotPassword()
 	if len(validateErr) > 0 {
-		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
 		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
 
-	userData, _, errException := au.us.GetUserByEmail(&user)
+	userData, _, errException := au.aa.GetUserByEmail(&user)
 	if errException != nil {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
 		return
 	}
 
-	nOptions := notify.NotificationOptions{URLPath: "token"}
+	forgotPasswordToken, _, errException := au.aa.CreateToken(userData)
+	if errException != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextAnErrorOccurred)
+		return
+	}
+
+	nOptions := notify.NotificationOptions{URLPath: forgotPasswordToken.Token}
 	nForgotPassword := notification.NewForgotPassword(userData, au.ni, translation.GetLanguage(c), nOptions)
 	err := nForgotPassword.Send()
 	if len(err) > 0 {
@@ -285,7 +294,7 @@ func (au *Authenticate) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	middleware.Formatter(c, nil, success.AuthSuccessfullyForgotPassword, nil)
+	response.NewSuccess(c, nil, success.AuthSuccessfullyForgotPassword).JSON()
 }
 
 // @Summary Authentication reset password
@@ -297,13 +306,78 @@ func (au *Authenticate) ForgotPassword(c *gin.Context) {
 // @Param token formData string true "Token from forgot password request"
 // @Param new_password formData string true "New password"
 // @Param confirm_password formData string true "Confirm password"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 422 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 422 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/password/reset/{token} [post]
 // ForgotPassword will handle request to set a new password.
 func (au *Authenticate) ResetPassword(c *gin.Context) {
-	middleware.Formatter(c, nil, success.AuthSuccessfullyResetPassword, nil)
+	var userForgotPassword entity.UserForgotPassword
+	var userResetPassword entity.UserResetPassword
+	if err := c.ShouldBindUri(&userForgotPassword.Token); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextBadRequest)
+		return
+	}
+
+	if err := c.ShouldBind(&userResetPassword); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, exception.ErrorTextBadRequest)
+		return
+	}
+
+	token := c.Param("token")
+	tokenForgotPassword, err := au.aa.GetToken(token)
+	if err != nil {
+		if errors.Is(err, exception.ErrorTextUserForgotPasswordTokenNotFound) {
+			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserForgotPasswordTokenNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	user, err := au.aa.GetUser(tokenForgotPassword.UserUUID)
+	if err != nil {
+		if errors.Is(err, exception.ErrorTextUserNotFound) {
+			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextUserForgotPasswordTokenNotFound)
+		return
+	}
+
+	validateErr := userResetPassword.ValidateResetPassword()
+	if len(validateErr) > 0 {
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
+	hashPassword, errHash := security.Hash(userResetPassword.NewPassword)
+	if errHash != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	user.Password = string(hashPassword)
+	_, errDesc, errException := au.aa.UpdateUser(user.UUID, user)
+	if errException != nil {
+		c.Set("data", errDesc)
+		if errors.Is(errException, exception.ErrorTextUserNotFound) {
+			_ = c.AbortWithError(http.StatusNotFound, errException)
+			return
+		}
+		if errors.Is(errException, exception.ErrorTextUnprocessableEntity) {
+			_ = c.AbortWithError(http.StatusUnprocessableEntity, errException)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
+		return
+	}
+
+	_ = au.aa.DeactivateToken(tokenForgotPassword.UUID)
+
+	response.NewSuccess(c, nil, success.AuthSuccessfullyResetPassword).JSON()
 }
