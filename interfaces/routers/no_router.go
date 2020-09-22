@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func roRoutes(e *gin.Engine) {
+func noRoutes(e *gin.Engine) {
 	e.NoRoute(func(c *gin.Context) {
 		err := exception.ErrorTextNotFound
 		_ = c.AbortWithError(http.StatusNotFound, err)
