@@ -8,10 +8,10 @@ import (
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/infrastructure/message/success"
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 	"net/http"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,7 +59,7 @@ func (s *Roles) SaveRole(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusCreated)
-	middleware.Formatter(c, newRole.DetailRole(), success.RoleSuccessfullyCreateRole, nil)
+	response.NewSuccess(c, newRole.DetailRole(), success.RoleSuccessfullyCreateRole).JSON()
 }
 
 // UpdateUser is a function uses to handle create a new user.
@@ -97,7 +97,7 @@ func (s *Roles) UpdateRole(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
-	middleware.Formatter(c, updatedRole.DetailRole(), success.RoleSuccessfullyUpdateRole, nil)
+	response.NewSuccess(c, updatedRole.DetailRole(), success.RoleSuccessfullyUpdateRole).JSON()
 }
 
 // DeleteRole is a function uses to handle delete role by UUID.
@@ -118,7 +118,7 @@ func (s *Roles) DeleteRole(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, nil, success.RoleSuccessfullyDeleteRole, nil)
+	response.NewSuccess(c, nil, success.RoleSuccessfullyDeleteRole).JSON()
 }
 
 // GetRoles is a function uses to handle get role list.
@@ -131,7 +131,7 @@ func (s *Roles) GetRoles(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, roles.DetailRoles(), success.RoleSuccessfullyGetRoleList, meta)
+	response.NewSuccess(c, roles.DetailRoles(), success.RoleSuccessfullyGetRoleList).WithMeta(meta).JSON()
 }
 
 // GetRole is a function uses to handle get role detail by UUID.
@@ -145,12 +145,12 @@ func (s *Roles) GetRole(c *gin.Context) {
 	UUID := c.Param("uuid")
 	role, err := s.ur.GetRole(UUID)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserNotFound)
 			return
 		}
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, role.DetailRole(), success.RoleSuccessfullyGetRoleDetail, nil)
+	response.NewSuccess(c, role.DetailRole(), success.RoleSuccessfullyGetRoleDetail).JSON()
 }

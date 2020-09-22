@@ -3,19 +3,21 @@ package entity
 import (
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // Role represent schema of table roles.
 type Role struct {
-	UUID           string           `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
-	Name           string           `gorm:"size:100;not null;" json:"name"`
-	CreatedAt      time.Time        `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	CreatedBy      int              `gorm:"default:null" json:"created_by,omitempty"`
-	UpdatedAt      time.Time        `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
-	UpdatedBy      int              `gorm:"default:null" json:"updated_by,omitempty"`
-	DeletedAt      *time.Time       `json:"deleted_at,omitempty"`
+	UUID           string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
+	Name           string    `gorm:"size:100;not null;" json:"name" form:"name"`
+	CreatedAt      time.Time `json:"created_at"`
+	CreatedBy      int       `gorm:"default:null" json:"created_by,omitempty"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	UpdatedBy      int       `gorm:"default:null" json:"updated_by,omitempty"`
+	DeletedAt      gorm.DeletedAt
 	DeletedBy      int              `gorm:"default:null" json:"deleted_by,omitempty"`
 	RolePermission []RolePermission `gorm:"foreignKey:RoleUUID"`
 }
@@ -27,8 +29,13 @@ type RoleFaker struct {
 // Roles represent multiple role.
 type Roles []Role
 
-// BeforeSave handle uuid generation.
-func (r *Role) BeforeSave() error {
+// TableName return name of table.
+func (r *Role) TableName() string {
+	return "roles"
+}
+
+// BeforeCreate handle uuid generation.
+func (r *Role) BeforeCreate(tx *gorm.DB) error {
 	generateUUID := uuid.New()
 	if r.UUID == "" {
 		r.UUID = generateUUID.String()

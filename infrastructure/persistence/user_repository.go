@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // UserRepo is a struct to store db connection.
@@ -45,15 +45,19 @@ func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string,
 func (r *UserRepo) UpdateUser(uuid string, user *entity.User) (*entity.User, map[string]string, error) {
 	errDesc := map[string]string{}
 	userData := &entity.User{
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Phone:     user.Phone,
+		Name:  user.Name,
+		Email: user.Email,
+		Phone: user.Phone,
 	}
+
+	if user.Password != "" {
+		userData.Password = user.Password
+	}
+
 	err := r.db.First(&user, "uuid = ?", uuid).Updates(userData).Error
 	if err != nil {
 		//If record not found
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["uuid"] = exception.ErrorTextUserInvalidUUID.Error()
 			return nil, errDesc, exception.ErrorTextUserNotFound
 		}
@@ -72,7 +76,7 @@ func (r *UserRepo) DeleteUser(uuid string) error {
 	var user entity.User
 	err := r.db.Where("uuid = ?", uuid).Take(&user).Delete(&user).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return exception.ErrorTextUserNotFound
 		}
 		return err
@@ -85,7 +89,7 @@ func (r *UserRepo) GetUser(uuid string) (*entity.User, error) {
 	var user entity.User
 	err := r.db.Where("uuid = ?", uuid).Take(&user).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exception.ErrorTextUserNotFound
 		}
 		return nil, err
@@ -98,7 +102,7 @@ func (r *UserRepo) GetUserRoles(uuid string) ([]entity.UserRole, error) {
 	var roles []entity.UserRole
 	err := r.db.Preload("Role").Where("user_uuid = ?", uuid).Find(&roles).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exception.ErrorTextUserNotFound
 		}
 		return nil, err
@@ -111,7 +115,7 @@ func (r *UserRepo) GetUserWithRoles(uuid string) (*entity.User, error) {
 	var user entity.User
 	err := r.db.Preload("UserRoles.Role").Where("uuid = ?", uuid).Take(&user).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exception.ErrorTextUserNotFound
 		}
 		return nil, err
@@ -121,7 +125,7 @@ func (r *UserRepo) GetUserWithRoles(uuid string) (*entity.User, error) {
 
 // GetUsers will return user list.
 func (r *UserRepo) GetUsers(p *repository.Parameters) ([]entity.User, interface{}, error) {
-	var total int
+	var total int64
 	var users []entity.User
 	errTotal := r.db.Find(&users).Count(&total).Error
 	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&users).Error
@@ -141,7 +145,7 @@ func (r *UserRepo) GetUserByEmail(u *entity.User) (*entity.User, map[string]stri
 	errDesc := map[string]string{}
 	err := r.db.Where("email = ?", u.Email).Take(&user).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
 			return nil, errDesc, exception.ErrorTextUserEmailNotRegistered
 		}
@@ -157,7 +161,7 @@ func (r *UserRepo) GetUserByEmailAndPassword(u *entity.User) (*entity.User, map[
 	errDesc := map[string]string{}
 	err := r.db.Where("email = ?", u.Email).Take(&user).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
 			return nil, errDesc, exception.ErrorTextUserEmailNotRegistered
 		}
@@ -182,7 +186,7 @@ func (r *UserRepo) UpdateUserAvatar(uuid string, user *entity.User) (*entity.Use
 	}
 	err := r.db.First(&user, "uuid = ?", uuid).Updates(userData).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["uuid"] = exception.ErrorTextUserInvalidUUID.Error()
 			return nil, errDesc, exception.ErrorTextUserNotFound
 		}

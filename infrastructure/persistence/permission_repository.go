@@ -4,8 +4,7 @@ import (
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // PermissionRepo is a struct to store db connection.
@@ -42,6 +41,6 @@ func (p PermissionRepo) GetPermission(s string) (*entity.Permission, error) {
 }
 
 // GetPermissions will return a permission list.
-func (p PermissionRepo) GetPermissions(c *gin.Context) ([]entity.Permission, interface{}, error) {
+func (p PermissionRepo) GetPermissions(c *repository.Parameters) ([]entity.Permission, interface{}, error) {
 	panic("implement me")
 }

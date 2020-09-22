@@ -1,12 +1,13 @@
 package seeds
 
 import (
+	"errors"
 	"fmt"
 	"go-rest-skeleton/domain/entity"
 
 	"github.com/bxcodec/faker"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // userFactory is a function uses to create []seed.Seed.
@@ -20,15 +21,14 @@ func userFactory() []Seed {
 		}
 
 		user := &entity.User{
-			UUID:      a.UUID,
-			FirstName: a.FirstName,
-			LastName:  a.LastName,
-			Email:     a.Email,
-			Phone:     a.Phone,
-			Password:  a.Password,
+			UUID:     a.UUID,
+			Name:     a.Name,
+			Email:    a.Email,
+			Phone:    a.Phone,
+			Password: a.Password,
 		}
 		fakerFactories[i] = Seed{
-			Name: fmt.Sprintf("Create %s", a.FirstName),
+			Name: fmt.Sprintf("Create %s", a.Name),
 			Run: func(db *gorm.DB) error {
 				_, errDB := createUser(db, user)
 				return errDB
@@ -44,7 +44,7 @@ func createUser(db *gorm.DB, user *entity.User) (*entity.User, error) {
 	var userExists entity.User
 	err := db.Where("email = ?", user.Email).Take(&userExists).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err := db.Create(user).Error
 			if err != nil {
 				return user, err

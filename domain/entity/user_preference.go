@@ -2,6 +2,11 @@ package entity
 
 import (
 	"encoding/json"
+	"go-rest-skeleton/pkg/response"
+	"go-rest-skeleton/pkg/validator"
+	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 )
@@ -11,10 +16,17 @@ type UserPreference struct {
 	UUID       string           `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
 	UserUUID   string           `gorm:"size:36;not null;unique_index;" json:"user_uuid"`
 	Preference *json.RawMessage `gorm:"type:text;not null;" json:"preference"`
+	CreatedAt  time.Time        `json:"created_at"`
+	UpdatedAt  time.Time        `json:"updated_at"`
 }
 
-// BeforeSave handle uuid generation.
-func (up *UserPreference) BeforeSave() error {
+// TableName return name of table.
+func (up *UserPreference) TableName() string {
+	return "user_preferences"
+}
+
+// BeforeCreate handle uuid generation.
+func (up *UserPreference) BeforeCreate(tx *gorm.DB) error {
 	generateUUID := uuid.New()
 	if up.UUID == "" {
 		up.UUID = generateUUID.String()
@@ -76,4 +88,14 @@ func (up *UserPreference) BuildPatchUserPreference(preference *json.RawMessage) 
 		UserUUID:   up.UserUUID,
 		Preference: up.BuildPatchPreference(&preferenceDetail),
 	}
+}
+
+// ValidateUpdatePreference will validate update preference request.
+func (dup *DetailUserPreference) ValidateUpdatePreference() []response.ErrorForm {
+	validation := validator.New()
+	validation.
+		Set("language", dup.Language, validation.AddRule().Required().In("en", "id").Apply()).
+		Set("dark_mode", dup.DarkMode, validation.AddRule().Required().Apply())
+
+	return validation.Validate()
 }

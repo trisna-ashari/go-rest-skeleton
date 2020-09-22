@@ -2,8 +2,6 @@ package repository
 
 import (
 	"go-rest-skeleton/domain/entity"
-
-	"github.com/gin-gonic/gin"
 )
 
 // PermissionRepository is an interface.
@@ -12,5 +10,5 @@ type PermissionRepository interface {
 	UpdatePermission(*entity.Permission) (*entity.Permission, map[string]string)
 	DeletePermission(*entity.Permission) error
 	GetPermission(string) (*entity.Permission, error)
-	GetPermissions(c *gin.Context) ([]entity.Permission, interface{}, error)
+	GetPermissions(parameters *Parameters) ([]entity.Permission, interface{}, error)
 }

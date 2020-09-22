@@ -3,14 +3,18 @@ package persistence
 import (
 	"fmt"
 	"go-rest-skeleton/config"
-	"go-rest-skeleton/domain/entity"
+	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/domain/seeds"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm/logger"
 	"log"
+	"os"
+	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"    // for mysql driver (optional)
-	_ "github.com/jinzhu/gorm/dialects/postgres" // for postgres driver (optional)
+	_ "gorm.io/driver/mysql"    // for mysql driver (optional)
+	_ "gorm.io/driver/postgres" // for postgres driver (optional)
+	"gorm.io/gorm"
 )
 
 const (
@@ -20,13 +24,14 @@ const (
 
 // Repositories represent it self.
 type Repositories struct {
-	Permission      repository.PermissionRepository
-	Role            repository.RoleRepository
-	StorageFile     repository.StorageFileRepository
-	StorageCategory repository.StorageCategoryRepository
-	User            repository.UserRepository
-	UserPreference  repository.UserPreferenceRepository
-	DB              *gorm.DB
+	Permission         repository.PermissionRepository
+	Role               repository.RoleRepository
+	StorageFile        repository.StorageFileRepository
+	StorageCategory    repository.StorageCategoryRepository
+	User               repository.UserRepository
+	UserForgotPassword repository.UserForgotPasswordRepository
+	UserPreference     repository.UserPreferenceRepository
+	DB                 *gorm.DB
 }
 
 // NewDBConnection will initialize db connection.
@@ -51,11 +56,28 @@ func NewDBConnection(config config.DBConfig) (*gorm.DB, error) {
 		)
 	}
 
-	db, err := gorm.Open(config.DBDriver, dbURL)
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold: time.Second,
+			LogLevel:      logger.Info,
+			Colorful:      true,
+		},
+	)
+
+	gormConfig := &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
+	}
+
+	if config.DBLog {
+		gormConfig.Logger = newLogger
+	}
+
+	db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
+
 	if err != nil {
 		return nil, err
 	}
-	db.LogMode(config.DBLog)
 
 	return db, nil
 }
@@ -66,37 +88,31 @@ func NewDBService(config config.DBConfig) (*Repositories, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.LogMode(config.DBLog)
 
 	return &Repositories{
-		Permission:      NewPermissionRepository(db),
-		Role:            NewRoleRepository(db),
-		StorageFile:     NewStorageFileRepository(db),
-		StorageCategory: NewStorageCategoryRepository(db),
-		User:            NewUserRepository(db),
-		UserPreference:  NewUserPreferenceRepository(db),
-		DB:              db,
+		Permission:         NewPermissionRepository(db),
+		Role:               NewRoleRepository(db),
+		StorageFile:        NewStorageFileRepository(db),
+		StorageCategory:    NewStorageCategoryRepository(db),
+		User:               NewUserRepository(db),
+		UserForgotPassword: NewUserForgotPasswordRepository(db),
+		UserPreference:     NewUserPreferenceRepository(db),
+		DB:                 db,
 	}, nil
-}
-
-// Close will closes the database connection.
-func (s *Repositories) Close() error {
-	return s.DB.Close()
 }
 
 // AutoMigrate will migrate all tables.
 func (s *Repositories) AutoMigrate() error {
-	return s.DB.AutoMigrate(
-		&entity.Module{},
-		&entity.Permission{},
-		&entity.Role{},
-		&entity.RolePermission{},
-		&entity.StorageCategory{},
-		&entity.StorageFile{},
-		&entity.User{},
-		&entity.UserPreference{},
-		&entity.UserRole{},
-	).Error
+	var err error
+	entities := registry.CollectEntities()
+	for _, model := range entities {
+		err = s.DB.AutoMigrate(model.Entity)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return err
 }
 
 // Seeds will run all seeders.

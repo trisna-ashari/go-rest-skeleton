@@ -64,7 +64,7 @@ func NewParameters(c *gin.Context) *Parameters {
 }
 
 // NewMeta construct of metadata for response.
-func NewMeta(p *Parameters, total int) *Meta {
+func NewMeta(p *Parameters, total int64) *Meta {
 	return &Meta{
 		Page:    p.Page,
 		PerPage: p.PerPage,

@@ -1,8 +1,9 @@
 package seeds
 
 import (
-	"github.com/jinzhu/gorm"
 	"go-rest-skeleton/domain/entity"
+
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 )
@@ -13,12 +14,11 @@ type InitFactory struct {
 
 var (
 	user = &entity.User{
-		UUID:      uuid.New().String(),
-		FirstName: "Trisna",
-		LastName:  "Ashari",
-		Email:     "trisna.x2@gmail.com",
-		Phone:     "01234567890",
-		Password:  "123456",
+		UUID:     uuid.New().String(),
+		Name:     "Trisna Novi Ashari",
+		Email:    "trisna.x2@gmail.com",
+		Phone:    "01234567890",
+		Password: "123456",
 	}
 	role = &entity.Role{
 		UUID: uuid.New().String(),

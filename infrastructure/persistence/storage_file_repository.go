@@ -1,11 +1,12 @@
 package persistence
 
 import (
+	"errors"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // StorageFileRepo is a struct to store db connection.
@@ -35,7 +36,7 @@ func (r *StorageFileRepo) GetFile(uuid string) (*entity.StorageFile, error) {
 	var file entity.StorageFile
 	err := r.db.Where("uuid = ?", uuid).Take(&file).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exception.ErrorTextUserNotFound
 		}
 		return nil, err

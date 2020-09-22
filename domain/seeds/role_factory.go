@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go-rest-skeleton/domain/entity"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 
 	"github.com/google/uuid"
 )

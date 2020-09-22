@@ -1,7 +1,7 @@
 package seeds
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // Seed represent it self.

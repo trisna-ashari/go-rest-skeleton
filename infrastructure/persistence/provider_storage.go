@@ -4,7 +4,7 @@ import (
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/infrastructure/storage"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

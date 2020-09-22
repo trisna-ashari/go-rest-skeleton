@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/message/exception"
@@ -11,8 +12,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	"github.com/minio/minio-go/v7"
+	"gorm.io/gorm"
 )
 
 // MinioDriver represents it self.
@@ -57,7 +58,7 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 
 	err = c.db.Where("slug = ?", category).Take(&fileCategory).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", nil, exception.ErrorTextStorageCategoryNotFound, nil
 		}
 		return "", nil, err, nil
@@ -66,8 +67,6 @@ func (c *MinioDriver) UploadFile(file *multipart.FileHeader, category string) (s
 	fileMimeTypes := strings.Split(fileCategory.MimeTypes, ",")
 	fileAllowed = false
 	for _, v := range fileMimeTypes {
-		fmt.Println(fileType)
-		fmt.Println(v)
 		if strings.HasPrefix(fileType, v) {
 			fileAllowed = true
 		}
@@ -109,7 +108,7 @@ func (c *MinioDriver) GetFile(UUID string) (interface{}, error) {
 
 	err := c.db.Where("uuid = ?", UUID).Take(&fileEntity).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err
@@ -117,7 +116,7 @@ func (c *MinioDriver) GetFile(UUID string) (interface{}, error) {
 
 	err = c.db.Where("uuid = ?", fileEntity.CategoryUUID).Take(&fileCategory).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, exception.ErrorTextStorageCategoryNotFound
 		}
 		return nil, err

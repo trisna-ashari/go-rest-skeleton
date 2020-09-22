@@ -1,11 +1,12 @@
 package persistence
 
 import (
+	"errors"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // UserPreferenceRepo is a struct to store db connection.
@@ -24,7 +25,7 @@ var _ repository.UserPreferenceRepository = &UserPreferenceRepo{}
 func (up UserPreferenceRepo) GetUserPreference(userUUID string) (*entity.UserPreference, error) {
 	var userPreference entity.UserPreference
 	err := up.db.Where("user_uuid = ?", userUUID).Take(&userPreference).Error
-	if err != nil && gorm.IsRecordNotFoundError(err) {
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		userPreference.UserUUID = userUUID
 		userPreference.Preference = userPreference.BuildDefaultPreference()
 		err := up.db.Create(&userPreference).Error
@@ -53,7 +54,7 @@ func (up UserPreferenceRepo) UpdateUserPreference(userUUID string, p *entity.Det
 		Preference: userPreference.BuildPatchPreference(p),
 	}
 	err := up.db.First(&userPreference, "user_uuid = ?", userUUID).Updates(userPreferenceData).Error
-	if err != nil && gorm.IsRecordNotFoundError(err) {
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		userPreference.UserUUID = userUUID
 		err := up.db.Create(&userPreferenceData).Error
 		if err != nil {
@@ -70,7 +71,7 @@ func (up UserPreferenceRepo) ResetUserPreference(userUUID string) (*entity.UserP
 		Preference: userPreference.BuildDefaultPreference(),
 	}
 	err := up.db.First(&userPreference, "user_uuid = ?", userUUID).Updates(userPreferenceData).Error
-	if err != nil && gorm.IsRecordNotFoundError(err) {
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		userPreference.UserUUID = userUUID
 		err := up.db.Create(&userPreferenceData).Error
 		if err != nil {

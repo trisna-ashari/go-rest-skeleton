@@ -1,11 +1,12 @@
 package persistence
 
 import (
+	"errors"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/message/exception"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // RoleRepo is a struct to store db connection.
@@ -40,7 +41,7 @@ func (r RoleRepo) UpdateRole(uuid string, role *entity.Role) (*entity.Role, map[
 	err := r.db.First(&role, "uuid = ?", uuid).Updates(roleData).Error
 	if err != nil {
 		//If record not found
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["uuid"] = exception.ErrorTextRoleInvalidUUID.Error()
 			return nil, errDesc, exception.ErrorTextRoleNotFound
 		}
@@ -54,7 +55,7 @@ func (r RoleRepo) DeleteRole(uuid string) error {
 	var role entity.Role
 	err := r.db.Where("uuid = ?", uuid).Take(&role).Delete(&role).Error
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return exception.ErrorTextUserNotFound
 		}
 		return err
@@ -69,7 +70,7 @@ func (r RoleRepo) GetRole(uuid string) (*entity.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	if gorm.IsRecordNotFoundError(err) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, exception.ErrorTextRoleNotFound
 	}
 	return &role, nil
@@ -82,7 +83,7 @@ func (r *RoleRepo) GetRolePermissions(uuid string) ([]entity.RolePermission, err
 	if err != nil {
 		return nil, err
 	}
-	if gorm.IsRecordNotFoundError(err) {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, exception.ErrorTextUserNotFound
 	}
 	return permission, nil
@@ -90,7 +91,7 @@ func (r *RoleRepo) GetRolePermissions(uuid string) ([]entity.RolePermission, err
 
 // GetRoles will return role list.
 func (r RoleRepo) GetRoles(p *repository.Parameters) ([]entity.Role, interface{}, error) {
-	var total int
+	var total int64
 	var roles []entity.Role
 	errTotal := r.db.Find(&roles).Count(&total).Error
 	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&roles).Error
@@ -100,7 +101,7 @@ func (r RoleRepo) GetRoles(p *repository.Parameters) ([]entity.Role, interface{}
 	if errList != nil {
 		return nil, nil, errList
 	}
-	if gorm.IsRecordNotFoundError(errList) {
+	if errors.Is(errList, gorm.ErrRecordNotFound) {
 		return nil, nil, errList
 	}
 	meta := repository.NewMeta(p, total)
