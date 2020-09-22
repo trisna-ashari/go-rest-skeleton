@@ -1,7 +1,7 @@
-package middleware_test
+package response_test
 
 import (
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,17 +11,21 @@ import (
 )
 
 func TestFormatter(t *testing.T) {
-	expectedResponse := `{"code":200,"data":null,"message":"OK"}`
+	expectedResponse := `{"code":200,"data":null,"message":"Ok"}`
 	var actualResponse string
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", func(c *gin.Context) {
-		middleware.Formatter(c, nil, "api.msg.success.common.ok", nil)
+		response.NewSuccess(c, nil, "api.msg.success.common.ok").JSON()
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 	actualResponse = w.Body.String()
 
