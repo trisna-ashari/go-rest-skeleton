@@ -1,7 +1,7 @@
 package welcomev1point00
 
 import (
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,5 +17,5 @@ func NewWelcomeHandler() *WelcomeHandler {
 
 // Index will handle request.
 func (s *WelcomeHandler) Index(c *gin.Context) {
-	middleware.Formatter(c, nil, "PONG v1.0", nil)
+	response.NewSuccess(c, nil, "PONG v1.0").JSON()
 }

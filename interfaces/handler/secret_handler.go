@@ -2,7 +2,7 @@ package handler
 
 import (
 	"go-rest-skeleton/infrastructure/message/success"
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 	"go-rest-skeleton/pkg/security"
 	"net/http"
 
@@ -24,10 +24,10 @@ func NewSecretHandler() *SecretHandler {
 // @Accept  json
 // @Produce  json
 // @Param Accept-Language header string false "Language code" Enums(en, id) default(id)
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {string} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {string} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/secret [get]
 // GenerateSecret will return base64 encoded string of private key and public key through rest api.
 func (s *SecretHandler) GenerateSecret(c *gin.Context) {
@@ -35,5 +35,5 @@ func (s *SecretHandler) GenerateSecret(c *gin.Context) {
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	middleware.Formatter(c, secretPriPubKey, success.DevSuccessfullyGenerateRSAKey, nil)
+	response.NewSuccess(c, secretPriPubKey, success.DevSuccessfullyGenerateRSAKey).JSON()
 }

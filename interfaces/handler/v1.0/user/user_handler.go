@@ -8,7 +8,7 @@ import (
 	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/infrastructure/message/success"
 	"go-rest-skeleton/infrastructure/storage"
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -41,17 +41,16 @@ func NewUsers(us application.UserAppInterface, ss application.StorageAppInterfac
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Param first_name formData string true "User firstname"
-// @Param last_name formData string true "User lastname"
+// @Param name formData string true "User name"
 // @Param password formData string true "User password"
 // @Param email formData string true "User email"
 // @Param phone formData string true "User phone"
-// @Success 201 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 201 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users [post]
 // SaveUser is a function uses to handle create a new user.
 func (s *Users) SaveUser(c *gin.Context) {
@@ -62,7 +61,7 @@ func (s *Users) SaveUser(c *gin.Context) {
 	}
 	validateErr := userEntity.ValidateSaveUser()
 	if len(validateErr) > 0 {
-		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
 		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
@@ -78,7 +77,7 @@ func (s *Users) SaveUser(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusCreated)
-	middleware.Formatter(c, newUser.DetailUser(), success.UserSuccessfullyCreateUser, nil)
+	response.NewSuccess(c, newUser.DetailUser(), success.UserSuccessfullyCreateUser).JSON()
 }
 
 // @Summary Update user
@@ -91,17 +90,16 @@ func (s *Users) SaveUser(c *gin.Context) {
 // @Security BasicAuth
 // @Security JWTAuth
 // @Param uuid path string true "User UUID"
-// @Param first_name formData string true "User firstname"
-// @Param last_name formData string true "User lastname"
+// @Param name formData string true "User name"
 // @Param password formData string true "User password"
 // @Param email formData string true "User email"
 // @Param phone formData string true "User phone"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users/uuid [put]
 // UpdateUser is a function uses to handle update user by UUID.
 func (s *Users) UpdateUser(c *gin.Context) {
@@ -118,7 +116,7 @@ func (s *Users) UpdateUser(c *gin.Context) {
 
 	validateErr := userEntity.ValidateUpdateUser()
 	if len(validateErr) > 0 {
-		exceptionData := exception.TranslateErrorForm(c, validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
 		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
@@ -139,7 +137,7 @@ func (s *Users) UpdateUser(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
-	middleware.Formatter(c, updatedUser.DetailUser(), success.UserSuccessfullyUpdateUser, nil)
+	response.NewSuccess(c, updatedUser.DetailUser(), success.UserSuccessfullyUpdateUser).JSON()
 }
 
 // @Summary Delete user
@@ -151,12 +149,12 @@ func (s *Users) UpdateUser(c *gin.Context) {
 // @Security BasicAuth
 // @Security JWTAuth
 // @Param uuid path string true "User UUID"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users/{uuid} [delete]
 // DeleteUser is a function uses to handle delete user by UUID.
 func (s *Users) DeleteUser(c *gin.Context) {
@@ -176,7 +174,7 @@ func (s *Users) DeleteUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, nil, success.UserSuccessfullyDeleteUser, nil)
+	response.NewSuccess(c, nil, success.UserSuccessfullyDeleteUser).JSON()
 }
 
 // @Summary Get users
@@ -187,12 +185,12 @@ func (s *Users) DeleteUser(c *gin.Context) {
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users [get]
 // GetUsers is a function uses to handle get user list.
 func (s *Users) GetUsers(c *gin.Context) {
@@ -204,7 +202,7 @@ func (s *Users) GetUsers(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	middleware.Formatter(c, users.DetailUsers(), success.UserSuccessfullyGetUserList, meta)
+	response.NewSuccess(c, users.DetailUsers(), success.UserSuccessfullyGetUserList).WithMeta(meta).JSON()
 }
 
 // @Summary Get user
@@ -216,12 +214,12 @@ func (s *Users) GetUsers(c *gin.Context) {
 // @Security BasicAuth
 // @Security JWTAuth
 // @Param uuid path string true "User UUID"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users/{uuid} [get]
 // GetUser is a function uses to handle get user detail by UUID.
 func (s *Users) GetUser(c *gin.Context) {
@@ -246,7 +244,7 @@ func (s *Users) GetUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, errAvatar)
 		return
 	}
-	middleware.Formatter(c, user.DetailUserAvatar(avatarURL), success.UserSuccessfullyGetUserDetail, nil)
+	response.NewSuccess(c, user.DetailUserAvatar(avatarURL), success.UserSuccessfullyGetUserDetail).JSON()
 }
 
 // @Summary Update user avatar
@@ -260,12 +258,12 @@ func (s *Users) GetUser(c *gin.Context) {
 // @Security JWTAuth
 // @Param uuid path string true "User UUID"
 // @Param avatar formData file true "User Avatar"
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 403 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 403 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/users/{uuid}/avatar [put]
 // UpdateAvatar is a function uses to handle update user avatar by UUID.
 func (s *Users) UpdateAvatar(c *gin.Context) {
@@ -314,5 +312,5 @@ func (s *Users) UpdateAvatar(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
-	middleware.Formatter(c, updatedUser.DetailUserAvatar(avatarURL), success.UserSuccessfullyUpdateUserAvatar, nil)
+	response.NewSuccess(c, updatedUser.DetailUserAvatar(avatarURL), success.UserSuccessfullyUpdateUserAvatar).JSON()
 }

@@ -8,7 +8,7 @@ import (
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/message/exception"
 	"go-rest-skeleton/infrastructure/message/success"
-	"go-rest-skeleton/interfaces/middleware"
+	"go-rest-skeleton/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -41,11 +41,11 @@ func NewPreference(
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/preference [get]
 // GerPreference will return detail user preference of current logged in user.
 func (up *Preference) GerPreference(c *gin.Context) {
@@ -64,7 +64,7 @@ func (up *Preference) GerPreference(c *gin.Context) {
 	fmt.Println(userPreferenceData)
 
 	userPreference := userPreferenceData.DetailUserPreference()
-	middleware.Formatter(c, userPreference, success.UserSuccessfullyGetUserPreference, nil)
+	response.NewSuccess(c, userPreference, success.UserSuccessfullyGetUserPreference).JSON()
 }
 
 // @Summary Update user preference
@@ -77,12 +77,12 @@ func (up *Preference) GerPreference(c *gin.Context) {
 // @Param preference body entity.DetailUserPreference true "User preference"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 422 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 422 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/preference [put]
 // UpdatePreference will update user preference of current logged in user.
 func (up *Preference) UpdatePreference(c *gin.Context) {
@@ -94,6 +94,14 @@ func (up *Preference) UpdatePreference(c *gin.Context) {
 
 	var preference entity.DetailUserPreference
 	if err := c.ShouldBind(&preference); err != nil {
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
+	validateErr := preference.ValidateUpdatePreference()
+	if len(validateErr) > 0 {
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -116,7 +124,7 @@ func (up *Preference) UpdatePreference(c *gin.Context) {
 	fmt.Println(userPreferenceData)
 
 	userPreference := userPreferenceData.DetailUserPreference()
-	middleware.Formatter(c, userPreference, success.UserSuccessfullyUpdateUserPreference, nil)
+	response.NewSuccess(c, userPreference, success.UserSuccessfullyUpdateUserPreference).JSON()
 }
 
 // @Summary Reset user preference
@@ -127,11 +135,11 @@ func (up *Preference) UpdatePreference(c *gin.Context) {
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
-// @Success 200 {object} middleware.successOutput
-// @Failure 400 {object} middleware.errOutput
-// @Failure 401 {object} middleware.errOutput
-// @Failure 404 {object} middleware.errOutput
-// @Failure 500 {object} middleware.errOutput
+// @Success 200 {object} response.successOutput
+// @Failure 400 {object} response.errorOutput
+// @Failure 401 {object} response.errorOutput
+// @Failure 404 {object} response.errorOutput
+// @Failure 500 {object} response.errorOutput
 // @Router /api/v1/external/preference/reset [post]
 // GerPreference will return detail user preference of current logged in user.
 func (up *Preference) ResetPreference(c *gin.Context) {
@@ -150,5 +158,5 @@ func (up *Preference) ResetPreference(c *gin.Context) {
 	fmt.Println(userPreferenceData)
 
 	userPreference := userPreferenceData.DetailUserPreference()
-	middleware.Formatter(c, userPreference, success.UserSuccessfullyResetUserPreference, nil)
+	response.NewSuccess(c, userPreference, success.UserSuccessfullyResetUserPreference).JSON()
 }
