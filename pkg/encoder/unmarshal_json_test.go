@@ -1,7 +1,7 @@
-package json_formatter_test
+package encoder_test
 
 import (
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,9 +22,13 @@ func TestResponseDecoder(t *testing.T) {
 		})
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 
 	assert.EqualValues(t, response["code"], http.StatusOK)
 	assert.Nil(t, response["data"])
