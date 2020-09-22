@@ -53,7 +53,7 @@ func NewRouterAuthGateway(authGateway *authorization.Gateway, authToken *authori
 }
 
 // MainRouter is a method to initialize gin engine.
-func (r *Router) Start() *gin.Engine {
+func (r *Router) Init() *gin.Engine {
 	// Logging
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if gin.IsDebugging() {
@@ -95,7 +95,7 @@ func (r *Router) Start() *gin.Engine {
 	rg := NewRouterAuthGateway(authGateway, authToken)
 	authRoutes(e, r, rg)
 	devRoutes(e, r)
-	roRoutes(e)
+	noRoutes(e)
 	roleRoutes(e, r, rg)
 	userRoutes(e, r, rg)
 	welcomeRoutes(e)

@@ -55,7 +55,6 @@ func main() {
 	if errDBService != nil {
 		panic(errDBService)
 	}
-	defer dbService.Close()
 
 	// Init DB Migrate
 	errAutoMigrate := dbService.AutoMigrate()
@@ -79,7 +78,7 @@ func main() {
 	app := cmd.NewCli()
 	app.Action = func(c *cli.Context) error {
 		// Init Router
-		router := routers.NewRouter(conf, dbService, redisService, storageService, notificationService).Start()
+		router := routers.NewRouter(conf, dbService, redisService, storageService, notificationService).Init()
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 		// Run app at defined port
