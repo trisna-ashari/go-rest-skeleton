@@ -2,21 +2,22 @@ package storage_test
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
+	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/infrastructure/storage"
 	"go-rest-skeleton/pkg/util"
+	"gorm.io/driver/mysql"
 	"log"
 	"testing"
 
-	"github.com/google/uuid"
-
 	"github.com/joho/godotenv"
 
-	"github.com/jinzhu/gorm"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"gorm.io/gorm"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 )
 
 type entities struct {
-	entity interface{}
+	entity string
 }
 
 // SkipThis is a function.
@@ -66,39 +67,27 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		)
 	}
 
-	entities := []entities{
-		{entity: &entity.Module{}},
-		{entity: &entity.Permission{}},
-		{entity: &entity.Role{}},
-		{entity: &entity.RolePermission{}},
-		{entity: &entity.StorageCategory{}},
-		{entity: &entity.StorageFile{}},
-		{entity: &entity.User{}},
-		{entity: &entity.UserRole{}},
+	gormConfig := &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
 	}
 
-	db, err := gorm.Open(config.DBDriver, dbURL)
-	if err != nil {
-		return nil, err
-	}
-	db.LogMode(false)
+	db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
 
-	err = db.AutoMigrate(
-		&entity.Module{},
-		&entity.Permission{},
-		&entity.Role{},
-		&entity.RolePermission{},
-		&entity.StorageCategory{},
-		&entity.StorageFile{},
-		&entity.User{},
-		&entity.UserRole{},
-	).Error
 	if err != nil {
 		return nil, err
 	}
 
+	tables := registry.CollectTableNames()
+	for _, table := range tables {
+		err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", table.Name)).Error
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	entities := registry.CollectEntities()
 	for _, model := range entities {
-		err := db.Exec(fmt.Sprintf("TRUNCATE %s", db.NewScope(model.entity).TableName())).Error
+		err := db.AutoMigrate(model.Entity)
 		if err != nil {
 			log.Fatal(err)
 		}

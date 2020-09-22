@@ -20,7 +20,7 @@ func TestResponseOptions_Handler(t *testing.T) {
 		DefaultTimezone: conf.AppTimezone,
 	}
 
-	expectedResponse := "{\"code\":500,\"data\":null,\"message\":\"Internal Server Error\"}"
+	expectedResponse := "{\"code\":500,\"data\":null,\"message\":\"Internal server error\"}"
 	var actualResponse string
 
 	gin.SetMode(gin.TestMode)
@@ -31,7 +31,11 @@ func TestResponseOptions_Handler(t *testing.T) {
 		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 	actualResponse = w.Body.String()
 	assert.Equal(t, expectedResponse, actualResponse)

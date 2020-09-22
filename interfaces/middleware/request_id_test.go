@@ -24,7 +24,11 @@ func TestSetRequestID_WithRequestHeader(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Set-Request-Id", expectedRequestID)
 	r.ServeHTTP(w, c.Request)
 	actualRequestID = w.Header().Get("X-Request-Id")
@@ -43,7 +47,11 @@ func TestSetRequestID_WithoutRequestHeader(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 	actualRequestID = w.Header().Get("X-Request-Id")
 	if actualRequestID != "" {

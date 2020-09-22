@@ -37,7 +37,11 @@ func TestAuth_WithJWTAuth_Success(t *testing.T) {
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", jwtAccessToken))
 	r.ServeHTTP(w, c.Request)
 	assert.EqualValues(t, http.StatusOK, w.Code)
@@ -64,7 +68,11 @@ func TestAuth_WithJWTAuth_Failed(t *testing.T) {
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", jwtAccessToken))
 	r.ServeHTTP(w, c.Request)
 	assert.EqualValues(t, http.StatusUnauthorized, w.Code)
@@ -89,7 +97,11 @@ func TestAuth_WithBasicAuth_Success(t *testing.T) {
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth))
 	r.ServeHTTP(w, c.Request)
 	assert.EqualValues(t, http.StatusOK, w.Code)
@@ -114,7 +126,11 @@ func TestAuth_WithBasicAuth_Failed(t *testing.T) {
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Authorization", fmt.Sprintf("Basic %s", basicAuth))
 	r.ServeHTTP(w, c.Request)
 	assert.EqualValues(t, http.StatusUnauthorized, w.Code)
@@ -130,7 +146,11 @@ func TestAuth_WithoutAuth_Failed(t *testing.T) {
 	c, r := gin.CreateTestContext(w)
 	r.GET("/test", middleware.Auth(dp.ag), func(c *gin.Context) {})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 	assert.EqualValues(t, http.StatusUnauthorized, w.Code)
 }

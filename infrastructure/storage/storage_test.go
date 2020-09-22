@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go-rest-skeleton/infrastructure/storage"
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"go-rest-skeleton/pkg/util"
 	"io"
 	"mime/multipart"
@@ -19,6 +19,8 @@ import (
 )
 
 func TestUploadFile_Success(t *testing.T) {
+	SkipThis(t)
+
 	conf := InitConfig()
 
 	dbConn, errDBConn := DBConnSetup(conf.DBTestConfig)
@@ -81,15 +83,20 @@ func TestUploadFile_Success(t *testing.T) {
 		})
 	})
 
-	c.Request, _ = http.NewRequest("POST", "/upload", requestBody)
+	c.Request, err = http.NewRequest(http.MethodPost, "/upload", requestBody)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 	r.ServeHTTP(w, c.Request)
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 
 	assert.NotNil(t, response["data"])
 }
 
 func TestGetFile_Success(t *testing.T) {
+	SkipThis(t)
+
 	conf := InitConfig()
 
 	dbConn, errDBConn := DBConnSetup(conf.DBTestConfig)
@@ -152,10 +159,13 @@ func TestGetFile_Success(t *testing.T) {
 		})
 	})
 
-	c.Request, _ = http.NewRequest("POST", "/upload", requestBody)
+	c.Request, err = http.NewRequest(http.MethodPost, "/upload", requestBody)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	c.Request.Header.Set("Content-Type", multipartWriter.FormDataContentType())
 	r.ServeHTTP(w, c.Request)
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 
 	fileUUID := response["data"].(string)
 	url, errGetURL := storageService.Storage.GetFile(fileUUID)

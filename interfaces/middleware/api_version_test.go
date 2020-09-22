@@ -24,7 +24,11 @@ func TestAPIVersion_URLContainsAPIPrefix(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/api/v1/external/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/external/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	router.ServeHTTP(w, c.Request)
 	actualVersion = w.Header().Get("X-Api-Version")
 	assert.Equal(t, expectedVersion, actualVersion)
@@ -43,7 +47,11 @@ func TestAPIVersion_URLDoesNotContainsAPIPrefix(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/api/external/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/external/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	router.ServeHTTP(w, c.Request)
 	actualVersion = w.Header().Get("X-Api-Version")
 	assert.Equal(t, expectedVersion, actualVersion)

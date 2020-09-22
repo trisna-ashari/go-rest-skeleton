@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
+	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/persistence"
@@ -12,11 +13,12 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
+	"gorm.io/driver/mysql"
 
 	"github.com/go-redis/redis/v8"
 
-	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 // Repositories represent it self.
@@ -99,25 +101,32 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		)
 	}
 
-	db, err := gorm.Open(config.DBDriver, dbURL)
-	if err != nil {
-		return nil, err
+	gormConfig := &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
 	}
-	db.LogMode(false)
 
-	err = db.AutoMigrate(
-		&entity.Module{},
-		&entity.Permission{},
-		&entity.Role{},
-		&entity.RolePermission{},
-		&entity.StorageCategory{},
-		&entity.StorageFile{},
-		&entity.User{},
-		&entity.UserRole{},
-	).Error
+	db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
+
 	if err != nil {
 		return nil, err
 	}
+
+	tables := registry.CollectTableNames()
+	for _, table := range tables {
+		err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", table.Name)).Error
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	entities := registry.CollectEntities()
+	for _, model := range entities {
+		err := db.AutoMigrate(model.Entity)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	return db, nil
 }
 
@@ -152,11 +161,10 @@ func seedUser(db *gorm.DB) (*entity.User, *entity.UserFaker, error) {
 	userFaker := entity.UserFaker{}
 	_ = faker.FakeData(&userFaker)
 	user := entity.User{
-		FirstName: userFaker.FirstName,
-		LastName:  userFaker.LastName,
-		Email:     userFaker.Email,
-		Phone:     userFaker.Phone,
-		Password:  userFaker.Password,
+		Name:     userFaker.Name,
+		Email:    userFaker.Email,
+		Phone:    userFaker.Phone,
+		Password: userFaker.Password,
 	}
 	err := db.Create(&user).Error
 	if err != nil {

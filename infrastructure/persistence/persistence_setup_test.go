@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
+	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/infrastructure/authorization"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/pkg/util"
@@ -11,23 +12,19 @@ import (
 	"testing"
 
 	"github.com/bxcodec/faker"
-
 	"github.com/go-redis/redis/v8"
+	"gorm.io/driver/mysql"
 
 	"github.com/google/uuid"
 
-	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 const (
 	driverMysql    = "mysql"
 	driverPostgres = "postgres"
 )
-
-type entities struct {
-	entity interface{}
-}
 
 // SkipThis is a function.
 func SkipThis(t *testing.T) {
@@ -90,41 +87,27 @@ func DBConnSetup(config config.DBTestConfig) (*gorm.DB, error) {
 		)
 	}
 
-	entities := []entities{
-		{entity: &entity.Module{}},
-		{entity: &entity.Permission{}},
-		{entity: &entity.Role{}},
-		{entity: &entity.RolePermission{}},
-		{entity: &entity.StorageCategory{}},
-		{entity: &entity.StorageFile{}},
-		{entity: &entity.User{}},
-		{entity: &entity.UserPreference{}},
-		{entity: &entity.UserRole{}},
+	gormConfig := &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
 	}
 
-	db, err := gorm.Open(config.DBDriver, dbURL)
-	if err != nil {
-		return nil, err
-	}
-	db.LogMode(false)
+	db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
 
-	err = db.AutoMigrate(
-		&entity.Module{},
-		&entity.Permission{},
-		&entity.Role{},
-		&entity.RolePermission{},
-		&entity.StorageCategory{},
-		&entity.StorageFile{},
-		&entity.User{},
-		&entity.UserPreference{},
-		&entity.UserRole{},
-	).Error
 	if err != nil {
 		return nil, err
 	}
 
+	tables := registry.CollectTableNames()
+	for _, table := range tables {
+		err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", table.Name)).Error
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	entities := registry.CollectEntities()
 	for _, model := range entities {
-		err := db.Exec(fmt.Sprintf("TRUNCATE %s", db.NewScope(model.entity).TableName())).Error
+		err := db.AutoMigrate(model.Entity)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -179,11 +162,10 @@ func seedUser(db *gorm.DB) (*entity.User, *entity.UserFaker, error) {
 	userFaker := entity.UserFaker{}
 	_ = faker.FakeData(&userFaker)
 	user := entity.User{
-		FirstName: userFaker.FirstName,
-		LastName:  userFaker.LastName,
-		Email:     userFaker.Email,
-		Phone:     userFaker.Phone,
-		Password:  userFaker.Password,
+		Name:     userFaker.Name,
+		Email:    userFaker.Email,
+		Phone:    userFaker.Phone,
+		Password: userFaker.Password,
 	}
 	err := db.Create(&user).Error
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/interfaces/handler"
-	"go-rest-skeleton/pkg/json_formatter"
+	"go-rest-skeleton/pkg/encoder"
 	"go-rest-skeleton/pkg/util"
 	"log"
 	"net/http"
@@ -19,6 +19,8 @@ import (
 )
 
 func TestPing_Success(t *testing.T) {
+	SkipThis(t)
+
 	var pingData handler.PingResponse
 
 	if err := godotenv.Load(fmt.Sprintf("%s/.env", util.RootDir())); err != nil {
@@ -30,17 +32,18 @@ func TestPing_Success(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/")
 	v1.GET("/ping", pingHandler.Ping)
 
-	req, err := http.NewRequest(http.MethodGet, "/api/v1/ping", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/ping", nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &pingData)
@@ -51,6 +54,8 @@ func TestPing_Success(t *testing.T) {
 }
 
 func TestPing_Failed(t *testing.T) {
+	SkipThis(t)
+
 	var pingData handler.PingResponse
 
 	conf := config.New()
@@ -60,17 +65,18 @@ func TestPing_Failed(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
-	_, r := gin.CreateTestContext(w)
+	c, r := gin.CreateTestContext(w)
 	v1 := r.Group("/api/v1/")
 	v1.GET("/ping", pingHandler.Ping)
 
-	req, err := http.NewRequest(http.MethodGet, "/api/v1/ping", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/api/v1/ping", nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
-	r.ServeHTTP(w, req)
+	r.ServeHTTP(w, c.Request)
 
-	response := json_formatter.ResponseDecoder(w.Body)
+	response := encoder.ResponseDecoder(w.Body)
 	data, _ := json.Marshal(response["data"])
 
 	_ = json.Unmarshal(data, &pingData)

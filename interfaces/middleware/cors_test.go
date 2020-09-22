@@ -19,7 +19,11 @@ func TestCORS_WithAcceptedHTTPMethod(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("GET", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, w.Header().Get("Access-Control-Allow-Origin"), "*")
@@ -37,7 +41,11 @@ func TestCORS_OptionsHTTPMethod(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	c.Request, _ = http.NewRequest("OPTIONS", "/test", nil)
+	var err error
+	c.Request, err = http.NewRequest(http.MethodOptions, "/test", nil)
+	if err != nil {
+		t.Errorf("this is the error: %v\n", err)
+	}
 	r.ServeHTTP(w, c.Request)
 
 	assert.Equal(t, w.Code, http.StatusNoContent)
