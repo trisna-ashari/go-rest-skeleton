@@ -2,8 +2,10 @@ package notify
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"go-rest-skeleton/pkg/util"
+	"golang.org/x/sync/errgroup"
 	"html/template"
 	"log"
 
@@ -100,9 +102,28 @@ func (e *EmailChannel) GenerateMessage() {
 
 // SendNotification will send email notification.
 func (e *EmailChannel) SendNotification() error {
-	if errSend := e.EmailClient.DialAndSend(e.EmailMessage); errSend != nil {
-		return errSend
-	}
+	g, _ := errgroup.WithContext(context.Background())
+
+	// Using goroutine to send email
+	chanSendEmail := make(chan bool)
+	g.Go(func() error {
+		errSend := e.EmailClient.DialAndSend(e.EmailMessage)
+		if errSend != nil {
+			return errSend
+		}
+
+		chanSendEmail <- true
+		return nil
+	})
+
+	go func() {
+		err := g.Wait()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		close(chanSendEmail)
+	}()
 
 	return nil
 }
