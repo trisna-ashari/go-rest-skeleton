@@ -8,21 +8,20 @@ definitions:
       skip_tour:
         type: boolean
     type: object
-  middleware.errOutput:
+  response.errorOutput:
     properties:
+      args:
+        type: string
       code:
         type: integer
       data:
-        type: object
-      details:
-        additionalProperties: true
         type: object
       error_code:
         type: string
       message:
         type: string
     type: object
-  middleware.successOutput:
+  response.successOutput:
     properties:
       code:
         type: integer
@@ -56,7 +55,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
@@ -64,11 +63,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Ping server
       tags:
       - development
@@ -92,7 +91,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
@@ -100,11 +99,11 @@ paths:
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Generate a secret
       tags:
       - development
@@ -142,27 +141,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Authentication login
       tags:
       - authentication
@@ -188,23 +187,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - JWTAuth: []
       summary: Authentication logout
@@ -235,23 +234,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Authentication forgot password
       tags:
       - authentication
@@ -290,23 +289,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Authentication reset password
       tags:
       - authentication
@@ -332,23 +331,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -384,27 +383,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -433,23 +432,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -478,23 +477,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -526,23 +525,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "422":
           description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       summary: Authentication refresh
       tags:
       - authentication
@@ -568,27 +567,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -612,14 +611,9 @@ paths:
         in: header
         name: Set-Request-Id
         type: string
-      - description: User firstname
+      - description: User name
         in: formData
-        name: first_name
-        required: true
-        type: string
-      - description: User lastname
-        in: formData
-        name: last_name
+        name: name
         required: true
         type: string
       - description: User password
@@ -643,27 +637,27 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -697,27 +691,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -750,27 +744,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -811,27 +805,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []
@@ -861,14 +855,9 @@ paths:
         name: uuid
         required: true
         type: string
-      - description: User firstname
+      - description: User name
         in: formData
-        name: first_name
-        required: true
-        type: string
-      - description: User lastname
-        in: formData
-        name: last_name
+        name: name
         required: true
         type: string
       - description: User password
@@ -892,27 +881,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/middleware.successOutput'
+            $ref: '#/definitions/response.successOutput'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/middleware.errOutput'
+            $ref: '#/definitions/response.errorOutput'
       security:
       - BasicAuth: []
       - JWTAuth: []

@@ -48,7 +48,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
@@ -60,13 +60,13 @@ var doc = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -102,7 +102,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
@@ -114,13 +114,13 @@ var doc = `{
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -176,37 +176,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -250,31 +250,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -317,31 +317,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -398,31 +398,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -469,31 +469,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -550,37 +550,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -627,31 +627,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -698,31 +698,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -765,31 +765,31 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -836,37 +836,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -911,15 +911,8 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "User firstname",
-                        "name": "first_name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User lastname",
-                        "name": "last_name",
+                        "description": "User name",
+                        "name": "name",
                         "in": "formData",
                         "required": true
                     },
@@ -949,37 +942,37 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -1033,15 +1026,8 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "User firstname",
-                        "name": "first_name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User lastname",
-                        "name": "last_name",
+                        "description": "User name",
+                        "name": "name",
                         "in": "formData",
                         "required": true
                     },
@@ -1071,37 +1057,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -1155,37 +1141,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -1237,37 +1223,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -1331,37 +1317,37 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/middleware.successOutput"
+                            "$ref": "#/definitions/response.successOutput"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/middleware.errOutput"
+                            "$ref": "#/definitions/response.errorOutput"
                         }
                     }
                 }
@@ -1383,18 +1369,17 @@ var doc = `{
                 }
             }
         },
-        "middleware.errOutput": {
+        "response.errorOutput": {
             "type": "object",
             "properties": {
+                "args": {
+                    "type": "string"
+                },
                 "code": {
                     "type": "integer"
                 },
                 "data": {
                     "type": "object"
-                },
-                "details": {
-                    "type": "object",
-                    "additionalProperties": true
                 },
                 "error_code": {
                     "type": "string"
@@ -1404,7 +1389,7 @@ var doc = `{
                 }
             }
         },
-        "middleware.successOutput": {
+        "response.successOutput": {
             "type": "object",
             "properties": {
                 "code": {
