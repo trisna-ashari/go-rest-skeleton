@@ -76,7 +76,10 @@ var (
 	ErrorTextUserEmailAlreadyTaken = errors.New("api.msg.error.user.email_already_taken")
 
 	// ErrorTextUserPreferenceInvalidUUID is an error representing UUID not found in database.
-	ErrorTextUserPreferenceInvalidUUID = errors.New("user_preference.invalid_uuid")
+	ErrorTextUserPreferenceInvalidUUID = errors.New("api.msg.error.user.preference.invalid_uuid")
+
+	// ErrorTextUserForgotPasswordTokenNotFound is an error representing Token not found in database.
+	ErrorTextUserForgotPasswordTokenNotFound = errors.New("api.msg.error.user.forgot_password.token_not_found")
 )
 
 // Errors for storage.
