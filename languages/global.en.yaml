@@ -2,15 +2,32 @@ api:
   msg:
     error:
       common:
-        an_error_occured: "An Error Occurred"
+        an_error_occurred: "An Error Occurred"
         internal_server_error: "Internal Server Error"
         not_found: "Not Found"
         bad_request: "Bad Request"
         unauthorized: "Unauthorized"
         forbidden: "Forbidden"
-        unprocessable_entity: "Unprocessable Entity"
+        unprocessable_entity: "Unprocessable Entity's"
         file_too_large: "File Too Large"
-        per_page: "Each Request Maximum is {{.Max}} Records Per Page"
+        per_page: "Each Request Maximum Is {{.Max}} Records Per Page"
+      validation:
+        is_required: "Field {{.Field}} Is Required"
+        must_be_number: "Field {{.Field}} Must Be A Number"
+        must_be_string: "Field {{.Field}} Must Be A String"
+        must_be_alpha: "Field {{.Field}} Must Contain Letters Only"
+        must_be_alpha_space: "Field {{.Field}} Must Contain Letters And Space Character Only"
+        must_be_alphanumeric: "Field {{.Field}} Must Contains Letters And Numbers Only"
+        must_be_alphanumeric_space: "Field {{.Field}} Must Contain Letters, Numbers And Space Character Only"
+        must_be_uuid: "Must Be A Valid UUID"
+        must_be_email: "Must Be A Valid Email"
+        must_be_phone: "Must Be A Valid Phone Number With Country Code"
+        must_be_url: "Must Be A Valid URL"
+        must_be_in: "Must Be On Of {{.Options}}"
+        must_be_length_between: "The Length Must Be Between {{.Min}} And {{.Max}}"
+        must_be_no_less_than: "The Length Must Be No Less Than {{.Length}}"
+        must_be_no_more_than: "The Length Must Be No More Than {{.Length}}"
+        must_be_equal_to: "Field {{.Field}} Must Be Equal To {{.Target}}"
       role:
         not_found: "Role Not found"
       storage:
@@ -35,6 +52,8 @@ api:
         email_not_registered: "Email Not Registered"
         invalid_password_length: "Password Should Be At Least 6 Characters"
         invalid_email_and_password: "Invalid Email And Password"
+        forgot_password:
+          token_not_found: "Invalid Token"
     success:
       common:
         ok: "OK"
@@ -63,3 +82,10 @@ api:
         successfully_get_user_preference: "Successfully Get Preference"
         successfully_update_user_preference: "Successfully Update Preference"
         successfully_reset_user_preference: "Successfully Reset Preference"
+attributes:
+  name: "Name"
+  email: "Email"
+  phone: "Phone"
+  password: "Password"
+  new_password: "New Password"
+  confirm_password: "Confirm Password"

@@ -2,7 +2,7 @@ api:
   msg:
     error:
       common:
-        an_error_occured: "Terjadi Kesalahan"
+        an_error_occurred: "Terjadi Kesalahan"
         internal_server_error: "Terjadi Kesalahan di Server"
         not_found: "Tidak Ditemukan"
         bad_request: "Permintaan Buruk"
@@ -11,6 +11,23 @@ api:
         unprocessable_entity: "Permintaan Tidak Dapat Diproses"
         file_too_large: "Ukuran File Terlalu Besar"
         per_page: "Setiap Pemintaan Dibatasi Maksimum {{.Max}} Per Halaman"
+      validation:
+        is_required: "Isian {{.Field}} Wajib Diisi"
+        must_be_number: "Isian {{.Field}} Harus Angka"
+        must_be_string: "Isian {{.Field}} Harus Teks"
+        must_be_alpha: "Isian {{.Field}} Harus Berisi Huruf Saja"
+        must_be_alpha_space: "Isian {{.Field}} Harus Berisi Huruf Dan Karakter Spasi Saja"
+        must_be_alphanumeric: "Isian {{.Field}} Harus Berisi Huruf Dan Angka Saja"
+        must_be_alphanumeric_space: "Isian {{.Field}} Harus Berisi Huruf, Angka Dan Karakter Spasi Saja"
+        must_be_uuid: "Harus Berupa UUID Yang Valid"
+        must_be_email: "Harus Berupa Alamat Email Yang Valid"
+        must_be_in: "Harus Diisi Dengan {{.Options}}"
+        must_be_phone: "Harus Berupa Nomor HP Yang Valid Disertai Kode Negara"
+        must_be_url: "Har Yang Valid"
+        must_be_length_between: "Panjang {{.Field}} Harus Antara {{.Min}} Hingga {{.Max}} Karakter"
+        must_be_no_less_than: "Panjang {{.Field}} Tidak Boleh Kurang Dari {{.Length}} Karakter"
+        must_be_no_more_than: "Panjang {{.Field}} Tidak Boleh Lebih Dari {{.Length}} Karakter"
+        must_be_equal_to: "Isian {{.Field}} Harus Sama Dengan Isian {{.Target}}"
       role:
         not_found: "Role Tidak Ditemukan"
       storage:
@@ -35,6 +52,8 @@ api:
         email_not_registered: "Email Tidak Terdaftar"
         invalid_password_length: "Panjang Minimal Kata Sandi Harus 6 Karakter"
         invalid_email_and_password: "Email Dan Kata Sandi Tidak Valid"
+        forgot_password:
+          token_not_found: "Token Tidak Valid"
     success:
       common:
         ok: "OK"
@@ -63,3 +82,10 @@ api:
         successfully_get_user_preference: "Berhasil Mendapatkan Preferensi"
         successfully_update_user_preference: "Berhasil Memperbarui Preferensi"
         successfully_reset_user_preference: "Berhasil Memulihkan Preferensi"
+attributes:
+  name: "Name"
+  email: "Alamat Email"
+  phone: "Nomor HP"
+  password: "Kata Sandi"
+  new_password: "Kata Sandi Baru"
+  confirm_password: "Konfirmasi Kata Sandi"
