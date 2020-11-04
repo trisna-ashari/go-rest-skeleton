@@ -18,6 +18,7 @@ func CollectEntities() []entities {
 		{Entity: entity.RolePermission{}},
 		{Entity: entity.StorageCategory{}},
 		{Entity: entity.StorageFile{}},
+		{Entity: entity.Tour{}},
 		{Entity: entity.User{}},
 		{Entity: entity.UserForgotPassword{}},
 		{Entity: entity.UserLogin{}},
@@ -33,6 +34,7 @@ func CollectTableNames() []table {
 	var rolePermission entity.RolePermission
 	var storageCategory entity.StorageCategory
 	var storageFile entity.StorageFile
+	var tour entity.Tour
 	var user entity.User
 	var userForgotPassword entity.UserForgotPassword
 	var userLogin entity.UserLogin
@@ -46,6 +48,7 @@ func CollectTableNames() []table {
 		{Name: rolePermission.TableName()},
 		{Name: storageCategory.TableName()},
 		{Name: storageFile.TableName()},
+		{Name: tour.TableName()},
 		{Name: user.TableName()},
 		{Name: userForgotPassword.TableName()},
 		{Name: userLogin.TableName()},
