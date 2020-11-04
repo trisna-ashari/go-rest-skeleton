@@ -60,6 +60,15 @@ type SMTPConfig struct {
 	SMTPPassword string
 }
 
+// RollbarConfig represent rollbar config keys.
+type RollbarConfig struct {
+	Token       string
+	Environment string
+	CodeVersion string
+	ServerHost  string
+	ServerRoot  string
+}
+
 // KeyConfig represent key config keys.
 type KeyConfig struct {
 	AppPrivateKey string
@@ -74,6 +83,7 @@ type Config struct {
 	RedisTestConfig
 	MinioConfig
 	SMTPConfig
+	RollbarConfig
 	KeyConfig
 	AppEnvironment  string
 	AppLanguage     string
@@ -128,6 +138,13 @@ func New() *Config {
 			SMTPPort:     getEnvAsInt("SMTP_PORT", 587),
 			SMTPUsername: getEnv("SMTP_USERNAME", ""),
 			SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		},
+		RollbarConfig: RollbarConfig{
+			Token:       getEnv("ROLLBAR_TOKEN", ""),
+			Environment: getEnv("APP_ENV", "local"),
+			CodeVersion: getEnv("APP_VERSION", "1.0.0"),
+			ServerHost:  getEnv("APP_SERVER_HOST", ""),
+			ServerRoot:  getEnv("APP_SERVER_ROOT", ""),
 		},
 		KeyConfig: KeyConfig{
 			AppPrivateKey: getEnv("APP_PRIVATE_KEY", "default-private-key"),
