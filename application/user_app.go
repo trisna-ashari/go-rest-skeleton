@@ -24,11 +24,12 @@ type UserAppInterface interface {
 	SaveUser(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUser(string, *entity.User) (*entity.User, map[string]string, error)
 	DeleteUser(UUID string) error
-	GetUsers(parameters *repository.Parameters) ([]entity.User, interface{}, error)
+	GetUsers(parameters *repository.Parameters) ([]*entity.User, *repository.Meta, error)
 	GetUser(UUID string) (*entity.User, error)
 	GetUserRoles(UUID string) ([]entity.UserRole, error)
 	GetUserWithRoles(UUID string) (*entity.User, error)
 	GetUserByEmail(*entity.User) (*entity.User, map[string]string, error)
+	GetUserByPhone(*entity.User) (*entity.User, map[string]string, error)
 	GetUserByEmailAndPassword(*entity.User) (*entity.User, map[string]string, error)
 	UpdateUserAvatar(string, *entity.User) (*entity.User, map[string]string, error)
 }
@@ -72,13 +73,18 @@ func (u *userApp) GetUserWithRoles(UUID string) (*entity.User, error) {
 }
 
 // GetUsers is an implementation of method GetUsers.
-func (u *userApp) GetUsers(p *repository.Parameters) ([]entity.User, interface{}, error) {
+func (u *userApp) GetUsers(p *repository.Parameters) ([]*entity.User, *repository.Meta, error) {
 	return u.us.GetUsers(p)
 }
 
 // GetUserByEmail is an implementation of method GetUserByEmail.
 func (u *userApp) GetUserByEmail(user *entity.User) (*entity.User, map[string]string, error) {
-	return u.us.GetUserByEmailAndPassword(user)
+	return u.us.GetUserByEmail(user)
+}
+
+// GetUserByPhone is an implementation of method GetUserByPhone.
+func (u *userApp) GetUserByPhone(user *entity.User) (*entity.User, map[string]string, error) {
+	return u.us.GetUserByPhone(user)
 }
 
 // GetUserByEmailAndPassword is an implementation of method GetUserByEmailAndPassword.

@@ -15,10 +15,11 @@ import (
 
 // User represent schema of table users.
 type User struct {
-	UUID               string    `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
+	UUID               string    `gorm:"size:36;not null;uniqueIndex;primary_key;" json:"uuid"`
 	Name               string    `gorm:"size:100;not null;" json:"name" form:"name"`
 	Email              string    `gorm:"size:100;not null;uniqueIndex;" json:"email" form:"email"`
-	Phone              string    `gorm:"size:100;" json:"phone,omitempty" form:"phone"`
+	EmailOrigin        string    `gorm:"size:100;not null;uniqueIndex;" json:"email_origin" form:"email_origin"`
+	Phone              string    `gorm:"size:100;index;" json:"phone,omitempty" form:"phone"`
 	Password           string    `gorm:"size:100;not null;index;" json:"password" form:"password"`
 	AvatarUUID         string    `gorm:"size:36;" json:"avatar_uuid"`
 	CreatedAt          time.Time `json:"created_at"`
@@ -45,7 +46,7 @@ type UserFaker struct {
 }
 
 // Users represent multiple User.
-type Users []User
+type Users []*User
 
 // DetailUser represent format of detail User.
 type DetailUser struct {
@@ -78,6 +79,11 @@ func (u *User) TableName() string {
 	return "users"
 }
 
+// FilterableFields return fields.
+func (u *User) FilterableFields() []interface{} {
+	return []interface{}{"uuid", "name", "email", "phone"}
+}
+
 // Prepare will prepare submitted data of user.
 func (u *User) Prepare() {
 	u.Name = html.EscapeString(strings.TrimSpace(u.Name))
@@ -90,12 +96,14 @@ func (u *User) Prepare() {
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	generateUUID := uuid.New()
 	hashPassword, err := security.Hash(u.Password)
+	emailOrigin, err := security.EmailOrigin(u.Email)
 	if err != nil {
 		return err
 	}
 	if u.UUID == "" {
 		u.UUID = generateUUID.String()
 	}
+	u.EmailOrigin = emailOrigin
 	u.Password = string(hashPassword)
 	return nil
 }

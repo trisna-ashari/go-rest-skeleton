@@ -59,6 +59,7 @@ func (s *Users) SaveUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
+
 	validateErr := userEntity.ValidateSaveUser()
 	if len(validateErr) > 0 {
 		exceptionData := response.TranslateErrorForm(c, validateErr)
@@ -66,6 +67,39 @@ func (s *Users) SaveUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
+
+	_, errDesc, errException := s.us.GetUserByEmail(&userEntity)
+	if errException == nil {
+		exceptionData := response.TranslateErrorForm(c, []response.ErrorForm{
+			{
+				Field: "email",
+				Msg:   exception.ErrorTextUserEmailAlreadyTaken.Error(),
+				Data: map[string]interface{}{
+					"Email": &userEntity.Email,
+				},
+			},
+		})
+		c.Set("data", exceptionData)
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
+	_, errDesc, errException = s.us.GetUserByPhone(&userEntity)
+	if errException == nil {
+		exceptionData := response.TranslateErrorForm(c, []response.ErrorForm{
+			{
+				Field: "phone",
+				Msg:   exception.ErrorTextUserPhoneAlreadyTaken.Error(),
+				Data: map[string]interface{}{
+					"Phone": &userEntity.Phone,
+				},
+			},
+		})
+		c.Set("data", exceptionData)
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
 	newUser, errDesc, errException := s.us.SaveUser(&userEntity)
 	if errException != nil {
 		c.Set("data", errDesc)
@@ -121,7 +155,54 @@ func (s *Users) UpdateUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
+
 	UUID := c.Param("uuid")
+	user, err := s.us.GetUser(UUID)
+	if err != nil {
+		if errors.Is(err, exception.ErrorTextUserNotFound) {
+			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserNotFound)
+			return
+		}
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if userEntity.Email != user.Email {
+		_, _, errException := s.us.GetUserByEmail(&userEntity)
+		if errException == nil {
+			exceptionData := response.TranslateErrorForm(c, []response.ErrorForm{
+				{
+					Field: "email",
+					Msg:   exception.ErrorTextUserEmailAlreadyTaken.Error(),
+					Data: map[string]interface{}{
+						"Email": &userEntity.Email,
+					},
+				},
+			})
+			c.Set("data", exceptionData)
+			_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+			return
+		}
+	}
+
+	if userEntity.Phone != user.Phone {
+		_, _, errException := s.us.GetUserByPhone(&userEntity)
+		if errException == nil {
+			exceptionData := response.TranslateErrorForm(c, []response.ErrorForm{
+				{
+					Field: "phone",
+					Msg:   exception.ErrorTextUserPhoneAlreadyTaken.Error(),
+					Data: map[string]interface{}{
+						"Phone": &userEntity.Phone,
+					},
+				},
+			})
+			c.Set("data", exceptionData)
+			_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+			return
+		}
+	}
+
 	updatedUser, errDesc, errException := s.us.UpdateUser(UUID, &userEntity)
 	if errException != nil {
 		c.Set("data", errDesc)
@@ -194,9 +275,18 @@ func (s *Users) DeleteUser(c *gin.Context) {
 // @Router /api/v1/external/users [get]
 // GetUsers is a function uses to handle get user list.
 func (s *Users) GetUsers(c *gin.Context) {
+	var user entity.User
 	var users entity.Users
 	var err error
-	parameters := repository.NewParameters(c)
+	parameters := repository.NewGinParameters(c)
+	validateErr := parameters.ValidateParameter(user.FilterableFields()...)
+	if len(validateErr) > 0 {
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
 	users, meta, err := s.us.GetUsers(parameters)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -239,6 +329,7 @@ func (s *Users) GetUser(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+
 	avatarURL, errAvatar := s.ss.GetFile(user.AvatarUUID)
 	if errAvatar != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errAvatar)
@@ -278,6 +369,7 @@ func (s *Users) UpdateAvatar(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, err)
 		return
 	}
+
 	var userEntity entity.User
 	avatarData, _, errException, errArgs := s.ss.UploadFile(avatar, fileCategory)
 	if errException != nil {
@@ -306,6 +398,7 @@ func (s *Users) UpdateAvatar(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, exception.ErrorTextInternalServerError)
 		return
 	}
+
 	avatarURL, errAvatar := s.ss.GetFile(updatedUser.AvatarUUID)
 	if errAvatar != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errAvatar)

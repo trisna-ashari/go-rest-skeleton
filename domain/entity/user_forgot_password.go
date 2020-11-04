@@ -9,7 +9,7 @@ import (
 
 // UserForgotPassword represent schema of table user_login.
 type UserForgotPassword struct {
-	UUID      string    `gorm:"size:36;not null;unique_index;primary_key;"`
+	UUID      string    `gorm:"size:36;not null;uniqueIndex;primary_key;"`
 	UserUUID  string    `gorm:"size:36;not null;index:user_uuid;"`
 	Token     string    `gorm:"size:255;"`
 	Password  string    `gorm:"size:255;index;"`

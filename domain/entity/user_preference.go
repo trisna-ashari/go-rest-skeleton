@@ -13,8 +13,8 @@ import (
 
 // UserPreference represent schema of table user_preferences.
 type UserPreference struct {
-	UUID       string           `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
-	UserUUID   string           `gorm:"size:36;not null;unique_index;" json:"user_uuid"`
+	UUID       string           `gorm:"size:36;not null;uniqueIndex;primary_key;" json:"uuid"`
+	UserUUID   string           `gorm:"size:36;not null;uniqueIndex;" json:"user_uuid"`
 	Preference *json.RawMessage `gorm:"type:text;not null;" json:"preference"`
 	CreatedAt  time.Time        `json:"created_at"`
 	UpdatedAt  time.Time        `json:"updated_at"`

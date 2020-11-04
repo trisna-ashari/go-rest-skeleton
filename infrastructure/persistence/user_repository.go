@@ -31,7 +31,6 @@ func (r *UserRepo) SaveUser(user *entity.User) (*entity.User, map[string]string,
 	errDesc := map[string]string{}
 	err := r.db.Create(&user).Error
 	if err != nil {
-		//If the email is already taken
 		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "Duplicate") {
 			errDesc["email"] = exception.ErrorTextUserEmailAlreadyTaken.Error()
 			return nil, errDesc, exception.ErrorTextUnprocessableEntity
@@ -124,11 +123,11 @@ func (r *UserRepo) GetUserWithRoles(uuid string) (*entity.User, error) {
 }
 
 // GetUsers will return user list.
-func (r *UserRepo) GetUsers(p *repository.Parameters) ([]entity.User, interface{}, error) {
+func (r *UserRepo) GetUsers(p *repository.Parameters) ([]*entity.User, *repository.Meta, error) {
 	var total int64
-	var users []entity.User
-	errTotal := r.db.Find(&users).Count(&total).Error
-	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&users).Error
+	var users []*entity.User
+	errTotal := r.db.Where(p.QueryKey, p.QueryValue...).Find(&users).Count(&total).Error
+	errList := r.db.Where(p.QueryKey, p.QueryValue...).Order(p.Order).Limit(p.Limit).Offset(p.Offset).Find(&users).Error
 	if errTotal != nil {
 		return nil, nil, errTotal
 	}
@@ -148,6 +147,21 @@ func (r *UserRepo) GetUserByEmail(u *entity.User) (*entity.User, map[string]stri
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errDesc["email"] = exception.ErrorTextUserEmailNotRegistered.Error()
 			return nil, errDesc, exception.ErrorTextUserEmailNotRegistered
+		}
+		return nil, errDesc, err
+	}
+
+	return &user, nil, nil
+}
+
+func (r *UserRepo) GetUserByPhone(u *entity.User) (*entity.User, map[string]string, error) {
+	var user entity.User
+	errDesc := map[string]string{}
+	err := r.db.Where("phone = ?", u.Phone).Take(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			errDesc["phone"] = exception.ErrorTextUserPhoneNotRegistered.Error()
+			return nil, errDesc, exception.ErrorTextUserPhoneNotRegistered
 		}
 		return nil, errDesc, err
 	}
