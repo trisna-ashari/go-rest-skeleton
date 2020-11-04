@@ -51,7 +51,7 @@ func (p *Policy) Can(action string, c *gin.Context) bool {
 		var permission entity.Permission
 		for _, rolePermission := range rolePermissions {
 			permission = rolePermission.Permission
-			if permission.PermissionKey == action {
+			if permission.ModuleKey+"_"+permission.PermissionKey == action {
 				hasPermission = true
 				return hasPermission
 			}
