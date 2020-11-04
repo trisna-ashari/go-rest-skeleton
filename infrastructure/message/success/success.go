@@ -24,6 +24,15 @@ const (
 	RoleSuccessfullyDeleteRole    = "api.msg.success.role.successfully_delete_role"
 )
 
+// Success message for tour.
+const (
+	TourSuccessfullyGetTourList   = "api.msg.success.tour.successfully_get_tour_list"
+	TourSuccessfullyGetTourDetail = "api.msg.success.tour.successfully_get_tour_detail"
+	TourSuccessfullyCreateTour    = "api.msg.success.tour.successfully_create_tour"
+	TourSuccessfullyUpdateTour    = "api.msg.success.tour.successfully_update_tour"
+	TourSuccessfullyDeleteTour    = "api.msg.success.tour.successfully_delete_tour"
+)
+
 // Success message for user.
 const (
 	UserSuccessfullyGetUserList          = "api.msg.success.user.successfully_get_user_list"
