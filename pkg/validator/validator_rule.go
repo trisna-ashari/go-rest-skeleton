@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gorm.io/gorm"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -30,6 +32,18 @@ func (v *Validator) AddRule() *ValidationRules {
 // Apply is a function uses to apply validation.Rule were has been stored in ValidationRules.
 func (vr *ValidationRules) Apply() []ValidationRule {
 	return vr.Rules
+}
+
+// When is a function to set the rule that current field when meet predefined condition.
+func (vr *ValidationRules) When(condition bool, rules *ValidationRules) *ValidationRules {
+	for _, rule := range rules.Rules {
+		vr.Rules = append(vr.Rules, ValidationRule{
+			Rule:    validation.When(condition, rule.Rule),
+			RuleOpt: nil,
+		})
+	}
+
+	return vr
 }
 
 // Required is a function to set the rule that current field is required.
@@ -83,8 +97,8 @@ func (vr *ValidationRules) In(slice ...interface{}) *ValidationRules {
 		Rule: validation.In(slice...).Error("api.msg.error.validation.must_be_in"),
 		RuleOpt: []RuleOpt{
 			{
-				key:   "Options",
-				value: joinSlice(slice),
+				Key:   "Options",
+				Value: joinSlice(slice),
 			},
 		},
 	})
@@ -94,34 +108,67 @@ func (vr *ValidationRules) In(slice ...interface{}) *ValidationRules {
 // NotIn is a function to set the rule that current field value is not on of slices.
 func (vr *ValidationRules) NotIn(slice ...interface{}) *ValidationRules {
 	vr.Rules = append(vr.Rules, ValidationRule{
-		Rule:    validation.NotIn(slice).Error("api.msg.error.validation.must_be_not_in"),
-		RuleOpt: nil,
-	})
-	return vr
-}
-
-// Min is a function to set the rule that current field value must be no less than the length.
-func (vr *ValidationRules) Min(length interface{}) *ValidationRules {
-	vr.Rules = append(vr.Rules, ValidationRule{
-		Rule: validation.Min(length).Error("api.msg.error.validation.must_be_no_less_than"),
+		Rule: validation.NotIn(slice).Error("api.msg.error.validation.must_be_not_in"),
 		RuleOpt: []RuleOpt{
 			{
-				key:   "Length",
-				value: length,
+				Key:   "Options",
+				Value: joinSlice(slice),
 			},
 		},
 	})
 	return vr
 }
 
-// Max is a function to set the rule that current field value must be no more than the length.
-func (vr *ValidationRules) Max(length interface{}) *ValidationRules {
+// MinValue is a function to set the rule that current field value must be no less than the length.
+func (vr *ValidationRules) MinValue(length interface{}) *ValidationRules {
 	vr.Rules = append(vr.Rules, ValidationRule{
-		Rule: validation.Max(length).Error("api.msg.error.validation.must_be_no_more_than"),
+		Rule: validation.Min(length).Error("api.msg.error.validation.must_be_no_less_than_value"),
 		RuleOpt: []RuleOpt{
 			{
-				key:   "Length",
-				value: length,
+				Key:   "Length",
+				Value: length,
+			},
+		},
+	})
+	return vr
+}
+
+// MinValue is a function to set the rule that current field value must be no less than the length.
+func (vr *ValidationRules) MinLength(length interface{}) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Min(length).Error("api.msg.error.validation.must_be_no_less_than_length"),
+		RuleOpt: []RuleOpt{
+			{
+				Key:   "Length",
+				Value: length,
+			},
+		},
+	})
+	return vr
+}
+
+// MaxValue is a function to set the rule that current field value must be no more than the length.
+func (vr *ValidationRules) MaxValue(length interface{}) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Max(length).Error("api.msg.error.validation.must_be_no_more_than_value"),
+		RuleOpt: []RuleOpt{
+			{
+				Key:   "Length",
+				Value: length,
+			},
+		},
+	})
+	return vr
+}
+
+// MaxValue is a function to set the rule that current field value must be no more than the length.
+func (vr *ValidationRules) MaxLength(length interface{}) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Max(length).Error("api.msg.error.validation.must_be_no_more_than_length"),
+		RuleOpt: []RuleOpt{
+			{
+				Key:   "Length",
+				Value: length,
 			},
 		},
 	})
@@ -135,12 +182,12 @@ func (vr *ValidationRules) Length(min int, max int) *ValidationRules {
 		RuleKey: "length",
 		RuleOpt: []RuleOpt{
 			{
-				key:   "Min",
-				value: min,
+				Key:   "Min",
+				Value: min,
 			},
 			{
-				key:   "Max",
-				value: max,
+				Key:   "Max",
+				Value: max,
 			},
 		},
 	})
@@ -150,17 +197,11 @@ func (vr *ValidationRules) Length(min int, max int) *ValidationRules {
 // EqualTo is a function to set the rule that current field value must be equal to target field's value.
 func (vr *ValidationRules) EqualTo(targetField string, targetValue string) *ValidationRules {
 	vr.Rules = append(vr.Rules, ValidationRule{
-		Rule: validation.By(func(fieldValue interface{}) error {
-			s, _ := fieldValue.(string)
-			if s != targetValue {
-				return errors.New("api.msg.error.validation.must_be_equal_to")
-			}
-			return nil
-		}),
+		Rule: validation.By(EqualValue(targetValue)),
 		RuleOpt: []RuleOpt{
 			{
-				key:   "Target",
-				value: "attributes." + targetField,
+				Key:   "Target",
+				Value: "attributes." + targetField,
 			},
 		},
 	})
@@ -186,10 +227,21 @@ func (vr *ValidationRules) IsAlphaSpace() *ValidationRules {
 	return vr
 }
 
+// IsLowerAlphaUnderscore is a function to set the rule that current field value must be lower letters and underscore character only.
+func (vr *ValidationRules) IsLowerAlphaUnderscore() *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Match(regexp.MustCompile("^[a-z_]*$")).
+			Error("api.msg.error.validation.must_be_lower_alpha_underscore"),
+		RuleOpt: nil,
+	})
+	return vr
+}
+
 // IsDigit is a function to set the rule that current field value must be digit only.
 func (vr *ValidationRules) IsDigit() *ValidationRules {
 	vr.Rules = append(vr.Rules, ValidationRule{
-		Rule:    is.Digit.Error("api.msg.error.validation.must_be_digit"),
+		Rule: validation.Match(regexp.MustCompile("^[0-9]*$")).
+			Error("api.msg.error.validation.must_be_digit"),
 		RuleOpt: nil,
 	})
 	return vr
@@ -211,6 +263,45 @@ func (vr *ValidationRules) IsAlphaNumericSpace() *ValidationRules {
 		Rule: validation.Match(regexp.MustCompile("^[a-zA-Z0-9\\s]*$")).
 			Error("api.msg.error.validation.must_be_alphanumeric_space"),
 		RuleOpt: nil,
+	})
+	return vr
+}
+
+// IsAlphaNumericSpaceAndSpecialCharacter is a function to set the rule that current field value must be letters, numbers,
+// space characters, and allowed special characters only.
+func (vr *ValidationRules) IsAlphaNumericSpaceAndSpecialCharacter() *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Match(regexp.MustCompile("^[a-zA-Z0-9_+\\s]*$")).
+			Error("api.msg.error.validation.must_be_alphanumeric_space_special_character"),
+		RuleOpt: nil,
+	})
+	return vr
+}
+
+// IsDate is a function to set the rule that current field value is valid date format.
+func (vr *ValidationRules) IsDate(layout string) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Date(layout).Error("api.msg.error.validation.must_be_date"),
+		RuleOpt: []RuleOpt{
+			{
+				Key:   "Layout",
+				Value: layout,
+			},
+		},
+	})
+	return vr
+}
+
+// IsTime is a function to set the rule that current field value is valid date format.
+func (vr *ValidationRules) IsTime(layout string) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.Date(layout).Error("api.msg.error.validation.must_be_time"),
+		RuleOpt: []RuleOpt{
+			{
+				Key:   "Layout",
+				Value: layout,
+			},
+		},
 	})
 	return vr
 }
@@ -278,6 +369,22 @@ func (vr *ValidationRules) IsJSON() *ValidationRules {
 	return vr
 }
 
+// IsExists
+func (vr *ValidationRules) IsExists(tx *gorm.DB, tableName string, fieldName string) *ValidationRules {
+	vr.Rules = append(vr.Rules, ValidationRule{
+		Rule: validation.By(func(fieldValue interface{}) error {
+			err := tx.Model(tableName).Where(fieldName+" = ?", fieldValue).Error
+			if err != nil {
+				return err
+			}
+			return nil
+		}),
+		RuleOpt: nil,
+	})
+	return vr
+}
+
+// joinSlice is a function uses to join slice of interfaces.
 func joinSlice(sliceOfInterface []interface{}) string {
 	var sliceOfString []string
 	for _, slice := range sliceOfInterface {
@@ -290,4 +397,15 @@ func joinSlice(sliceOfInterface []interface{}) string {
 	}
 
 	return strings.Join(sliceOfString, "/")
+}
+
+// EqualValue is a closure uses by EqualTo method.
+func EqualValue(targetValue string) validation.RuleFunc {
+	return func(fieldValue interface{}) error {
+		s, _ := fieldValue.(string)
+		if s != targetValue {
+			return errors.New("api.msg.error.validation.must_be_equal_to")
+		}
+		return nil
+	}
 }
