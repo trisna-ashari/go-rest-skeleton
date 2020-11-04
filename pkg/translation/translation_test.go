@@ -109,8 +109,3 @@ func TestIsValidAcceptLanguage(t *testing.T) {
 	invalidLang := translation.IsValidAcceptLanguage(selectedLang)
 	assert.Equal(t, false, invalidLang)
 }
-
-func TestSentenceCase(t *testing.T) {
-	message := "Not Found"
-	assert.Equal(t, "Not found", translation.SentenceCase(message))
-}

@@ -3,8 +3,6 @@ package translation
 import (
 	"fmt"
 	"go-rest-skeleton/pkg/util"
-	"strings"
-	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -62,7 +60,7 @@ func NewTranslation(
 		TemplateData: messageData,
 	})
 
-	return SentenceCase(translatedMessage), translation.Language
+	return util.SentenceCase(translatedMessage), translation.Language
 }
 
 // GetLanguage gets language from Accept-Language on request header. Default language is "en".
@@ -82,22 +80,6 @@ func IsValidAcceptLanguage(x string) bool {
 	a := translationLanguage{
 		Available: []string{"en", "id"},
 	}
-	for _, n := range a.Available {
-		if x == n {
-			return true
-		}
-	}
 
-	return false
-}
-
-func SentenceCase(sentence string) string {
-	if sentence == "" {
-		return ""
-	}
-
-	tmpString := []rune(strings.ToLower(sentence))
-	tmpString[0] = unicode.ToUpper(tmpString[0])
-
-	return string(tmpString)
+	return util.SliceContains(a.Available, x)
 }
