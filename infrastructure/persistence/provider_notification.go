@@ -29,8 +29,9 @@ func NewSMTPClient(config config.SMTPConfig) (*SMTPClient, error) {
 func NewNotificationService(config *config.Config) (*NotificationService, error) {
 	smtpClient, errSMTP := NewSMTPClient(config.SMTPConfig)
 	if errSMTP != nil {
-		return nil, errSMTP
+		return &NotificationService{}, errSMTP
 	}
+
 	emailChannel := &notify.EmailChannel{EmailClient: smtpClient.Client}
 	smsChannel := &notify.SMSChannel{}
 	firebaseChannel := &notify.FirebaseChannel{}
