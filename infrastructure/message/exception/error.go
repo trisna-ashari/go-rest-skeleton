@@ -55,6 +55,12 @@ var (
 	ErrorTextRoleInvalidUUID = errors.New("api.msg.error.role.invalid_uuid")
 )
 
+// Errors fot tour.
+var (
+	// ErrorTextTourSlugAlreadyExists is an error representing slug is already exists in database.
+	ErrorTextTourSlugAlreadyExists = errors.New("api.msg.error.tour.slug_already_exists")
+)
+
 // Errors for user.
 var (
 	// ErrorTextUserNotFound is an error representing user not found in database.
@@ -72,8 +78,14 @@ var (
 	// ErrorTextUserEmailNotRegistered is an error representing email already is not exists in database.
 	ErrorTextUserEmailNotRegistered = errors.New("api.msg.error.user.email_not_registered")
 
+	// ErrorTextUserPhoneNotRegistered is an error representing email already is not exists in database.
+	ErrorTextUserPhoneNotRegistered = errors.New("api.msg.error.user.phone_not_registered")
+
 	// ErrorTextUserEmailAlreadyTaken is an error representing email already exists in database.
 	ErrorTextUserEmailAlreadyTaken = errors.New("api.msg.error.user.email_already_taken")
+
+	// ErrorTextUserPhoneAlreadyTaken is an error representing phone already exists in database.
+	ErrorTextUserPhoneAlreadyTaken = errors.New("api.msg.error.user.phone_already_taken")
 
 	// ErrorTextUserPreferenceInvalidUUID is an error representing UUID not found in database.
 	ErrorTextUserPreferenceInvalidUUID = errors.New("api.msg.error.user.preference.invalid_uuid")
