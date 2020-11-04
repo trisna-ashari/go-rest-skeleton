@@ -89,12 +89,25 @@ func (r *RoleRepo) GetRolePermissions(uuid string) ([]entity.RolePermission, err
 	return permission, nil
 }
 
+// GetRoleWithPermissions will return user detail with roles.
+func (r *RoleRepo) GetRoleWithPermissions(uuid string) (*entity.Role, error) {
+	var role entity.Role
+	err := r.db.Preload("RolePermissions.Permission").Where("uuid = ?", uuid).Take(&role).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, exception.ErrorTextUserNotFound
+		}
+		return nil, err
+	}
+	return &role, nil
+}
+
 // GetRoles will return role list.
 func (r RoleRepo) GetRoles(p *repository.Parameters) ([]entity.Role, interface{}, error) {
 	var total int64
 	var roles []entity.Role
-	errTotal := r.db.Find(&roles).Count(&total).Error
-	errList := r.db.Limit(p.Limit).Offset(p.Offset).Find(&roles).Error
+	errTotal := r.db.Where(p.QueryKey, p.QueryValue...).Find(&roles).Count(&total).Error
+	errList := r.db.Where(p.QueryKey, p.QueryValue...).Limit(p.Limit).Offset(p.Offset).Find(&roles).Error
 	if errTotal != nil {
 		return nil, nil, errTotal
 	}

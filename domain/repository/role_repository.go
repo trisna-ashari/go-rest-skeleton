@@ -11,5 +11,6 @@ type RoleRepository interface {
 	DeleteRole(string) error
 	GetRole(string) (*entity.Role, error)
 	GetRolePermissions(string) ([]entity.RolePermission, error)
+	GetRoleWithPermissions(string) (*entity.Role, error)
 	GetRoles(parameters *Parameters) ([]entity.Role, interface{}, error)
 }

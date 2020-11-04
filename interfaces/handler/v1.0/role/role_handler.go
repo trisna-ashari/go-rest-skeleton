@@ -42,9 +42,10 @@ func (s *Roles) SaveRole(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
-	validateErr := roleEntity.ValidateSaveRole(c)
+	validateErr := roleEntity.ValidateSaveRole()
 	if len(validateErr) > 0 {
-		c.Set("data", validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -75,9 +76,10 @@ func (s *Roles) UpdateRole(c *gin.Context) {
 		return
 	}
 
-	validateErr := roleEntity.ValidateUpdateRole(c)
+	validateErr := roleEntity.ValidateUpdateRole()
 	if len(validateErr) > 0 {
-		c.Set("data", validateErr)
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
@@ -123,9 +125,18 @@ func (s *Roles) DeleteRole(c *gin.Context) {
 
 // GetRoles is a function uses to handle get role list.
 func (s *Roles) GetRoles(c *gin.Context) {
+	var role entity.Role
 	var roles entity.Roles
 	var err error
-	parameters := repository.NewParameters(c)
+	parameters := repository.NewGinParameters(c)
+	validateErr := parameters.ValidateParameter(role.FilterableFields()...)
+	if len(validateErr) > 0 {
+		exceptionData := response.TranslateErrorForm(c, validateErr)
+		c.Set("data", exceptionData)
+		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
+		return
+	}
+
 	roles, meta, err := s.ur.GetRoles(parameters)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -143,7 +154,7 @@ func (s *Roles) GetRole(c *gin.Context) {
 	}
 
 	UUID := c.Param("uuid")
-	role, err := s.ur.GetRole(UUID)
+	role, err := s.ur.GetRoleWithPermissions(UUID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			_ = c.AbortWithError(http.StatusNotFound, exception.ErrorTextUserNotFound)

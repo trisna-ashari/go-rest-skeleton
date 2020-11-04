@@ -20,6 +20,7 @@ type RoleAppInterface interface {
 	GetRoles(p *repository.Parameters) ([]entity.Role, interface{}, error)
 	GetRole(UUID string) (*entity.Role, error)
 	GetRolePermissions(UUID string) ([]entity.RolePermission, error)
+	GetRoleWithPermissions(UUID string) (*entity.Role, error)
 }
 
 // SaveRole is an implementation of method SaveRole.
@@ -45,6 +46,11 @@ func (u *roleApp) GetRole(UUID string) (*entity.Role, error) {
 // GetRolePermissions is an implementation of method GetRolePermissions.
 func (u *roleApp) GetRolePermissions(UUID string) ([]entity.RolePermission, error) {
 	return u.us.GetRolePermissions(UUID)
+}
+
+// GetRoleWithPermissions is an implementation of method GetRoleWithPermissions.
+func (u *roleApp) GetRoleWithPermissions(UUID string) (*entity.Role, error) {
+	return u.us.GetRoleWithPermissions(UUID)
 }
 
 // GetRoles is an implementation of method GetRoles.

@@ -1,25 +1,26 @@
 package entity
 
 import (
+	"go-rest-skeleton/pkg/response"
+	"go-rest-skeleton/pkg/validator"
 	"time"
 
 	"gorm.io/gorm"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 // Role represent schema of table roles.
 type Role struct {
-	UUID           string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
-	Name           string    `gorm:"size:100;not null;" json:"name" form:"name"`
-	CreatedAt      time.Time `json:"created_at"`
-	CreatedBy      int       `gorm:"default:null" json:"created_by,omitempty"`
-	UpdatedAt      time.Time `json:"updated_at"`
-	UpdatedBy      int       `gorm:"default:null" json:"updated_by,omitempty"`
-	DeletedAt      gorm.DeletedAt
-	DeletedBy      int              `gorm:"default:null" json:"deleted_by,omitempty"`
-	RolePermission []RolePermission `gorm:"foreignKey:RoleUUID"`
+	UUID            string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
+	Name            string    `gorm:"size:100;not null;uniqueIndex;" json:"name" form:"name"`
+	CreatedAt       time.Time `json:"created_at"`
+	CreatedBy       int       `gorm:"default:null" json:"created_by,omitempty"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	UpdatedBy       int       `gorm:"default:null" json:"updated_by,omitempty"`
+	DeletedAt       gorm.DeletedAt
+	DeletedBy       int              `gorm:"default:null" json:"deleted_by,omitempty"`
+	RolePermissions []RolePermission `gorm:"foreignKey:RoleUUID"`
 }
 
 // RoleFaker represent content when generate fake data of role.
@@ -32,6 +33,11 @@ type Roles []Role
 // TableName return name of table.
 func (r *Role) TableName() string {
 	return "roles"
+}
+
+// FilterableFields return fields.
+func (r *Role) FilterableFields() []interface{} {
+	return []interface{}{"name"}
 }
 
 // BeforeCreate handle uuid generation.
@@ -57,6 +63,7 @@ type FieldsForRoleList struct {
 // DetailRole represent format of detail role.
 type DetailRole struct {
 	FieldsForRoleDetail
+	Permission []interface{} `json:"permissions,omitempty"`
 }
 
 // DetailRoleList represent format of detail role list.
@@ -72,6 +79,7 @@ func (r *Role) DetailRole() interface{} {
 			UUID: r.UUID,
 			Name: r.Name,
 		},
+		Permission: RolePermissions.GetRolePermission(r.RolePermissions),
 	}
 }
 
@@ -98,15 +106,19 @@ func (roles Roles) DetailRoles() []interface{} {
 }
 
 // ValidateSaveRole will validate create a new role request.
-func (r *Role) ValidateSaveRole(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (r *Role) ValidateSaveRole() []response.ErrorForm {
+	validation := validator.New()
+	validation.
+		Set("name", r.Name, validation.AddRule().Required().IsAlphaSpace().Length(3, 64).Apply())
 
-	return errMsg
+	return validation.Validate()
 }
 
 // ValidateUpdateRole will validate update role request.
-func (r *Role) ValidateUpdateRole(c *gin.Context) map[string]string {
-	var errMsg = make(map[string]string)
+func (r *Role) ValidateUpdateRole() []response.ErrorForm {
+	validation := validator.New()
+	validation.
+		Set("name", r.Name, validation.AddRule().Required().IsAlphaSpace().Length(3, 64).Apply())
 
-	return errMsg
+	return validation.Validate()
 }
