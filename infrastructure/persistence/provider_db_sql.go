@@ -6,11 +6,12 @@ import (
 	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/domain/repository"
 	"go-rest-skeleton/domain/seeds"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
 	"time"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm/logger"
 
 	_ "gorm.io/driver/mysql"    // for mysql driver (optional)
 	_ "gorm.io/driver/postgres" // for postgres driver (optional)
@@ -28,6 +29,7 @@ type Repositories struct {
 	Role               repository.RoleRepository
 	StorageFile        repository.StorageFileRepository
 	StorageCategory    repository.StorageCategoryRepository
+	Tour               repository.TourRepository
 	User               repository.UserRepository
 	UserForgotPassword repository.UserForgotPasswordRepository
 	UserPreference     repository.UserPreferenceRepository
@@ -94,6 +96,7 @@ func NewDBService(config config.DBConfig) (*Repositories, error) {
 		Role:               NewRoleRepository(db),
 		StorageFile:        NewStorageFileRepository(db),
 		StorageCategory:    NewStorageCategoryRepository(db),
+		Tour:               NewTourRepository(db),
 		User:               NewUserRepository(db),
 		UserForgotPassword: NewUserForgotPasswordRepository(db),
 		UserPreference:     NewUserPreferenceRepository(db),
