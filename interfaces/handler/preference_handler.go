@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"go-rest-skeleton/application"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/infrastructure/authorization"
@@ -60,8 +59,6 @@ func (up *Preference) GerPreference(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
-	fmt.Println(userPreferenceData)
 
 	userPreference := userPreferenceData.DetailUserPreference()
 	response.NewSuccess(c, userPreference, success.UserSuccessfullyGetUserPreference).JSON()
@@ -121,8 +118,6 @@ func (up *Preference) UpdatePreference(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(userPreferenceData)
-
 	userPreference := userPreferenceData.DetailUserPreference()
 	response.NewSuccess(c, userPreference, success.UserSuccessfullyUpdateUserPreference).JSON()
 }
@@ -154,8 +149,6 @@ func (up *Preference) ResetPreference(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
-	fmt.Println(userPreferenceData)
 
 	userPreference := userPreferenceData.DetailUserPreference()
 	response.NewSuccess(c, userPreference, success.UserSuccessfullyResetUserPreference).JSON()
