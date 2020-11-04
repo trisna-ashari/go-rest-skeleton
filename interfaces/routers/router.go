@@ -90,6 +90,7 @@ func (r *Router) Init() *gin.Engine {
 	e.Use(middleware.CORS(middleware.CORSOptions{AllowSetting: r.conf.EnableCors}))
 	e.Use(middleware.SetLogger(middleware.LoggerOptions{AllowSetting: r.conf.EnableLogger}))
 	e.Use(middleware.APIVersion())
+	e.Use(middleware.Recovery())
 
 	// Init Routes
 	rg := NewRouterAuthGateway(authGateway, authToken)
@@ -97,8 +98,10 @@ func (r *Router) Init() *gin.Engine {
 	devRoutes(e, r)
 	noRoutes(e)
 	roleRoutes(e, r, rg)
+	tourRoutes(e, r, rg)
 	userRoutes(e, r, rg)
 	welcomeRoutes(e)
+	graphqlRoute(e, r, rg)
 
 	return e
 }
