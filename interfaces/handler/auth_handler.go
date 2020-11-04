@@ -94,6 +94,7 @@ func (au *Authenticate) Login(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
+
 	validateErr := user.ValidateLogin()
 	if len(validateErr) > 0 {
 		exceptionData := response.TranslateErrorForm(c, validateErr)
@@ -101,22 +102,26 @@ func (au *Authenticate) Login(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, exception.ErrorTextUnprocessableEntity)
 		return
 	}
+
 	u, _, errException := au.aa.GetUserByEmailAndPassword(user)
 	if errException != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, errException)
 		return
 	}
+
 	ts, tErr := au.tk.CreateToken(u.UUID)
 	if tErr != nil {
 		errToken["token_error"] = tErr.Error()
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, tErr)
 		return
 	}
+
 	errSave := au.rd.CreateAuth(u.UUID, ts)
 	if errSave != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errSave)
 		return
 	}
+
 	userData := make(map[string]interface{})
 	userData["access_token"] = ts.AccessToken
 	userData["refresh_token"] = ts.RefreshToken
