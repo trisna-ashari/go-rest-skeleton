@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-rest-skeleton/domain/entity"
+	"log"
 
 	"github.com/bxcodec/faker"
 
@@ -17,7 +18,7 @@ func userFactory() []Seed {
 		a := entity.UserFaker{}
 		errFaker := faker.FakeData(&a)
 		if errFaker != nil {
-			fmt.Println(errFaker)
+			log.Fatal(errFaker)
 		}
 
 		user := &entity.User{

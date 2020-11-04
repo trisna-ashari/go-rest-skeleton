@@ -3,6 +3,7 @@ package seeds
 import (
 	"errors"
 	"go-rest-skeleton/domain/entity"
+
 	"gorm.io/gorm"
 )
 
