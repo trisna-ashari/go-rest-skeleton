@@ -9,7 +9,7 @@ import (
 
 // Module represent schema of table modules.
 type Module struct {
-	UUID      string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
+	UUID      string    `gorm:"size:36;not null;uniqueIndex;primary_key" json:"uuid"`
 	Key       string    `gorm:"size:100;not null;index:module_key;" json:"module_key"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
