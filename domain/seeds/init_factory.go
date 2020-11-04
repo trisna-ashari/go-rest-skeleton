@@ -37,6 +37,12 @@ var (
 		{UUID: uuid.New().String(), ModuleKey: "role", PermissionKey: "delete"},
 		{UUID: uuid.New().String(), ModuleKey: "role", PermissionKey: "bulk_delete"},
 		{UUID: uuid.New().String(), ModuleKey: "role", PermissionKey: "detail"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "read"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "create"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "update"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "delete"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "bulk_delete"},
+		{UUID: uuid.New().String(), ModuleKey: "tour", PermissionKey: "detail"},
 	}
 	userRole = &entity.UserRole{
 		UUID:     uuid.New().String(),
@@ -119,17 +125,17 @@ func (is *InitFactory) generatePermissionsSeeder() *InitFactory {
 }
 
 func (is *InitFactory) generateRolePermissionsSeeder() *InitFactory {
+	r := role
 	for _, p := range permissions {
-		cp := p
+		csp := p
 		crp := &entity.RolePermission{
-			UUID:           uuid.New().String(),
-			RoleUUID:       role.UUID,
-			PermissionUUID: cp.UUID,
+			UUID: uuid.New().String(),
 		}
+
 		is.seeders = append(is.seeders, Seed{
 			Name: "Create initial permission",
 			Run: func(db *gorm.DB) error {
-				_, errDB := createRolePermission(db, crp)
+				_, errDB := createRolePermission(db, r, csp, crp)
 				return errDB
 			},
 		})
@@ -142,7 +148,7 @@ func (is *InitFactory) generateUserRoleSeeder() *InitFactory {
 	is.seeders = append(is.seeders, Seed{
 		Name: "Assign initial role to user",
 		Run: func(db *gorm.DB) error {
-			_, errDB := createUserRole(db, userRole)
+			_, errDB := createUserRole(db, user, role, userRole)
 			return errDB
 		},
 	})
