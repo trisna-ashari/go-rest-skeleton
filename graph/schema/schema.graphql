@@ -1,0 +1,12 @@
+type Query {
+  users(search: SearchUserInput, orderBy: UserOrderFields!, pagination: PaginationInput!): UserConnection!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
+  deleteUser(uuid: String!): Boolean!
+}
+
+scalar Time
+

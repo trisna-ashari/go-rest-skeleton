@@ -1,0 +1,14 @@
+input SearchInput {
+    method: SearchMethod!
+    condition: SearchCondition!
+}
+
+enum SearchMethod {
+    EXACT
+    SIMILAR
+}
+
+enum SearchCondition {
+    AND
+    OR
+}

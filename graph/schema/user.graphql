@@ -1,0 +1,46 @@
+type User {
+    uuid: String!
+    name: String!
+    email: String!
+    phone: String!
+    created_at: Time!
+}
+
+type UserConnection implements PageConnection {
+    pagination: Pagination!
+    list: [User!]!
+}
+
+input CreateUserInput {
+    name: String!
+    email: String!
+    phone: String!
+}
+
+input UpdateUserInput {
+    uuid: String!
+    name: String!
+    email: String!
+    phone: String!
+}
+
+input FindUserInput {
+    uuid: String
+    name: String
+    email: String
+    phone: String
+}
+
+input SearchUserInput {
+    rules: SearchInput!
+    keywords: FindUserInput!
+}
+
+input DeleteUserInput {
+    uuid: String!
+}
+
+enum UserOrderFields {
+    LATEST
+    OLDEST
+}

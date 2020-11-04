@@ -1,0 +1,20 @@
+schema:
+  - "graph/schema/*.graphql"
+
+exec:
+  filename: graph/resolver/resolver.go
+  package: resolver
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  filename: graph/resolver.go
+  type: Resolver
+
+models:
+  User:
+    model: go-rest-skeleton/domain/entity.User
+  Role:
+    model: go-rest-skeleton/domain/entity.Role

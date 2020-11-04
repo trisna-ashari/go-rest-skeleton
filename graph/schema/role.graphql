@@ -1,0 +1,17 @@
+type Role {
+    uuid: String!
+    name: String!
+}
+
+input CreateRoleInput {
+    name: String!
+}
+
+input UpdateRoleInput {
+    uuid: String!
+    name: String!
+}
+
+input DeleteRoleInput {
+    name: String!
+}
