@@ -2,16 +2,17 @@ package storage_test
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/domain/entity"
 	"go-rest-skeleton/domain/registry"
 	"go-rest-skeleton/infrastructure/persistence"
 	"go-rest-skeleton/infrastructure/storage"
 	"go-rest-skeleton/pkg/util"
-	"gorm.io/driver/mysql"
 	"log"
 	"testing"
+
+	"github.com/google/uuid"
+	"gorm.io/driver/mysql"
 
 	"github.com/joho/godotenv"
 
