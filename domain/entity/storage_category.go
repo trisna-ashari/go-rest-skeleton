@@ -10,8 +10,8 @@ import (
 
 // StorageCategory represent schema of table storage_categories.
 type StorageCategory struct {
-	UUID      string    `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
-	Slug      string    `gorm:"size:100;not null;index:slug;" json:"slug" form:"slug"`
+	UUID      string    `gorm:"size:36;not null;uniqueIndex;primary_key;" json:"uuid"`
+	Slug      string    `gorm:"size:100;not null;uniqueIndex:slug;" json:"slug" form:"slug"`
 	Path      string    `gorm:"size:100;not null;" json:"path" form:"path"`
 	Name      string    `gorm:"size:100;not null;" json:"name" form:"name"`
 	MimeTypes string    `gorm:"size:255;not null;" json:"mime_types" form:"mime_types"`

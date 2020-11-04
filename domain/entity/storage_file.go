@@ -10,7 +10,7 @@ import (
 
 // StorageFile represent schema of table storage_files.
 type StorageFile struct {
-	UUID         string    `gorm:"size:36;not null;unique_index;primary_key;" json:"uuid"`
+	UUID         string    `gorm:"size:36;not null;uniqueIndex;primary_key;" json:"uuid"`
 	CategoryUUID string    `gorm:"size:36;not null;index:category_uuid;" json:"category_uui"`
 	OriginalName string    `gorm:"size:255;not null;" json:"original_name"`
 	Name         string    `gorm:"size:255;not null;" json:"name"`
