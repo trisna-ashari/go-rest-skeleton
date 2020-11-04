@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/rollbar/rollbar-go"
+
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
@@ -73,6 +75,10 @@ func main() {
 
 	// Init notification service
 	notificationService, _ := persistence.NewNotificationService(conf)
+
+	// Init rollbar service
+	rollbar.SetToken(conf.RollbarConfig.Token)
+	rollbar.SetEnvironment(conf.RollbarConfig.Environment)
 
 	// Init App
 	app := cmd.NewCli()
