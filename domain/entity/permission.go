@@ -9,9 +9,9 @@ import (
 
 // Permission represent schema of table permissions.
 type Permission struct {
-	UUID          string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
+	UUID          string    `gorm:"size:36;not null;uniqueIndex;primary_key" json:"uuid"`
 	ModuleKey     string    `gorm:"size:100;not null;index:module_key;" json:"module_key" form:"module_key"`
-	PermissionKey string    `gorm:"size:100;not null;index:permission_key;" json:"permission_key" form:"permission_key"`
+	PermissionKey string    `gorm:"size:100;not null;uniqueIndex:permission_key;" json:"permission_key" form:"permission_key"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt
