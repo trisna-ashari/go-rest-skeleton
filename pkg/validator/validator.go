@@ -75,7 +75,7 @@ func (v *Validator) Validate() []response.ErrorForm {
 
 		if err != nil {
 			errMsgData := make(map[string]interface{})
-			errMsgData = map[string]interface{}{ruleGroup.Field: ruleGroup.Data}
+			errMsgData[ruleGroup.Field] = ruleGroup.Data
 
 			for _, opt := range rulesOpt {
 				errMsgData[opt.Key] = opt.Value
