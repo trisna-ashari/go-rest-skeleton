@@ -22,3 +22,9 @@ docker-down:
 	@docker-compose down
 
 clear: docker-down
+
+proto:
+	for f in grpc/proto/*/*/*.proto; do \
+		protoc --go_out=plugins=grpc:. $$f; \
+		echo compiled: $$f; \
+	done
