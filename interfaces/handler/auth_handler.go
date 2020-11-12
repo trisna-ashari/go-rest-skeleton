@@ -50,6 +50,7 @@ func NewAuthenticate(
 // @Param Set-Request-Id header string false "Request id"
 // @Security BasicAuth
 // @Security JWTAuth
+// @Security OauthGrantTypePassword
 // @Success 200 {object} response.successOutput
 // @Failure 400 {object} response.errorOutput
 // @Failure 401 {object} response.errorOutput
@@ -109,7 +110,7 @@ func (au *Authenticate) Login(c *gin.Context) {
 		return
 	}
 
-	ts, tErr := au.tk.CreateToken(u.UUID)
+	ts, tErr := au.tk.CreateToken(u.UUID, "")
 	if tErr != nil {
 		errToken["token_error"] = tErr.Error()
 		_ = c.AbortWithError(http.StatusUnprocessableEntity, tErr)
@@ -229,7 +230,7 @@ func (au *Authenticate) Refresh(c *gin.Context) {
 	}
 
 	// Create new pairs of refresh and access tokens
-	ts, errCreate := au.tk.CreateToken(UUID)
+	ts, errCreate := au.tk.CreateToken(UUID, "")
 	if errCreate != nil {
 		_ = c.AbortWithError(http.StatusForbidden, errCreate)
 		return

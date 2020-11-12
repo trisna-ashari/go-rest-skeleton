@@ -26,6 +26,7 @@ type Router struct {
 type RouterAuthGateway struct {
 	authGateway *authorization.Gateway
 	authToken   *authorization.Token
+	authOauth   *authorization.OauthAuth
 }
 
 // NewRouter is a constructor uses to construct Router.
@@ -45,10 +46,11 @@ func NewRouter(
 }
 
 // NewRouter is a constructor uses to construct RouterAuthGateway.
-func NewRouterAuthGateway(authGateway *authorization.Gateway, authToken *authorization.Token) *RouterAuthGateway {
+func NewRouterAuthGateway(ag *authorization.Gateway, at *authorization.Token, oa *authorization.OauthAuth) *RouterAuthGateway {
 	return &RouterAuthGateway{
-		authGateway: authGateway,
-		authToken:   authToken,
+		authGateway: ag,
+		authToken:   at,
+		authOauth:   oa,
 	}
 }
 
@@ -78,7 +80,8 @@ func (r *Router) Init() *gin.Engine {
 	authBasic := authorization.NewBasicAuth(r.dbService.User)
 	authJWT := authorization.NewJWTAuth(r.conf.KeyConfig, r.redisService.Client)
 	authToken := authorization.NewToken(r.conf.KeyConfig, r.redisService.Client)
-	authGateway := authorization.NewAuthGateway(authBasic, authJWT, r.dbService.User, r.dbService.Role)
+	authOauth := authorization.NewOauthAuth(r.conf.KeyConfig, r.redisService.Client)
+	authGateway := authorization.NewAuthGateway(authBasic, authJWT, authOauth, r.dbService.User, r.dbService.Role)
 
 	// Init gin
 	if !r.conf.DebugMode {
@@ -93,10 +96,12 @@ func (r *Router) Init() *gin.Engine {
 	e.Use(middleware.Recovery())
 
 	// Init Routes
-	rg := NewRouterAuthGateway(authGateway, authToken)
+	rg := NewRouterAuthGateway(authGateway, authToken, authOauth)
 	authRoutes(e, r, rg)
 	devRoutes(e, r)
 	noRoutes(e)
+	oauthServerRoutes(e, r, rg)
+	oauthClientRoutes(e, r, rg)
 	roleRoutes(e, r, rg)
 	tourRoutes(e, r, rg)
 	userRoutes(e, r, rg)

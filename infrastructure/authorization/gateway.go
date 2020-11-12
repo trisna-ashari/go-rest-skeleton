@@ -11,22 +11,33 @@ import (
 )
 
 const (
-	lenOfAuthorization = 2
+	lenOfAuthorization  = 2
+	authTypeBasic       = "Basic"
+	authTypeBearer      = "Bearer"
+	authTypeApiKey      = "ApiKey"
+	authTypeAccessToken = "AccessToken"
 )
 
 // Gateway is a struct.
 type Gateway struct {
 	ba *BasicAuth
 	ja *JWTAuth
+	oa *OauthAuth
 	US repository.UserRepository
 	RS repository.RoleRepository
 }
 
 // NewAuthGateway is a constructor.
-func NewAuthGateway(ba *BasicAuth, ja *JWTAuth, us repository.UserRepository, rs repository.RoleRepository) *Gateway {
+func NewAuthGateway(
+	ba *BasicAuth,
+	ja *JWTAuth,
+	oa *OauthAuth,
+	us repository.UserRepository,
+	rs repository.RoleRepository) *Gateway {
 	return &Gateway{
 		ba: ba,
 		ja: ja,
+		oa: oa,
 		US: us,
 		RS: rs,
 	}
@@ -35,21 +46,39 @@ func NewAuthGateway(ba *BasicAuth, ja *JWTAuth, us repository.UserRepository, rs
 // AuthGateway is authentication gateway based on supported authentication type.
 func AuthGateway(g *Gateway, c *gin.Context) (*entity.User, error) {
 	var userAuth *entity.User
-	auth := c.Request.Header.Get("Authorization")
-	authType := strings.SplitN(auth, " ", 2)
+	headerAuth := c.Request.Header.Get("Authorization")
+	headerAuthType := strings.SplitN(headerAuth, " ", 2)
+	queryApiKeyAuth := c.DefaultQuery("api_key", "")
+	queryAccessTokenAuth := c.DefaultQuery("access_token", "")
 
-	if len(authType) != lenOfAuthorization {
+	if len(headerAuthType) != lenOfAuthorization && queryApiKeyAuth == "" && queryAccessTokenAuth == "" {
 		c.Set("errorTracingCode", exception.ErrorCodeIFAUGA001)
 		return userAuth, exception.ErrorTextUnauthorized
 	}
 
-	if !(authType[0] == "Basic" || authType[0] == "Bearer") {
+	var authType string
+	if len(headerAuthType) == lenOfAuthorization {
+		authType = headerAuthType[0]
+	}
+
+	if queryApiKeyAuth != "" {
+		authType = authTypeApiKey
+	}
+
+	if queryAccessTokenAuth != "" {
+		authType = authTypeAccessToken
+	}
+
+	if !(authType == authTypeBasic ||
+		authType == authTypeBearer ||
+		authType == authTypeApiKey ||
+		authType == authTypeAccessToken) {
 		c.Set("errorTracingCode", exception.ErrorCodeIFAUGA002)
 		return userAuth, exception.ErrorTextUnauthorized
 	}
 
-	if authType[0] == "Basic" {
-		payload, _ := base64.StdEncoding.DecodeString(authType[1])
+	if authType == authTypeBasic {
+		payload, _ := base64.StdEncoding.DecodeString(headerAuthType[1])
 		pair := strings.SplitN(string(payload), ":", 2)
 		if len(pair) == lenOfAuthorization {
 			email := pair[0]
@@ -72,17 +101,23 @@ func AuthGateway(g *Gateway, c *gin.Context) (*entity.User, error) {
 		}
 	}
 
-	if authType[0] == "Bearer" {
-		bearerToken := strings.Split(auth, " ")
-		if len(bearerToken) == authorizationLen {
-			accessDetails, errJWT := TokenValid(c, g.ja.tk)
-			if errJWT != nil {
-				c.Set("errorTracingCode", exception.ErrorCodeIFAUGA005)
-				return userAuth, exception.ErrorTextUnauthorized
-			}
-
-			c.Set("UUID", accessDetails.UUID)
+	if authType == authTypeBearer || authType == authTypeAccessToken {
+		accessDetails, errJWT := TokenValid(c, g.ja.tk)
+		if errJWT != nil {
+			c.Set("errorTracingCode", exception.ErrorCodeIFAUGA005)
+			return userAuth, exception.ErrorTextUnauthorized
 		}
+
+		if accessDetails.UUID == "" {
+			c.Set("errorTracingCode", exception.ErrorCodeIFAUGA006)
+			return userAuth, exception.ErrorTextUnauthorized
+		}
+
+		c.Set("UUID", accessDetails.UUID)
+	}
+
+	if authType == authTypeApiKey {
+		panic("implement me")
 	}
 
 	return userAuth, nil

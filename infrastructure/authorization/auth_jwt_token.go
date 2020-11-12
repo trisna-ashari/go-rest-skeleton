@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"fmt"
 	"go-rest-skeleton/config"
 	"go-rest-skeleton/infrastructure/message/exception"
 	"os"
@@ -36,7 +37,7 @@ func NewToken(config config.KeyConfig, rd *redis.Client) *Token {
 
 // TokenInterface is an interface.
 type TokenInterface interface {
-	CreateToken(UUID string) (*TokenDetails, error)
+	CreateToken(UUID string, AUD string) (*TokenDetails, error)
 	ExtractTokenMetadata(c *gin.Context) (*AccessDetails, error)
 }
 
@@ -44,7 +45,7 @@ type TokenInterface interface {
 var _ TokenInterface = &Token{}
 
 // CreateToken is a function uses to create a new token.
-func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
+func (t *Token) CreateToken(UUID string, AUD string) (*TokenDetails, error) {
 	td := &TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * expiredTime).Unix()
 	td.TokenUUID = uuid.NewV4().String()
@@ -56,10 +57,12 @@ func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 
 	// Creating Access Token
 	atClaims := jwt.MapClaims{}
-	atClaims["authorized"] = true
 	atClaims["access_uuid"] = td.TokenUUID
-	atClaims["uuid"] = UUID
+	atClaims["sub"] = UUID
 	atClaims["exp"] = td.AtExpires
+	if AUD != "" {
+		atClaims["aud"] = AUD
+	}
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	td.AccessToken, err = at.SignedString([]byte(t.kc.AppPrivateKey))
 	if err != nil {
@@ -69,8 +72,11 @@ func (t *Token) CreateToken(UUID string) (*TokenDetails, error) {
 	// Creating Refresh Token
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUUID
-	rtClaims["uuid"] = UUID
+	rtClaims["sub"] = UUID
 	rtClaims["exp"] = td.RtExpires
+	if AUD != "" {
+		rtClaims["aud"] = AUD
+	}
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 	td.RefreshToken, err = rt.SignedString([]byte(t.kc.AppPrivateKey))
 	if err != nil {
@@ -105,6 +111,7 @@ func TokenValid(c *gin.Context, t *Token) (*AccessDetails, error) {
 // VerifyToken is a function to verify token.
 func VerifyToken(c *gin.Context) (*jwt.Token, error) {
 	tokenString := ExtractToken(c)
+	fmt.Println(tokenString)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Make sure that the token method conform to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -121,11 +128,17 @@ func VerifyToken(c *gin.Context) (*jwt.Token, error) {
 
 // ExtractToken is a function uses to get the token from the request body.
 func ExtractToken(c *gin.Context) string {
-	bearToken := c.Request.Header.Get("Authorization")
-	strArr := strings.Split(bearToken, " ")
+	bearerToken := c.Request.Header.Get("Authorization")
+	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) == authorizationLen {
 		return strArr[1]
 	}
+
+	accessToken := c.DefaultQuery("access_token", "")
+	if accessToken != "" {
+		return accessToken
+	}
+
 	return ""
 }
 
@@ -143,7 +156,7 @@ func (t *Token) ExtractTokenMetadata(c *gin.Context) (*AccessDetails, error) {
 			return nil, err
 		}
 
-		UUID, _ := claims["uuid"].(string)
+		UUID, _ := claims["sub"].(string)
 		return &AccessDetails{
 			TokenUUID: accessUUID,
 			UUID:      UUID,

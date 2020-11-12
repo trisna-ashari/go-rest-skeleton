@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +15,7 @@ type DBConfig struct {
 	DBUser     string
 	DBName     string
 	DBPassword string
+	DBTimeZone string
 	DBLog      bool
 }
 
@@ -25,6 +27,7 @@ type DBTestConfig struct {
 	DBUser     string
 	DBName     string
 	DBPassword string
+	DBTimeZone string
 	DBLog      bool
 }
 
@@ -69,6 +72,14 @@ type RollbarConfig struct {
 	ServerRoot  string
 }
 
+// Oauth2Config represent key config keys.
+type Oauth2Config struct {
+	OauthID     string
+	OauthSecret string
+	OauthDomain string
+	OauthToken  string
+}
+
 // KeyConfig represent key config keys.
 type KeyConfig struct {
 	AppPrivateKey string
@@ -84,6 +95,7 @@ type Config struct {
 	MinioConfig
 	SMTPConfig
 	RollbarConfig
+	Oauth2Config
 	KeyConfig
 	AppEnvironment  string
 	AppLanguage     string
@@ -100,19 +112,21 @@ func New() *Config {
 		DBConfig: DBConfig{
 			DBDriver:   getEnv("DB_DRIVER", "mysql"),
 			DBHost:     getEnv("DB_HOST", "localhost"),
-			DBPort:     getEnv("DB_POST", "3306"),
+			DBPort:     getEnv("DB_PORT", "3306"),
 			DBUser:     getEnv("DB_USER", "root"),
 			DBName:     getEnv("DB_NAME", "go_rest_skeleton"),
 			DBPassword: getEnv("DB_PASSWORD", ""),
+			DBTimeZone: getEnv("APP_TIMEZONE", "Asia/Jakarta"),
 			DBLog:      getEnvAsBool("ENABLE_LOGGER", true),
 		},
 		DBTestConfig: DBTestConfig{
 			DBDriver:   getEnv("TEST_DB_DRIVER", "mysql"),
 			DBHost:     getEnv("TEST_DB_HOST", "localhost"),
-			DBPort:     getEnv("TEST_DB_POST", "3306"),
+			DBPort:     getEnv("TEST_DB_PORT", "3306"),
 			DBUser:     getEnv("TEST_DB_USER", "root"),
 			DBName:     getEnv("TEST_DB_NAME", "go_rest_skeleton_test"),
 			DBPassword: getEnv("TEST_DB_PASSWORD", ""),
+			DBTimeZone: getEnv("APP_TIMEZONE", "Asia/Jakarta"),
 			DBLog:      getEnvAsBool("ENABLE_LOGGER", true),
 		},
 		RedisConfig: RedisConfig{
@@ -145,6 +159,13 @@ func New() *Config {
 			CodeVersion: getEnv("APP_VERSION", "1.0.0"),
 			ServerHost:  getEnv("APP_SERVER_HOST", ""),
 			ServerRoot:  getEnv("APP_SERVER_ROOT", ""),
+		},
+		Oauth2Config: Oauth2Config{
+			OauthID:     getEnv("OAUTH_ID", "go-rest-skeleton"),
+			OauthSecret: getEnv("OAUTH_SECRET", "go-rest-skeleton"),
+			OauthDomain: getEnv("OAUTH_DOMAIN",
+				fmt.Sprintf("http://localhost:%s", os.Getenv("APP_PORT"))),
+			OauthToken: getEnv("OAUTH_TOKEN", "Bearer"),
 		},
 		KeyConfig: KeyConfig{
 			AppPrivateKey: getEnv("APP_PRIVATE_KEY", "default-private-key"),

@@ -20,6 +20,9 @@ const (
 	// ErrorCodeIFAUGA005 is an error represent invalid JWT Token.
 	ErrorCodeIFAUGA005 = "IFAUGA005"
 
+	// ErrorCodeIFAUGA006 is an error represent valid JWT Token but not represent a user.
+	ErrorCodeIFAUGA006 = "IFAUGA006"
+
 	// ErrorCodeITMIPO001 is an error represent UUID on context is not exists.
 	ErrorCodeITMIPO001 = "ITMIPO001"
 
