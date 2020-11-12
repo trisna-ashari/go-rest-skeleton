@@ -12,6 +12,11 @@ type table struct {
 
 func CollectEntities() []entities {
 	return []entities{
+		{Entity: entity.Application{}},
+		{Entity: entity.ApplicationApiKey{}},
+		{Entity: entity.ApplicationOauth{}},
+		{Entity: entity.ApplicationOauthClient{}},
+		{Entity: entity.Document{}},
 		{Entity: entity.Module{}},
 		{Entity: entity.Permission{}},
 		{Entity: entity.Role{}},
@@ -28,6 +33,11 @@ func CollectEntities() []entities {
 }
 
 func CollectTableNames() []table {
+	var application entity.Application
+	var applicationApiKey entity.ApplicationApiKey
+	var applicationOauth entity.ApplicationOauth
+	var applicationOauthClient entity.ApplicationOauthClient
+	var document entity.Document
 	var module entity.Module
 	var permission entity.Permission
 	var role entity.Role
@@ -42,6 +52,11 @@ func CollectTableNames() []table {
 	var userRole entity.UserRole
 
 	return []table{
+		{Name: application.TableName()},
+		{Name: applicationApiKey.TableName()},
+		{Name: applicationOauth.TableName()},
+		{Name: applicationOauthClient.TableName()},
+		{Name: document.TableName()},
 		{Name: module.TableName()},
 		{Name: permission.TableName()},
 		{Name: role.TableName()},
