@@ -46,6 +46,15 @@ var (
 	ErrorTextPerPage = errors.New("api.msg.error.common.per_page")
 )
 
+// Errors for document
+var (
+	// ErrorTextDocumentNotFound is an error representing document not found in database.
+	ErrorTextDocumentNotFound = errors.New("api.msg.error.document.not_found")
+
+	// ErrorTextDocumentInvalidUUID is an error representing UUID not found in database.
+	ErrorTextDocumentInvalidUUID = errors.New("api.msg.error.document.invalid_uuid")
+)
+
 // Errors for role.
 var (
 	// ErrorTextRoleNotFound is an error representing role not found in database.
