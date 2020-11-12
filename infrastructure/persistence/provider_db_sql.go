@@ -11,11 +11,10 @@ import (
 	"time"
 
 	"gorm.io/driver/mysql"
-	"gorm.io/gorm/logger"
+	"gorm.io/driver/postgres"
 
-	_ "gorm.io/driver/mysql"    // for mysql driver (optional)
-	_ "gorm.io/driver/postgres" // for postgres driver (optional)
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 const (
@@ -25,6 +24,7 @@ const (
 
 // Repositories represent it self.
 type Repositories struct {
+	Document           repository.DocumentRepository
 	Permission         repository.PermissionRepository
 	Role               repository.RoleRepository
 	StorageFile        repository.StorageFileRepository
@@ -38,26 +38,6 @@ type Repositories struct {
 
 // NewDBConnection will initialize db connection.
 func NewDBConnection(config config.DBConfig) (*gorm.DB, error) {
-	dbURL := ""
-	switch config.DBDriver {
-	case driverPostgres:
-		dbURL = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s",
-			config.DBHost,
-			config.DBPort,
-			config.DBUser,
-			config.DBName,
-			config.DBPassword,
-		)
-	case driverMysql:
-		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			config.DBUser,
-			config.DBPassword,
-			config.DBHost,
-			config.DBPort,
-			config.DBName,
-		)
-	}
-
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -75,10 +55,42 @@ func NewDBConnection(config config.DBConfig) (*gorm.DB, error) {
 		gormConfig.Logger = newLogger
 	}
 
-	db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
+	var dbURL string
+	var db *gorm.DB
+	switch config.DBDriver {
+	case driverPostgres:
+		dbURL = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=%s",
+			config.DBHost,
+			config.DBUser,
+			config.DBPassword,
+			config.DBName,
+			config.DBPort,
+			config.DBTimeZone,
+		)
 
-	if err != nil {
-		return nil, err
+		fmt.Println(dbURL)
+
+		db, err := gorm.Open(postgres.Open(dbURL), gormConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		return db, nil
+	case driverMysql:
+		dbURL = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+			config.DBUser,
+			config.DBPassword,
+			config.DBHost,
+			config.DBPort,
+			config.DBName,
+		)
+
+		db, err := gorm.Open(mysql.Open(dbURL), gormConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		return db, nil
 	}
 
 	return db, nil
@@ -92,6 +104,7 @@ func NewDBService(config config.DBConfig) (*Repositories, error) {
 	}
 
 	return &Repositories{
+		Document:           NewDocumentRepository(db),
 		Permission:         NewPermissionRepository(db),
 		Role:               NewRoleRepository(db),
 		StorageFile:        NewStorageFileRepository(db),
