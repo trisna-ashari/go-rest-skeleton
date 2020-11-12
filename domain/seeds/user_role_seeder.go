@@ -17,12 +17,12 @@ func createUserRole(db *gorm.DB, user *entity.User, role *entity.Role, userRole 
 		return userRole, nil
 	}
 
-	userRole.UserUUID = user.UUID
-	userRole.RoleUUID = role.UUID
+	userRole.UserUUID = userExists.UUID
+	userRole.RoleUUID = roleExists.UUID
 
 	errUserRole := db.Where("user_uuid = ? AND role_uuid = ?", userExists.UUID, roleExists.UUID).
 		Take(&userRoleExists).Error
-	if errUserRole == nil {
+	if errUserRole != nil {
 		if errors.Is(errUserRole, gorm.ErrRecordNotFound) {
 			err := db.Create(userRole).Error
 			if err != nil {
