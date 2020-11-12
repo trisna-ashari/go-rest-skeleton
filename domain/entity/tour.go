@@ -17,12 +17,9 @@ type Tour struct {
 	Name      string     `gorm:"size:100;not null;index;" json:"name" form:"name"`
 	Slug      string     `gorm:"size:100;not null;uniqueIndex;" json:"slug" form:"slug"`
 	CreatedAt time.Time  `json:"created_at"`
-	CreatedBy int        `gorm:"default:null" json:"created_by,omitempty"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	UpdatedBy int        `gorm:"default:null" json:"updated_by,omitempty"`
 	ExpiredAt *time.Time `gorm:"default:null" json:"expired_at"`
 	DeletedAt gorm.DeletedAt
-	DeletedBy int `gorm:"default:null" json:"deleted_by,omitempty"`
 }
 
 // Tours represent multiple Tour.

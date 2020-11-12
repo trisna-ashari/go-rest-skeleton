@@ -10,8 +10,8 @@ import (
 // UserRole represent schema of table user_roles.
 type UserRole struct {
 	UUID      string    `gorm:"size:36;not null;uniqueIndex;primary_key" json:"uuid"`
-	UserUUID  string    `gorm:"size:36;not null;index:user_uuid;" json:"user_uuid"`
-	RoleUUID  string    `gorm:"size:100;not null;index:role_uuid;" json:"role_uuid"`
+	UserUUID  string    `gorm:"size:36;not null;index;" json:"user_uuid"`
+	RoleUUID  string    `gorm:"size:100;not null;index;" json:"role_uuid"`
 	Role      Role      `gorm:"foreignKey:RoleUUID;association_foreignKey:RoleUUID"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

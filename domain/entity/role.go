@@ -15,11 +15,8 @@ type Role struct {
 	UUID            string    `gorm:"size:36;not null;unique_index;primary_key" json:"uuid"`
 	Name            string    `gorm:"size:100;not null;uniqueIndex;" json:"name" form:"name"`
 	CreatedAt       time.Time `json:"created_at"`
-	CreatedBy       int       `gorm:"default:null" json:"created_by,omitempty"`
 	UpdatedAt       time.Time `json:"updated_at"`
-	UpdatedBy       int       `gorm:"default:null" json:"updated_by,omitempty"`
 	DeletedAt       gorm.DeletedAt
-	DeletedBy       int              `gorm:"default:null" json:"deleted_by,omitempty"`
 	RolePermissions []RolePermission `gorm:"foreignKey:RoleUUID"`
 }
 

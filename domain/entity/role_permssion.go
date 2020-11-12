@@ -8,8 +8,8 @@ import (
 // RolePermission represent schema of table role_permissions.
 type RolePermission struct {
 	UUID           string     `gorm:"size:36;not null;uniqueIndex;primary_key" json:"uuid"`
-	RoleUUID       string     `gorm:"size:100;not null;index:role_uuid;" json:"role_uuid"`
-	PermissionUUID string     `gorm:"size:100;not null;index:permission_uuid;" json:"permission_uuid"`
+	RoleUUID       string     `gorm:"size:100;not null;index;" json:"role_uuid"`
+	PermissionUUID string     `gorm:"size:100;not null;index;" json:"permission_uuid"`
 	Permission     Permission `gorm:"foreignKey:PermissionUUID;association_foreignKey:PermissionUUID"`
 }
 

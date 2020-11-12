@@ -15,7 +15,7 @@ import (
 type UserPreference struct {
 	UUID       string           `gorm:"size:36;not null;uniqueIndex;primary_key;" json:"uuid"`
 	UserUUID   string           `gorm:"size:36;not null;uniqueIndex;" json:"user_uuid"`
-	Preference *json.RawMessage `gorm:"type:text;not null;" json:"preference"`
+	Preference *json.RawMessage `gorm:"type:json;not null;" json:"preference"`
 	CreatedAt  time.Time        `json:"created_at"`
 	UpdatedAt  time.Time        `json:"updated_at"`
 }
