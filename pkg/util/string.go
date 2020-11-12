@@ -1,6 +1,8 @@
 package util
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 	"unicode"
 )
@@ -24,4 +26,13 @@ func SentenceCase(sentence string) string {
 	tmpString[0] = unicode.ToUpper(tmpString[0])
 
 	return string(tmpString)
+}
+
+func BuildEncodedQueryString(query url.Values) string {
+	encodedQuery := query.Encode()
+	if len(encodedQuery) > 0 {
+		encodedQuery = fmt.Sprintf("?%s", encodedQuery)
+	}
+
+	return encodedQuery
 }
