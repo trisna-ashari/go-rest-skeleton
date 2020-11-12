@@ -16,7 +16,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8888",
+    "host": "localhost:8181",
     "paths": {
         "/api/ping": {
             "get": {
@@ -652,6 +652,9 @@
                     },
                     {
                         "JWTAuth": []
+                    },
+                    {
+                        "OauthGrantTypePassword": []
                     }
                 ],
                 "description": "Get current user profile using Authorization Header.",
@@ -1407,6 +1410,23 @@
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
+        },
+        "Oauth2AccessCode": {
+            "type": "oauth2",
+            "flow": "accessCode",
+            "authorizationUrl": "http://localhost:8181/oauth/authorize",
+            "tokenUrl": "http://localhost:8181/oauth/token",
+            "scopes": {
+                "all": " Grants all access"
+            }
+        },
+        "Oauth2Password": {
+            "type": "oauth2",
+            "flow": "password",
+            "tokenUrl": "http://localhost:8181/oauth/token",
+            "scopes": {
+                "all": " Grants all access"
+            }
         }
     }
 }

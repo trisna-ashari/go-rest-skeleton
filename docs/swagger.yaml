@@ -32,7 +32,7 @@ definitions:
       meta:
         type: object
     type: object
-host: localhost:8888
+host: localhost:8181
 info:
   contact:
     email: trisna.x2@gmail.com
@@ -497,6 +497,7 @@ paths:
       security:
       - BasicAuth: []
       - JWTAuth: []
+      - OauthGrantTypePassword: []
       summary: Authentication profile
       tags:
       - authentication
@@ -921,4 +922,17 @@ securityDefinitions:
     in: header
     name: Authorization
     type: apiKey
+  Oauth2AccessCode:
+    authorizationUrl: http://localhost:8181/oauth/authorize
+    flow: accessCode
+    scopes:
+      all: ' Grants all access'
+    tokenUrl: http://localhost:8181/oauth/token
+    type: oauth2
+  Oauth2Password:
+    flow: password
+    scopes:
+      all: ' Grants all access'
+    tokenUrl: http://localhost:8181/oauth/token
+    type: oauth2
 swagger: "2.0"
