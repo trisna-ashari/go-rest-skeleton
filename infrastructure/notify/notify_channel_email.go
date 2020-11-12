@@ -5,9 +5,10 @@ import (
 	"context"
 	"fmt"
 	"go-rest-skeleton/pkg/util"
-	"golang.org/x/sync/errgroup"
 	"html/template"
 	"log"
+
+	"golang.org/x/sync/errgroup"
 
 	"gopkg.in/gomail.v2"
 )
