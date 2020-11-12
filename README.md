@@ -7,12 +7,14 @@ Golang RESTful API boilerplate with modern architectures.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
+- [Api Documentation](#api-documentation)
 - [Structures](#structures)
 - [Features](#features)
     - [Better API Response](#better-api-response)
     - [Authentication](#authentication)
         - [JWT](#jwt)
         - [Basic Auth](#basic-auth)
+        - [Oauth](#oauth)
     - [Role Based Access Permission](#role-based-access-permission)
     - [DB Migration & Seeder](#db-migration-and-seeder)
         - [Auto Migrate](#auto-migrate)
@@ -40,15 +42,36 @@ Download this project:
 git clone https://github.com/trisna-ashari/go-rest-skeleton
 ```
 
-Before running API server, you should set configs with yours.
+Download project dependencies:
+```shell script
+go mod download
+```
+
+Before run this project, you should set configs with yours.
 Create & configure your `.env` based on: [.env.example](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/.env.example)
 
-Fast run with:
+Create app secret (private and public key):
+```shell script
+go run main.go create:secret
+```
 
+**NOTE**: you can use this generated key pair for `APP_PRIVATE_KEY` and `APP_PUBLIC_KEY` for your `.env`
+
+Run migration:
+```shell script
+go run main.go db:migrate
+```
+
+Run initial seeder:
+```shell script
+go run main.go db:init
+```
+
+Fast run with:
 ```shell script
 go run main.go
 
-# API Endpoint : http://127.0.0.1:8888
+# running on default port 8888
 ```
 
 or Enable hot reload with [Air](https://github.com/cosmtrek/air):
@@ -65,6 +88,16 @@ air
 
 **NOTE**: hot reload very useful on development processes
 
+## Api documentation
+This skeleton has builtin API documentation using [swagger](https://github.com/swaggo/swag). Just run this project and open this link:
+
+http://localhost:8888/swagger.index.html
+
+To rebuild api docs, simply run:
+```shell script
+swag init
+```
+
 ## Structures
 
 ```md
@@ -76,8 +109,8 @@ air
 │   ├── registry
 │   ├── repository
 │   ├── seeds
-├── graph                   // an example of graphQL server
-├── grpc                    // an example of gRPC server
+├── graph                   // an example of graphQL rpcServer
+├── grpc                    // an example of gRPC rpcServer
 ├── infrastructure
 │   ├── authorization
 │   ├── message
@@ -102,7 +135,7 @@ air
 
 ## Features
 ### Better API Response
-All RESTful endpoints were designed with `prefix` and `versioning` support. Prefix format is: /`api`/`v1`/`external`/routes.
+All RESTful endpoint has `prefix` and `versioning` support. Prefix format is: /`api`/`v1`/`external`/routes.
 
 Supported HTTP Method: 
 - `POST`
@@ -171,7 +204,10 @@ This is an example of response with meta pagination including `page`, `per_page`
 #### JWT
 This skeleton has builtin `JWT` based authentication. For an example:
 ```shell script
-curl --location --request POST 'http://localhost:8888/api/v1/external/login' --header 'Accept-Language: ' --header 'Content-Type: application/json' --data-raw '{
+curl --location --request POST 'http://localhost:8888/api/v1/external/login' \
+--header 'Accept-Language: ' \
+--header 'Content-Type: application/json' \
+--data-raw '{
     "email": "me@example.com",
     "password": "123456"
 }'
@@ -190,6 +226,25 @@ will return:
 
 #### Basic Auth
 There also builtin authentication using `Basic Auth` by passing auth through header.
+
+Basic auth constructed from based64 encoded of:
+```
+email:password
+me@example.com:123456
+```
+
+Example:
+
+```shell script
+curl --location --request GET 'http://localhost:8888/api/v1/external/profile' \
+--header 'Accept-Language: en' \
+--header 'Authorization: Basic dHJpc25hLngyQGdtYWlsLmNvbToxMjM0NTY='
+```
+
+#### Oauth
+There are builtin oauth2 server and client. For an example click this link:
+
+http://localhost:8181/oauth/login
 
 ### Role Based Access Permission
 There is builtin middleware called `policy`. It a middleware uses to handle access permission for each URI based on (method on the handler). This `policy` works by defined `custom role` and `permission`.
@@ -241,7 +296,7 @@ Absolutely yes, just run:
 go test -p 1 ./... -cover -coverprofile=coverage.out 
 ```
 
-or using the Makefile:
+or using the [Makefile](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/Makefile):
 ```
 make unit test
 make integration test
@@ -251,7 +306,10 @@ make integration test
 - [Go](https://github.com/golang/go) - The Go Programming Language
 - [gin](https://github.com/gin-gonic/gin) - Gin is HTTP web framework written in Go (Golang)
 - [gorm](https://github.com/go-gorm/gorm) - The fantastic ORM library for Golang
- 
+- [swag](https://github.com/swaggo/swag) - Automatically generate RESTful API documentation with Swagger 2.0 for Go
+- [oauth2](https://github.com/go-oauth2/oauth2) - OAuth 2.0 server library for the Go programming language
+- [ozzo-validation](https://github.com/go-ozzo/ozzo-validation) - An idiomatic Go (golang) validation package
+
 ## License
 
 MIT License. See [LICENSE](https://github.com/trisna-ashari/go-rest-skeleton/blob/master/LICENSE) for details.
