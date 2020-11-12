@@ -10,10 +10,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/rollbar/rollbar-go"
-
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+
+	"github.com/rollbar/rollbar-go"
 
 	"github.com/urfave/cli/v2"
 
@@ -38,7 +38,17 @@ import (
 // @in header
 // @name api_key
 
-// @host localhost:8888
+// @securityDefinitions.oauth2.password Oauth2Password
+// @tokenUrl http://localhost:8181/oauth/token
+// @scope.all Grants all access
+
+// @securityDefinitions.oauth2.accessCode Oauth2AccessCode
+// @tokenUrl http://localhost:8181/oauth/token
+// @redirectUrl http://localhost:8181/oauth2/callback
+// @authorizationUrl http://localhost:8181/oauth/authorize
+// @scope.all Grants all access
+
+// @host localhost:8181
 // @schemes http
 // main init the go-rest-skeleton.
 func main() {
@@ -70,13 +80,13 @@ func main() {
 		panic(errRedis)
 	}
 
-	// Connect to storage service
+	// Connect to storage services
 	storageService, _ := persistence.NewStorageService(conf.MinioConfig, dbService.DB)
 
-	// Init notification service
+	// Init notification services
 	notificationService, _ := persistence.NewNotificationService(conf)
 
-	// Init rollbar service
+	// Init rollbar services
 	rollbar.SetToken(conf.RollbarConfig.Token)
 	rollbar.SetEnvironment(conf.RollbarConfig.Environment)
 
@@ -85,7 +95,11 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		// Init Router
 		router := routers.NewRouter(conf, dbService, redisService, storageService, notificationService).Init()
-		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+		// Inject swagger handler on dev environment
+		if conf.AppEnvironment != "production" {
+			router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		}
 
 		// Run app at defined port
 		appPort := os.Getenv("APP_PORT")
