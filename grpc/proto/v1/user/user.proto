@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "grpc/proto/v1/user";
+
+message User {
+  string uuid = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  string created_at = 5;
+}
+
+message Users {
+  repeated User users = 5;
+}
+
+message RequestUser {
+  string uuid = 1;
+}
+
+message RequestUsers {
+  string uuid = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  enum order_by {
+    NAME = 0;
+    EMAIL = 1;
+    PHONE = 2;
+    CREATED_AT = 3;
+  }
+  enum order_mode {
+    ASC = 0;
+    DESC = 1;
+  }
+}
+
+service UserService {
+  rpc GetUser(RequestUser) returns (User);
+  rpc GetUsers(RequestUsers) returns (Users);
+}
