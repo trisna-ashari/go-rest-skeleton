@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package document;
+
+option go_package = "grpc/proto/v1/document";
+
+message Document {
+  string uuid = 1;
+  string title = 2;
+  string workflow = 3;
+  string type = 4;
+  string created_at = 5;
+}
+
+message Documents {
+  repeated Document document = 5;
+}
+
+message RequestDocument {
+  string uuid = 1;
+}
+
+message RequestDocuments {
+  string uuid = 1;
+  string title = 2;
+  string workflow = 3;
+  string type = 4;
+  enum order_by {
+    TITLE = 0;
+    CREATED_AT = 1;
+  }
+  enum order_mode {
+    ASC = 0;
+    DESC = 1;
+  }
+}
+
+service DocumentService {
+  rpc GetDocument(RequestDocument) returns (Document);
+  rpc GetDocuments(RequestDocuments) returns (Documents);
+}
